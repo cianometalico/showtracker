@@ -14,6 +14,7 @@ type Show = {
   publico_estimado: number
   fiscalizacao: boolean
   risco_cancelamento: boolean
+  participou: boolean
   artists: { nome: string; genero: string }
   venues: { nome: string; cidade: string }
   designs: { status: string }[]
@@ -31,14 +32,14 @@ export default function Agenda() {
   async function fetchShows() {
     const { data } = await supabase
       .from('shows')
-      .select(`
-        id, data, resultado_geral, status_ingresso,
-        publico_estimado, fiscalizacao, risco_cancelamento,
-        artists ( nome, genero ),
-        venues ( nome, cidade ),
-        designs ( status ),
-        pieces ( quantidade )
-      `)
+.select(`
+  id, data, resultado_geral, status_ingresso,
+  publico_estimado, fiscalizacao, risco_cancelamento, participou,
+  artists ( nome, genero ),
+  venues ( nome, cidade ),
+  designs ( status ),
+  pieces ( quantidade )
+`)
       .order('data', { ascending: true })
     if (data) setShows(data as unknown as Show[])
   }
@@ -61,14 +62,15 @@ export default function Agenda() {
   }
 
   function eventColor(show: Show) {
-    if (show.resultado_geral === 'Excelente') return '#4ade80'
-    if (show.resultado_geral === 'Bom') return '#34d399'
-    if (show.resultado_geral === 'Razoável') return '#facc15'
-    if (show.resultado_geral === 'Ruim') return '#f87171'
-    if (show.fiscalizacao) return '#f87171'
-    if (show.risco_cancelamento) return '#facc15'
-    return '#6366f1'
-  }
+  if (show.resultado_geral === 'Excelente') return '#8DB596'
+  if (show.resultado_geral === 'Bom') return 'rgba(141,181,150,0.6)'
+  if (show.resultado_geral === 'Razoável') return '#C9A84C'
+  if (show.resultado_geral === 'Ruim') return '#CC2200'
+  if (!show.participou) return 'rgba(106,96,85,0.5)'
+  if (show.fiscalizacao) return 'rgba(204,34,0,0.5)'
+  if (show.risco_cancelamento) return 'rgba(201,168,76,0.5)'
+  return 'rgba(74,123,224,0.7)'
+}
 
   const calendarEvents = shows.map(s => ({
     id: s.id,
