@@ -61,8 +61,6 @@ export default function Dados() {
   const [tab, setTab] = useState<'shows' | 'pecas' | 'revisao'>('shows')
   const [resultado, setResultado] = useState<ImportResult | null>(null)
   const [carregando, setCarregando] = useState(false)
-
-  // Revisão
   const [venues, setVenues] = useState<any[]>([])
   const [editando, setEditando] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<any>({})
@@ -87,8 +85,7 @@ export default function Dados() {
     const data = await res.json()
     if (data.length > 0) {
       await supabase.from('venues').update({
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon)
+        lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon)
       }).eq('id', id)
       fetchVenues()
     }
@@ -97,12 +94,10 @@ export default function Dados() {
   async function importarShows(file: File) {
     setCarregando(true)
     const erros: string[] = []
-    let importados = 0
-    let ignorados = 0
+    let importados = 0, ignorados = 0
 
     Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
+      header: true, skipEmptyLines: true,
       complete: async (results) => {
         const rows = results.data as NotionRow[]
         for (const row of rows) {
@@ -144,9 +139,8 @@ export default function Dados() {
               : data
 
             await supabase.from('shows').insert([{
-              artist_id: artistId, venue_id: venueId,
-              data: dataFormatada, status_ingresso: status,
-              participou, resultado_geral, publico_estimado: 0,
+              artist_id: artistId, venue_id: venueId, data: dataFormatada,
+              status_ingresso: status, participou, resultado_geral, publico_estimado: 0,
             }])
             importados++
           } catch {
@@ -163,12 +157,10 @@ export default function Dados() {
   async function importarPecas(file: File) {
     setCarregando(true)
     const erros: string[] = []
-    let importados = 0
-    let ignorados = 0
+    let importados = 0, ignorados = 0
 
     Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
+      header: true, skipEmptyLines: true,
       complete: async (results) => {
         const rows = results.data as PiecesRow[]
         for (const row of rows) {
@@ -182,7 +174,6 @@ export default function Dados() {
               ? `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`
               : data
 
-            // Busca o show pelo artista + data
             const { data: artistData } = await supabase.from('artists').select('id').ilike('nome', artista).single()
             if (!artistData) { erros.push(`Artista não encontrado: ${artista}`); ignorados++; continue }
 
@@ -191,15 +182,12 @@ export default function Dados() {
             if (!showData) { erros.push(`Show não encontrado: ${artista} - ${data}`); ignorados++; continue }
 
             await supabase.from('pieces').insert([{
-  show_id: showData.id,
-  tipo: 'Camiseta',
-  cor_malha: '',
-  qualidade_malha: '',
-  tamanho: '',
-  quantidade: Number(row['Quantidade']) || 0,
-  vendidas: Number(row['Vendidas']) || 0,
-  preco_medio: Number(row['Preco']) || 0,
-}])
+              show_id: showData.id, tipo: 'Camiseta', cor_malha: '',
+              qualidade_malha: '', tamanho: '',
+              quantidade: Number(row['Quantidade']) || 0,
+              vendidas: Number(row['Vendidas']) || 0,
+              preco_medio: Number(row['Preco']) || 0,
+            }])
             importados++
           } catch {
             erros.push(`Erro: ${row['Artista']} - ${row['Data']}`)
@@ -213,113 +201,117 @@ export default function Dados() {
   }
 
   return (
-    <div className="space-y-8 max-w-3xl">
-      <h1 className="text-2xl font-bold">Dados</h1>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
       {/* TABS */}
-      <div className="flex bg-zinc-900 rounded-lg p-1 text-sm w-fit">
-        {([['shows', 'Importar Shows'], ['pecas', 'Importar Peças'], ['revisao', 'Revisão de Locais']] as const).map(([key, label]) => (
-          <button key={key} type="button" onClick={() => { setTab(key); setResultado(null); if (key === 'revisao') fetchVenues() }}
-            className={`px-4 py-1.5 rounded-md transition-colors ${tab === key ? 'bg-white text-black font-semibold' : 'text-zinc-400 hover:text-white'}`}>
-            {label}
-          </button>
-        ))}
+      <div className="win-window">
+        <div className="win-titlebar"><span>💾 Dados</span></div>
+        <div style={{ padding: '4px 8px', background: '#c0c0c0', display: 'flex', gap: '4px' }}>
+          {([['shows', '📥 Importar Shows'], ['pecas', '👕 Importar Peças'], ['revisao', '🗺 Revisão de Locais']] as const).map(([key, label]) => (
+            <button key={key} type="button"
+              className={`win-btn ${tab === key ? 'win-btn-primary' : ''}`}
+              onClick={() => { setTab(key); setResultado(null); if (key === 'revisao') fetchVenues() }}>
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* IMPORTAR SHOWS */}
       {tab === 'shows' && (
-        <div className="bg-zinc-900 rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Importar do Notion</h2>
-          <ol className="text-sm text-zinc-400 space-y-1 list-decimal list-inside">
-            <li>Abre a tabela no Notion</li>
-            <li>Clica em ··· → Exportar → CSV</li>
-            <li>Faz upload abaixo</li>
-          </ol>
-          <input type="file" accept=".csv"
-            onChange={e => { const f = e.target.files?.[0]; if (f) importarShows(f) }}
-            className="text-sm text-zinc-400" />
-          {carregando && <p className="text-sm text-zinc-400 animate-pulse">Importando...</p>}
-          {resultado && <ResultadoImport resultado={resultado} />}
+        <div className="win-window">
+          <div className="win-titlebar"><span>📥 Importar Shows do Notion</span></div>
+          <div style={{ padding: '12px', background: '#c0c0c0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="win-inset" style={{ padding: '8px', fontSize: '11px' }}>
+              <strong>Como exportar do Notion:</strong><br />
+              1. Abre a tabela no Notion<br />
+              2. Clica em ··· → Exportar → CSV<br />
+              3. Faz upload abaixo
+            </div>
+            <input type="file" accept=".csv" style={{ fontSize: '12px' }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) importarShows(f) }} />
+            {carregando && <p style={{ fontSize: '12px', color: '#808080' }}>⏳ Importando...</p>}
+            {resultado && <ResultadoImport resultado={resultado} />}
+          </div>
         </div>
       )}
 
       {/* IMPORTAR PEÇAS */}
       {tab === 'pecas' && (
-        <div className="bg-zinc-900 rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Importar Histórico de Peças</h2>
-          <div className="bg-zinc-800 rounded-lg p-4 text-xs text-zinc-400 font-mono">
-  Artista, Data, Quantidade, Vendidas, Preco
-</div>
-          <p className="text-sm text-zinc-400">Uma linha por combinação de tipo + cor + malha + tamanho. O sistema cruza Artista + Data para vincular ao show correto.</p>
-          <input type="file" accept=".csv"
-            onChange={e => { const f = e.target.files?.[0]; if (f) importarPecas(f) }}
-            className="text-sm text-zinc-400" />
-          {carregando && <p className="text-sm text-zinc-400 animate-pulse">Importando...</p>}
-          {resultado && <ResultadoImport resultado={resultado} />}
+        <div className="win-window">
+          <div className="win-titlebar"><span>👕 Importar Histórico de Peças</span></div>
+          <div style={{ padding: '12px', background: '#c0c0c0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="win-inset" style={{ padding: '8px', fontFamily: 'monospace', fontSize: '11px' }}>
+              Artista, Data, Quantidade, Vendidas, Preco
+            </div>
+            <p style={{ fontSize: '11px', color: '#808080' }}>Uma linha por show. O sistema cruza Artista + Data para vincular ao show correto.</p>
+            <input type="file" accept=".csv" style={{ fontSize: '12px' }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) importarPecas(f) }} />
+            {carregando && <p style={{ fontSize: '12px', color: '#808080' }}>⏳ Importando...</p>}
+            {resultado && <ResultadoImport resultado={resultado} />}
+          </div>
         </div>
       )}
 
       {/* REVISÃO */}
       {tab === 'revisao' && (
-        <div className="space-y-3">
-          {venues.map(v => (
-            <div key={v.id} className={`bg-zinc-900 rounded-xl px-6 py-4 ${salvo === v.id ? 'ring-1 ring-green-500' : ''}`}>
-              {editando === v.id ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs text-zinc-400">Nome</label>
-                      <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-                        value={editForm.nome ?? ''} onChange={e => setEditForm({ ...editForm, nome: e.target.value })} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-zinc-400">Cidade</label>
-                      <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-                        value={editForm.cidade ?? ''} onChange={e => setEditForm({ ...editForm, cidade: e.target.value })} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-zinc-400">Latitude</label>
-                      <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm" type="number" step="any"
-                        value={editForm.lat ?? ''} onChange={e => setEditForm({ ...editForm, lat: parseFloat(e.target.value) })} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-zinc-400">Longitude</label>
-                      <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm" type="number" step="any"
-                        value={editForm.lng ?? ''} onChange={e => setEditForm({ ...editForm, lng: parseFloat(e.target.value) })} />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => salvarVenue(v.id)}
-                      className="bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-zinc-200 transition-colors">
-                      Salvar
-                    </button>
-                    <button type="button" onClick={() => reprocessarGeo(v.id, editForm.nome ?? v.nome)}
-                      className="bg-zinc-700 hover:bg-zinc-600 text-sm px-4 py-2 rounded-lg transition-colors">
-                      Reprocessar geo
-                    </button>
-                    <button type="button" onClick={() => setEditando(null)}
-                      className="text-zinc-400 hover:text-white text-sm px-4 py-2 transition-colors">
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{v.nome}</p>
-                    <p className="text-sm text-zinc-400">{v.cidade}</p>
-                    {v.lat && v.lng
-                      ? <p className="text-xs text-green-500 mt-1">✓ {v.lat.toFixed(4)}, {v.lng.toFixed(4)}</p>
-                      : <p className="text-xs text-red-400 mt-1">✗ Sem coordenadas</p>}
-                  </div>
-                  <button type="button" onClick={() => { setEditando(v.id); setEditForm({ ...v }) }}
-                    className="text-xs text-zinc-400 hover:text-white transition-colors underline">
-                    Editar
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="win-window">
+          <div className="win-titlebar"><span>🗺 Revisão de Locais</span></div>
+          <div style={{ padding: '4px', background: '#c0c0c0' }}>
+            <table className="win-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Cidade</th>
+                  <th>Coordenadas</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {venues.map(v => (
+                  editando === v.id ? (
+                    <tr key={v.id} style={{ background: '#ffffc0' }}>
+                      <td><input style={{ width: '160px' }} value={editForm.nome ?? ''}
+                        onChange={e => setEditForm({ ...editForm, nome: e.target.value })} /></td>
+                      <td><input style={{ width: '100px' }} value={editForm.cidade ?? ''}
+                        onChange={e => setEditForm({ ...editForm, cidade: e.target.value })} /></td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        <input type="number" step="any" style={{ width: '80px' }} placeholder="lat"
+                          value={editForm.lat ?? ''}
+                          onChange={e => setEditForm({ ...editForm, lat: parseFloat(e.target.value) })} />
+                        {' '}
+                        <input type="number" step="any" style={{ width: '80px' }} placeholder="lng"
+                          value={editForm.lng ?? ''}
+                          onChange={e => setEditForm({ ...editForm, lng: parseFloat(e.target.value) })} />
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px', marginRight: '2px' }}
+                          onClick={() => salvarVenue(v.id)}>OK</button>
+                        <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px', marginRight: '2px' }}
+                          onClick={() => reprocessarGeo(v.id, editForm.nome ?? v.nome)}>🌐</button>
+                        <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px' }}
+                          onClick={() => setEditando(null)}>✕</button>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={v.id} style={{ background: salvo === v.id ? '#c8ffc8' : undefined }}>
+                      <td><strong>{v.nome}</strong></td>
+                      <td>{v.cidade}</td>
+                      <td>
+                        {v.lat && v.lng
+                          ? <span className="tag-success">✓ {v.lat.toFixed(3)}, {v.lng.toFixed(3)}</span>
+                          : <span className="tag-danger">✗ Sem geo</span>}
+                      </td>
+                      <td>
+                        <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px' }}
+                          onClick={() => { setEditando(v.id); setEditForm({ ...v }) }}>✎</button>
+                      </td>
+                    </tr>
+                  )
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -328,26 +320,30 @@ export default function Dados() {
 
 function ResultadoImport({ resultado }: { resultado: ImportResult }) {
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-zinc-800 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold">{resultado.total}</p>
-          <p className="text-xs text-zinc-400">Total</p>
-        </div>
-        <div className="bg-zinc-800 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-green-400">{resultado.importados}</p>
-          <p className="text-xs text-zinc-400">Importados</p>
-        </div>
-        <div className="bg-zinc-800 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-yellow-400">{resultado.ignorados}</p>
-          <p className="text-xs text-zinc-400">Ignorados</p>
-        </div>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <table className="win-table" style={{ width: 'auto' }}>
+        <thead>
+          <tr><th>Total</th><th>Importados</th><th>Ignorados</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style={{ textAlign: 'center' }}><strong>{resultado.total}</strong></td>
+            <td style={{ textAlign: 'center' }} className="tag-success"><strong>{resultado.importados}</strong></td>
+            <td style={{ textAlign: 'center' }} className="tag-warning"><strong>{resultado.ignorados}</strong></td>
+          </tr>
+        </tbody>
+      </table>
       {resultado.erros.length > 0 && (
-        <div className="bg-red-900/20 rounded-lg p-4 space-y-1">
-          <p className="text-sm font-medium text-red-400">Erros:</p>
-          {resultado.erros.map((e, i) => <p key={i} className="text-xs text-red-300">{e}</p>)}
+        <div className="win-inset" style={{ padding: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+          {resultado.erros.map((e, i) => (
+            <div key={i} style={{ fontSize: '11px', color: '#CC2200' }}>{e}</div>
+          ))}
         </div>
+      )}
+      {resultado.importados > 0 && (
+        <a href="/agenda" className="win-btn win-btn-primary" style={{ textDecoration: 'none', display: 'inline-block', textAlign: 'center' }}>
+          Ver Agenda →
+        </a>
       )}
     </div>
   )

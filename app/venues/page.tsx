@@ -51,130 +51,120 @@ export default function Venues() {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`)
     const data = await res.json()
     if (data.length > 0) {
-      const lat = parseFloat(data[0].lat)
-      const lng = parseFloat(data[0].lon)
-      await supabase.from('venues').update({ lat, lng }).eq('id', id)
+      await supabase.from('venues').update({
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      }).eq('id', id)
       fetchVenues()
     }
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Locais</h1>
+    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
 
-      <form onSubmit={handleSubmit} className="bg-zinc-900 rounded-xl p-6 space-y-4 max-w-xl">
-        <h2 className="text-lg font-semibold">Novo Local</h2>
-
-        <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-          placeholder="Nome do local" value={form.nome}
-          onChange={e => setForm({ ...form, nome: e.target.value })} required />
-
-        <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-          placeholder="Cidade" value={form.cidade}
-          onChange={e => setForm({ ...form, cidade: e.target.value })} />
-
-        <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-          placeholder="Capacidade" type="number"
-          value={form.capacidade || ''}
-          onChange={e => setForm({ ...form, capacidade: Number(e.target.value) })} />
-
-        <div className="grid grid-cols-2 gap-3">
-          <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-            placeholder="Latitude" type="number" step="any"
-            value={form.lat || ''}
-            onChange={e => setForm({ ...form, lat: Number(e.target.value) })} />
-          <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-            placeholder="Longitude" type="number" step="any"
-            value={form.lng || ''}
-            onChange={e => setForm({ ...form, lng: Number(e.target.value) })} />
+      {/* FORM NOVO */}
+      <div className="win-window" style={{ width: '260px', flexShrink: 0 }}>
+        <div className="win-titlebar">
+          <span>📍 Novo Local</span>
         </div>
+        <div style={{ padding: '8px', background: '#c0c0c0' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
 
-        <button type="submit" className="w-full bg-white text-black font-semibold rounded-lg py-2 text-sm hover:bg-zinc-200 transition-colors">
-          Salvar
-        </button>
-      </form>
+            <label style={{ fontSize: '11px' }}>Nome:</label>
+            <input style={{ width: '100%' }} value={form.nome}
+              onChange={e => setForm({ ...form, nome: e.target.value })} required />
 
-      <div className="space-y-2">
-        {venues.map(v => (
-          <div key={v.id} className="bg-zinc-900 rounded-xl px-6 py-4">
-            {editando === v.id ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-zinc-400">Nome</label>
-                    <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-                      value={editForm.nome ?? ''}
-                      onChange={e => setEditForm({ ...editForm, nome: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-zinc-400">Cidade</label>
-                    <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-                      value={editForm.cidade ?? ''}
-                      onChange={e => setEditForm({ ...editForm, cidade: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-zinc-400">Capacidade</label>
-                    <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-                      type="number"
-                      value={editForm.capacidade ?? ''}
-                      onChange={e => setEditForm({ ...editForm, capacidade: Number(e.target.value) })} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-zinc-400">Latitude</label>
-                    <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-                      type="number" step="any"
-                      value={editForm.lat ?? ''}
-                      onChange={e => setEditForm({ ...editForm, lat: Number(e.target.value) })} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-zinc-400">Longitude</label>
-                    <input className="w-full bg-zinc-800 rounded-lg px-4 py-2 text-sm"
-                      type="number" step="any"
-                      value={editForm.lng ?? ''}
-                      onChange={e => setEditForm({ ...editForm, lng: Number(e.target.value) })} />
-                  </div>
-                </div>
+            <label style={{ fontSize: '11px' }}>Cidade:</label>
+            <input style={{ width: '100%' }} value={form.cidade}
+              onChange={e => setForm({ ...form, cidade: e.target.value })} />
 
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => handleUpdate(v.id)}
-                    className="bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-zinc-200 transition-colors">
-                    Salvar
-                  </button>
-                  <button type="button"
-                    onClick={() => reprocessarGeo(v.id, editForm.nome ?? v.nome)}
-                    className="bg-zinc-700 hover:bg-zinc-600 text-sm px-4 py-2 rounded-lg transition-colors">
-                    Reprocessar geo
-                  </button>
-                  <button type="button" onClick={() => setEditando(null)}
-                    className="text-zinc-400 hover:text-white text-sm px-4 py-2 transition-colors">
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="font-semibold">{v.nome}</p>
-                  <p className="text-sm text-zinc-400">{v.cidade} · {v.capacidade?.toLocaleString()} pessoas</p>
-                  {v.lat && v.lng
-                    ? <p className="text-xs text-green-500 mt-1">✓ {v.lat.toFixed(4)}, {v.lng.toFixed(4)}</p>
-                    : <p className="text-xs text-red-400 mt-1">✗ Sem coordenadas</p>
-                  }
-                </div>
-                <div className="flex flex-col gap-1 items-end">
-                  <button type="button" onClick={() => { setEditando(v.id); setEditForm({ ...v }) }}
-                    className="text-xs text-zinc-400 hover:text-white transition-colors underline">
-                    Editar
-                  </button>
-                  <button type="button" onClick={() => handleDelete(v.id)}
-                    className="text-xs text-red-400 hover:text-red-300 transition-colors">
-                    Deletar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+            <label style={{ fontSize: '11px' }}>Capacidade:</label>
+            <input style={{ width: '100%' }} type="number" value={form.capacidade || ''}
+              onChange={e => setForm({ ...form, capacidade: Number(e.target.value) })} />
+
+            <label style={{ fontSize: '11px' }}>Latitude:</label>
+            <input style={{ width: '100%' }} type="number" step="any" value={form.lat || ''}
+              onChange={e => setForm({ ...form, lat: Number(e.target.value) })} />
+
+            <label style={{ fontSize: '11px' }}>Longitude:</label>
+            <input style={{ width: '100%' }} type="number" step="any" value={form.lng || ''}
+              onChange={e => setForm({ ...form, lng: Number(e.target.value) })} />
+
+            <p style={{ fontSize: '10px', color: '#808080' }}>
+              Lat/Lng: clique direito no Google Maps para copiar.
+            </p>
+
+            <button type="submit" className="win-btn win-btn-primary">Salvar</button>
+          </form>
+        </div>
+      </div>
+
+      {/* TABELA */}
+      <div className="win-window" style={{ flex: 1 }}>
+        <div className="win-titlebar">
+          <span>📍 Locais ({venues.length})</span>
+        </div>
+        <div style={{ padding: '4px', background: '#c0c0c0' }}>
+          <table className="win-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Cidade</th>
+                <th>Capacidade</th>
+                <th>Coordenadas</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {venues.map(v => (
+                editando === v.id ? (
+                  <tr key={v.id} style={{ background: '#ffffc0' }}>
+                    <td><input style={{ width: '140px' }} value={editForm.nome ?? ''}
+                      onChange={e => setEditForm({ ...editForm, nome: e.target.value })} /></td>
+                    <td><input style={{ width: '100px' }} value={editForm.cidade ?? ''}
+                      onChange={e => setEditForm({ ...editForm, cidade: e.target.value })} /></td>
+                    <td><input type="number" style={{ width: '70px' }} value={editForm.capacidade ?? ''}
+                      onChange={e => setEditForm({ ...editForm, capacidade: Number(e.target.value) })} /></td>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <input type="number" step="any" style={{ width: '80px' }} placeholder="lat"
+                        value={editForm.lat ?? ''}
+                        onChange={e => setEditForm({ ...editForm, lat: Number(e.target.value) })} />
+                      {' '}
+                      <input type="number" step="any" style={{ width: '80px' }} placeholder="lng"
+                        value={editForm.lng ?? ''}
+                        onChange={e => setEditForm({ ...editForm, lng: Number(e.target.value) })} />
+                    </td>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px', marginRight: '2px' }}
+                        onClick={() => handleUpdate(v.id)}>OK</button>
+                      <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px', marginRight: '2px' }}
+                        onClick={() => reprocessarGeo(v.id, editForm.nome ?? v.nome)}>🌐</button>
+                      <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px' }}
+                        onClick={() => setEditando(null)}>✕</button>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={v.id}>
+                    <td><strong>{v.nome}</strong></td>
+                    <td>{v.cidade}</td>
+                    <td>{v.capacidade?.toLocaleString()}</td>
+                    <td>
+                      {v.lat && v.lng
+                        ? <span className="tag-success">✓ {v.lat.toFixed(3)}, {v.lng.toFixed(3)}</span>
+                        : <span className="tag-danger">✗ Sem geo</span>}
+                    </td>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <button className="win-btn" style={{ fontSize: '11px', padding: '1px 6px', marginRight: '2px' }}
+                        onClick={() => { setEditando(v.id); setEditForm({ ...v }) }}>✎</button>
+                      <button className="win-btn win-btn-danger" style={{ fontSize: '11px', padding: '1px 6px' }}
+                        onClick={() => handleDelete(v.id)}>✕</button>
+                    </td>
+                  </tr>
+                )
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

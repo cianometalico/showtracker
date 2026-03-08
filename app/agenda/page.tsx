@@ -114,135 +114,132 @@ export default function Agenda() {
       </div>
 
       {/* CALENDÁRIO */}
-      {view === 'calendario' && (
-        <div className="bg-zinc-900 rounded-xl p-6 calendar-dark">
-          <style>{`
-            .calendar-dark .fc-theme-standard td,
-            .calendar-dark .fc-theme-standard th,
-            .calendar-dark .fc-theme-standard .fc-scrollgrid {
-              border-color: #27272a;
-            }
-            .calendar-dark .fc-col-header-cell-cushion,
-            .calendar-dark .fc-daygrid-day-number {
-              color: #a1a1aa;
-              text-decoration: none;
-            }
-            .calendar-dark .fc-day-today {
-              background: #1f1f23 !important;
-            }
-            .calendar-dark .fc-button {
-              background: #3f3f46 !important;
-              border-color: #3f3f46 !important;
-              color: white !important;
-            }
-            .calendar-dark .fc-button:hover {
-              background: #52525b !important;
-            }
-            .calendar-dark .fc-button-active {
-              background: #52525b !important;
-            }
-            .calendar-dark .fc-toolbar-title {
-              color: white;
-              font-size: 1rem;
-              font-weight: 600;
-            }
-            .calendar-dark .fc-event {
-              cursor: pointer;
-              font-size: 0.75rem;
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-            .calendar-dark .fc-daygrid-day-frame {
-              background: transparent;
-            }
-          `}</style>
-          <FullCalendar
-            plugins={[dayGridPlugin]}
-            initialView="dayGridMonth"
-            events={calendarEvents}
-            locale="pt-br"
-            height="auto"
-            eventClick={(info) => {
-              info.jsEvent.preventDefault()
-              window.location.href = info.event.url
-            }}
-            eventContent={(arg) => (
-              <div className="truncate px-1">
-                <span>{arg.event.title}</span>
-                {arg.event.extendedProps.venue && (
-                  <span className="opacity-70 ml-1 text-xs">{arg.event.extendedProps.venue}</span>
-                )}
-              </div>
+{view === 'calendario' && (
+  <div className="win-window">
+    <div className="win-titlebar">
+      <span>📅 Agenda — Calendário</span>
+    </div>
+    <div style={{ padding: '8px', background: '#c0c0c0' }}>
+      <FullCalendar
+        plugins={[dayGridPlugin]}
+        initialView="dayGridMonth"
+        events={calendarEvents}
+        locale="pt-br"
+        height="auto"
+        eventClick={(info) => {
+          info.jsEvent.preventDefault()
+          window.location.href = info.event.url
+        }}
+        eventContent={(arg) => (
+          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>
+            <strong>{arg.event.title}</strong>
+            {arg.event.extendedProps.venue && (
+              <span style={{ opacity: 0.7, marginLeft: 4, fontSize: '10px' }}>{arg.event.extendedProps.venue}</span>
             )}
-          />
-        </div>
-      )}
+          </div>
+        )}
+      />
+    </div>
+  </div>
+)}
 
       {/* LISTA */}
-      {view === 'lista' && (
+{view === 'lista' && (
+  <div className="win-window">
+    <div className="win-titlebar">
+      <span>📅 Agenda — Lista</span>
+    </div>
+    <div style={{ padding: '4px' }}>
+      {proximos.length > 0 && (
         <>
-          {proximos.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Próximos</h2>
+          <div style={{ background: '#000080', color: '#ffffff', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold' }}>
+            PRÓXIMOS
+          </div>
+          <table className="win-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Artista</th>
+                <th>Local</th>
+                <th>Estampa</th>
+                <th>Peças</th>
+                <th>Público</th>
+                <th>Flags</th>
+              </tr>
+            </thead>
+            <tbody>
               {proximos.map(s => {
                 const ds = designStatus(s.designs)
                 const total = s.pieces?.reduce((acc, p) => acc + p.quantidade, 0) ?? 0
                 return (
-                  <Link key={s.id} href={`/shows/${s.id}`}>
-                    <div className="bg-zinc-900 hover:bg-zinc-800 rounded-xl px-6 py-4 flex justify-between items-center transition-colors cursor-pointer">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3">
-                          <p className="font-semibold">{s.artists?.nome}</p>
-                          <span className="text-xs text-zinc-500">{s.artists?.genero}</span>
-                          {s.fiscalizacao && <span className="text-xs bg-red-900/40 text-red-400 px-2 py-0.5 rounded-full">Fiscalização</span>}
-                          {s.risco_cancelamento && <span className="text-xs bg-yellow-900/40 text-yellow-400 px-2 py-0.5 rounded-full">Risco cancelamento</span>}
-                        </div>
-                        <p className="text-sm text-zinc-400">{s.venues?.nome} · {s.venues?.cidade}</p>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <p className="text-sm font-medium">{new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR')}</p>
-                        <p className={`text-xs ${ds.color}`}>{ds.label}</p>
-                        <p className="text-xs text-zinc-500">{total > 0 ? `${total} peças` : 'Sem peças'} · {s.publico_estimado?.toLocaleString()} pessoas</p>
-                      </div>
-                    </div>
-                  </Link>
+                  <tr key={s.id} style={{ cursor: 'pointer' }}
+                    onClick={() => window.location.href = `/shows/${s.id}`}>
+                    <td>{new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td><strong>{s.artists?.nome}</strong></td>
+                    <td>{s.venues?.nome}</td>
+                    <td className={ds.color === 'text-green-400' ? 'tag-success' : ds.color === 'text-yellow-400' ? 'tag-warning' : 'tag-neutral'}>{ds.label}</td>
+                    <td>{total > 0 ? `${total} pç` : '—'}</td>
+                    <td>{s.publico_estimado > 0 ? s.publico_estimado.toLocaleString() : '—'}</td>
+                    <td>
+                      {s.fiscalizacao && <span className="tag-danger">⚠ Fisc</span>}
+                      {s.risco_cancelamento && <span className="tag-warning"> ⚠ Cancel</span>}
+                      {!s.participou && <span className="tag-neutral"> ∅</span>}
+                    </td>
+                  </tr>
                 )
               })}
-            </div>
-          )}
+            </tbody>
+          </table>
+        </>
+      )}
 
-          {passados.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Histórico</h2>
+      {passados.length > 0 && (
+        <>
+          <div style={{ background: '#808080', color: '#ffffff', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold', marginTop: '8px' }}>
+            HISTÓRICO
+          </div>
+          <table className="win-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Artista</th>
+                <th>Local</th>
+                <th>Peças</th>
+                <th>Resultado</th>
+              </tr>
+            </thead>
+            <tbody>
               {[...passados].reverse().map(s => {
                 const total = s.pieces?.reduce((acc, p) => acc + p.quantidade, 0) ?? 0
                 return (
-                  <Link key={s.id} href={`/shows/${s.id}`}>
-                    <div className="bg-zinc-900/60 hover:bg-zinc-800 rounded-xl px-6 py-4 flex justify-between items-center transition-colors cursor-pointer">
-                      <div className="space-y-1">
-                        <p className="font-semibold">{s.artists?.nome}</p>
-                        <p className="text-sm text-zinc-400">{s.venues?.nome} · {s.venues?.cidade}</p>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <p className="text-sm">{new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR')}</p>
-                        <p className={`text-sm font-semibold ${statusColor(s.resultado_geral)}`}>{s.resultado_geral || 'Sem resultado'}</p>
-                        <p className="text-xs text-zinc-500">{total > 0 ? `${total} peças` : '—'}</p>
-                      </div>
-                    </div>
-                  </Link>
+                  <tr key={s.id} style={{ cursor: 'pointer' }}
+                    onClick={() => window.location.href = `/shows/${s.id}`}>
+                    <td>{new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td><strong>{s.artists?.nome}</strong></td>
+                    <td>{s.venues?.nome}</td>
+                    <td>{total > 0 ? `${total} pç` : '—'}</td>
+                    <td className={
+                      s.resultado_geral === 'Excelente' ? 'tag-success' :
+                      s.resultado_geral === 'Bom' ? 'tag-sage' :
+                      s.resultado_geral === 'Razoável' ? 'tag-warning' :
+                      s.resultado_geral === 'Ruim' ? 'tag-danger' : 'tag-neutral'
+                    }>{s.resultado_geral || '—'}</td>
+                  </tr>
                 )
               })}
-            </div>
-          )}
-
-          {shows.length === 0 && (
-            <div className="text-center py-20 text-zinc-600">
-              <p className="text-lg">Nenhum show cadastrado ainda.</p>
-              <p className="text-sm mt-2">Clica em + Novo show para começar.</p>
-            </div>
-          )}
+            </tbody>
+          </table>
         </>
       )}
+
+      {shows.length === 0 && (
+        <div style={{ padding: '32px', textAlign: 'center', color: '#808080' }}>
+          Nenhum show cadastrado. Clique em + Novo Show para começar.
+        </div>
+      )}
+    </div>
+  </div>
+)}
     </div>
   )
 }
