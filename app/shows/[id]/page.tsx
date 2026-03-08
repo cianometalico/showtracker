@@ -132,6 +132,24 @@ async function fetchClima() {
     setNewPiece({ tipo: '', cor_malha: '', qualidade_malha: '', tamanho: '', quantidade: 0, vendidas: 0, preco_medio: 0 })
   }
 
+  async function updatePiece(id: string, fields: Partial<Piece>) {
+  await supabase.from('pieces').update(fields).eq('id', id)
+  fetchShow()
+}
+
+async function deletePiece(id: string) {
+  await supabase.from('pieces').delete().eq('id', id)
+  setPieces(prev => prev.filter(p => p.id !== id))
+}
+
+async function handleDelete() {
+  if (!confirm('Deletar este show? Todas as peças e estampas serão removidas.')) return
+  await supabase.from('pieces').delete().eq('show_id', id)
+  await supabase.from('designs').delete().eq('show_id', id)
+  await supabase.from('shows').delete().eq('id', id)
+  window.location.href = '/agenda'
+}
+
   const totalPecas = pieces.reduce((acc, p) => acc + p.quantidade, 0)
   const totalVendidas = pieces.reduce((acc, p) => acc + p.vendidas, 0)
 
@@ -282,10 +300,18 @@ async function fetchClima() {
             onChange={e => setForm({ ...form, observacoes: e.target.value })} />
         </div>
 
-        <button type="submit"
-          className="w-full bg-white text-black font-semibold rounded-lg py-2 text-sm hover:bg-zinc-200 transition-colors">
-          Salvar Show
-        </button>
+        <div className="flex gap-3">
+  <button type="submit"
+    className="flex-1 bg-white text-black font-semibold rounded-lg py-2 text-sm hover:bg-zinc-200 transition-colors">
+    Salvar Show
+  </button>
+  {!isNew && (
+    <button type="button" onClick={handleDelete}
+      className="px-4 bg-red-900/30 text-red-400 border border-red-900/50 font-semibold rounded-lg py-2 text-sm hover:bg-red-900/50 transition-colors">
+      Deletar
+    </button>
+  )}
+</div>
       </form>
 
       {/* ESTAMPAS */}
@@ -427,29 +453,59 @@ async function fetchClima() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-zinc-400 text-xs border-b border-zinc-800">
-                  <th className="text-left py-2">Tipo</th>
-                  <th className="text-left py-2">Cor</th>
-                  <th className="text-left py-2">Malha</th>
-                  <th className="text-left py-2">Tam</th>
-                  <th className="text-right py-2">Qtd</th>
-                  <th className="text-right py-2">Vendidas</th>
-                  <th className="text-right py-2">Preço</th>
-                </tr>
+<tr className="text-zinc-400 text-xs border-b border-zinc-800">
+  <th className="text-left py-2">Tipo</th>
+  <th className="text-left py-2">Cor</th>
+  <th className="text-left py-2">Malha</th>
+  <th className="text-left py-2">Tam</th>
+  <th className="text-right py-2">Qtd</th>
+  <th className="text-right py-2">Vendidas</th>
+  <th className="text-right py-2">Preço</th>
+  <th className="py-2"></th>
+</tr>
               </thead>
-              <tbody>
-                {pieces.map((p, i) => (
-                  <tr key={i} className="border-b border-zinc-800/50">
-                    <td className="py-2">{p.tipo}</td>
-                    <td className="py-2">{p.cor_malha}</td>
-                    <td className="py-2">{p.qualidade_malha}</td>
-                    <td className="py-2">{p.tamanho}</td>
-                    <td className="py-2 text-right">{p.quantidade}</td>
-                    <td className="py-2 text-right text-green-400">{p.vendidas}</td>
-                    <td className="py-2 text-right">R$ {p.preco_medio}</td>
-                  </tr>
-                ))}
-              </tbody>
+<tbody>
+  {pieces.map((p, i) => (
+    <tr key={p.id ?? i} className="border-b border-zinc-800/50 group">
+      <td className="py-2">{p.tipo}</td>
+      <td className="py-2">{p.cor_malha}</td>
+      <td className="py-2">{p.qualidade_malha}</td>
+      <td className="py-2">{p.tamanho}</td>
+      <td className="py-2 text-right">
+        <input
+          type="number"
+          defaultValue={p.quantidade}
+          onBlur={e => updatePiece(p.id!, { quantidade: Number(e.target.value) })}
+          className="w-16 text-right bg-transparent border-none outline-none focus:bg-zinc-800 rounded px-1"
+        />
+      </td>
+      <td className="py-2 text-right">
+        <input
+          type="number"
+          defaultValue={p.vendidas}
+          onBlur={e => updatePiece(p.id!, { vendidas: Number(e.target.value) })}
+          className="w-16 text-right bg-transparent border-none outline-none focus:bg-zinc-800 rounded px-1 text-green-400"
+        />
+      </td>
+      <td className="py-2 text-right">
+        <input
+          type="number"
+          defaultValue={p.preco_medio}
+          onBlur={e => updatePiece(p.id!, { preco_medio: Number(e.target.value) })}
+          className="w-20 text-right bg-transparent border-none outline-none focus:bg-zinc-800 rounded px-1"
+        />
+      </td>
+      <td className="py-2 text-right">
+        <button
+          type="button"
+          onClick={() => deletePiece(p.id!)}
+          className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-all text-xs px-2">
+          ✕
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
             </table>
           </div>
         </div>
