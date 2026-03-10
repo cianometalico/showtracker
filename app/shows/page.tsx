@@ -1,11 +1,10 @@
 'use client'
 
-import { calculateSuggestedVolume, getVenueZona } from '@/lib/inference'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-type Artist = { id: string; nome: string; genero: string; propensao_compra: number }
+type Artist = { id: string; nome: string }
 type Venue = { id: string; nome: string; capacidade: number; lat: number; lng: number }
 
 type Design = {
@@ -38,16 +37,15 @@ export default function ShowPage() {
   const [designs, setDesigns] = useState<Design[]>([])
   const [pieces, setPieces] = useState<Piece[]>([])
   const [clima, setClima] = useState<{
-  descricao: string; temp_min: number; temp_max: number; chuva: number; vento: number; icone: string
-} | null>(null)
+    descricao: string; temp_min: number; temp_max: number; chuva: number; vento: number; icone: string
+  } | null>(null)
 
   const [form, setForm] = useState({
-  artist_id: '', venue_id: '', data: '', status_ingresso: '',
-  publico_estimado: 0, primeira_vez_brasil: false, fiscalizacao: false,
-  risco_cancelamento: false, concorrentes: '', qualidade_concorrencia: 3,
-  clima_estimado: '', resultado_geral: '', observacoes: '', participou: true,
-  fiscalizacao_score: 0,
-})
+    artist_id: '', venue_id: '', data: '', status_ingresso: '',
+    publico_estimado: 0, primeira_vez_brasil: false, fiscalizacao: false,
+    risco_cancelamento: false, concorrentes: '', qualidade_concorrencia: 3,
+    clima_estimado: '', resultado_geral: '', observacoes: '', participou: true,
+  })
 
   const [newDesign, setNewDesign] = useState<Design>({
     nome: '', abordagem: '', cromatismo: '', tamanho_estampa: '', status: ''
@@ -59,22 +57,14 @@ export default function ShowPage() {
   })
 
   useEffect(() => {
-  supabase.from('artists').select('id, nome, genero, propensao_compra').order('nome').then(({ data }) => { if (data) setArtists(data) })
-  supabase.from('venues').select('id, nome, capacidade, lat, lng').order('nome').then(({ data }) => { if (data) setVenues(data as Venue[]) })
-  if (!isNew) fetchShow()
-}, [id])
+    supabase.from('artists').select('id, nome').order('nome').then(({ data }) => { if (data) setArtists(data) })
+    supabase.from('venues').select('id, nome, capacidade, lat, lng').order('nome').then(({ data }) => { if (data) setVenues(data as Venue[]) })
+    if (!isNew) fetchShow()
+  }, [id])
 
   async function fetchShow() {
     const { data: show } = await supabase.from('shows').select('*').eq('id', id).single()
-    if (show) setForm({
-  ...show,
-  concorrentes: show.concorrentes ?? '',
-  clima_estimado: show.clima_estimado ?? '',
-  observacoes: show.observacoes ?? '',
-  resultado_geral: show.resultado_geral ?? '',
-  publico_estimado: show.publico_estimado ?? 0,
-  fiscalizacao_score: show.fiscalizacao_score ?? 0,
-})
+    if (show) setForm(show)
     const { data: d } = await supabase.from('designs').select('*').eq('show_id', id)
     if (d) setDesigns(d)
     const { data: p } = await supabase.from('pieces').select('*').eq('show_id', id)
@@ -144,21 +134,6 @@ export default function ShowPage() {
   const totalPecas = pieces.reduce((acc, p) => acc + p.quantidade, 0)
   const totalVendidas = pieces.reduce((acc, p) => acc + p.vendidas, 0)
   const artista = artists.find(a => a.id === form.artist_id)
-  const venueAtual = venues.find(v => v.id === form.venue_id)
-  const inferencia = calculateSuggestedVolume({
-  status_ingresso: form.status_ingresso,
-  publico_estimado: form.publico_estimado,
-  concorrentes: form.concorrentes,
-  qualidade_concorrencia: form.qualidade_concorrencia,
-  fiscalizacao: form.fiscalizacao,
-  fiscalizacao_score: form.fiscalizacao_score ?? 0,
-  chuva_prevista: (clima?.chuva ?? 0) > 2,
-  venue_zona: venueAtual ? getVenueZona(venueAtual.nome) : '',
-  artist_propensao: artists.find(a => a.id === form.artist_id)?.propensao_compra,
-  artist_genero: artists.find(a => a.id === form.artist_id)?.genero,
-  num_artistas: designs.length > 0 ? designs.length : 1,
-})
-
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -213,7 +188,7 @@ export default function ShowPage() {
                     <option>último lote</option>
                     <option>lotes intermediários</option>
                     <option>mal vendido</option>
-
+                    <option>não participei</option>
                   </select>
                 </div>
               </div>
@@ -221,7 +196,7 @@ export default function ShowPage() {
               {/* PÚBLICO ESTIMADO */}
               <div className="win-inset" style={{ padding: '4px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '11px' }}>Público estimado:</span>
-                <strong style={{ fontSize: '16px', color: '#2B5BE0' }}>{(form.publico_estimado ?? 0).toLocaleString()}</strong>
+                <strong style={{ fontSize: '16px', color: '#2B5BE0' }}>{form.publico_estimado.toLocaleString()}</strong>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
@@ -237,7 +212,7 @@ export default function ShowPage() {
                 <div>
                   <label style={{ fontSize: '11px', display: 'block' }}>Qualidade concorrência: {form.qualidade_concorrencia}/5</label>
                   <input type="range" min={1} max={5} style={{ width: '100%' }}
-                    value={form.qualidade_concorrencia ?? 5}
+                    value={form.qualidade_concorrencia}
                     onChange={e => setForm({ ...form, qualidade_concorrencia: Number(e.target.value) })} />
                 </div>
               </div>
@@ -248,6 +223,7 @@ export default function ShowPage() {
                   { label: 'Primeira vez no Brasil', key: 'primeira_vez_brasil' },
                   { label: 'Fiscalização', key: 'fiscalizacao' },
                   { label: 'Risco cancelamento', key: 'risco_cancelamento' },
+                  { label: 'Participei', key: 'participou' },
                 ].map(({ label, key }) => (
                   <label key={key} style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
                     <input type="checkbox"
@@ -361,57 +337,10 @@ export default function ShowPage() {
                   ))}
                 </tbody>
               </table>
-</div>
-        </div>
-      )}
-
-      </div>  {/* fecha o grid 1fr 1fr */}
-
-      {/* INFERÊNCIA */}
-      {!isNew && form.status_ingresso && form.status_ingresso !== 'não participei' && (
-        <div className="win-window">
-          <div className="win-titlebar" style={{ background: 'linear-gradient(to right, #806800, #C9A84C)' }}>
-            <span>🧮 Sugestão de Produção</span>
-          </div>
-          <div style={{ padding: '8px', background: '#c0c0c0' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '8px' }}>
-              <div className="sunken" style={{ padding: '6px', textAlign: 'center', background: '#fff' }}>
-                <div style={{ fontSize: '10px', color: '#808080' }}>Mínimo</div>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#806800' }}>{inferencia.volume_min}</div>
-                <div style={{ fontSize: '10px' }}>peças</div>
-              </div>
-              <div className="sunken" style={{ padding: '6px', textAlign: 'center', background: '#ffffc0' }}>
-                <div style={{ fontSize: '10px', color: '#808080' }}>Sugerido</div>
-                <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#C9A84C' }}>{inferencia.volume_sugerido}</div>
-                <div style={{ fontSize: '10px' }}>peças</div>
-              </div>
-              <div className="sunken" style={{ padding: '6px', textAlign: 'center', background: '#fff' }}>
-                <div style={{ fontSize: '10px', color: '#808080' }}>Máximo</div>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#806800' }}>{inferencia.volume_max}</div>
-                <div style={{ fontSize: '10px' }}>peças</div>
-              </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginBottom: '8px' }}>
-              <div className="sunken" style={{ padding: '4px 8px', background: '#fff' }}>
-                <div style={{ fontSize: '10px', color: '#808080' }}>Receita estimada</div>
-                <div style={{ fontWeight: 'bold', color: '#006400' }}>R$ {inferencia.receita_estimada.toFixed(0)}</div>
-              </div>
-              <div className="sunken" style={{ padding: '4px 8px', background: '#fff' }}>
-                <div style={{ fontSize: '10px', color: '#808080' }}>Margem estimada</div>
-                <div style={{ fontWeight: 'bold', color: '#2B5BE0' }}>R$ {inferencia.margem_estimada.toFixed(0)}</div>
-              </div>
-            </div>
-            {inferencia.alertas.map((a, i) => (
-              <div key={i} style={{ fontSize: '11px', color: '#CC2200', padding: '1px 0' }}>{a}</div>
-            ))}
-            {inferencia.notas.map((n, i) => (
-              <div key={i} style={{ fontSize: '11px', color: '#808080', padding: '1px 0' }}>{n}</div>
-            ))}
           </div>
-        </div>
-      )}
-
-      {/* PEÇAS */}
+        )}
+      </div>
 
       {/* PEÇAS */}
       {!isNew && (
