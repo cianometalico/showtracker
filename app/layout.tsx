@@ -7,12 +7,18 @@ import './globals.css'
 const TREE = [
   { id: 'home', label: '🏠 Home', path: '/' },
   {
+    id: 'arquivos', label: '📁 Arquivos', path: null,
+    children: [
+      { id: 'importacoes', label: '📥 Importações', path: '/arquivos/importacoes' },
+      { id: 'exportacoes', label: '📤 Exportações', path: '/arquivos/exportacoes' },
+    ]
+  },
+  {
     id: 'database', label: '🗄️ Database', path: null,
     children: [
-      { id: 'artists', label: '🎸 Artistas', path: '/artists' },
-      { id: 'venues', label: '📍 Locais', path: '/venues' },
-      { id: 'imports', label: '📥 Importações', path: '/dados' },
-      { id: 'exports', label: '📤 Exportações', path: '/exportacoes' },
+      { id: 'artistas', label: '🎸 Artistas', path: '/database/artistas' },
+      { id: 'generos', label: '🎼 Gêneros', path: '/database/generos' },
+      { id: 'locais', label: '📍 Locais', path: '/database/locais' },
     ]
   },
   { id: 'eventos', label: '📅 Eventos', path: '/agenda' },
@@ -23,7 +29,7 @@ const TREE = [
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const [expanded, setExpanded] = useState<string[]>(['database'])
+  const [expanded, setExpanded] = useState<string[]>(['arquivos', 'database'])
   const [time, setTime] = useState('')
 
   useEffect(() => {
@@ -55,12 +61,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   }
 
   function getStatusLeft() {
-    if (pathname === '/artists') return '🎸 Artistas cadastrados'
-    if (pathname === '/venues') return '📍 Locais cadastrados'
+    if (pathname === '/database/artistas') return '🎸 Artistas cadastrados'
+    if (pathname.startsWith('/database/artistas/')) return '🎸 Detalhes do artista'
+    if (pathname === '/database/generos') return '🎼 Gêneros musicais'
+    if (pathname === '/database/locais') return '📍 Locais cadastrados'
+    if (pathname === '/arquivos/importacoes') return '📥 Importações'
+    if (pathname === '/arquivos/exportacoes') return '📤 Exportações'
     if (pathname === '/agenda') return '📅 Agenda de eventos'
     if (pathname === '/estoque') return '🧾 Controle de estoque'
     if (pathname === '/inventario') return '⚔️ Inventário de produção'
-    if (pathname === '/dados') return '💾 Importações e exportações'
     if (pathname === '/') return '🏠 Painel principal'
     if (pathname.startsWith('/shows/')) return '🎵 Detalhes do evento'
     return 'ShowTracker'
