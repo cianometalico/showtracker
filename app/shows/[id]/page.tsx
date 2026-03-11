@@ -36,18 +36,19 @@ export default function ShowPage() {
   const [artists, setArtists] = useState<Artist[]>([])
   const [venues, setVenues] = useState<Venue[]>([])
   const [designs, setDesigns] = useState<Design[]>([])
+  const [genre, setGenre] = useState<any>(null)
   const [pieces, setPieces] = useState<Piece[]>([])
   const [clima, setClima] = useState<{
-  descricao: string; temp_min: number; temp_max: number; chuva: number; vento: number; icone: string
-} | null>(null)
+    descricao: string; temp_min: number; temp_max: number; chuva: number; vento: number; icone: string
+  } | null>(null)
 
   const [form, setForm] = useState({
-  artist_id: '', venue_id: '', data: '', status_ingresso: '',
-  publico_estimado: 0, primeira_vez_brasil: false, fiscalizacao: false,
-  risco_cancelamento: false, concorrentes: '', qualidade_concorrencia: 3,
-  clima_estimado: '', resultado_geral: '', observacoes: '', participou: true,
-  fiscalizacao_score: 0,
-})
+    artist_id: '', venue_id: '', data: '', status_ingresso: '',
+    publico_estimado: 0, primeira_vez_brasil: false, fiscalizacao: false,
+    risco_cancelamento: false, concorrentes: '', qualidade_concorrencia: 3,
+    clima_estimado: '', resultado_geral: '', observacoes: '', participou: true,
+    fiscalizacao_score: 0,
+  })
 
   const [newDesign, setNewDesign] = useState<Design>({
     nome: '', abordagem: '', cromatismo: '', tamanho_estampa: '', status: ''
@@ -59,26 +60,37 @@ export default function ShowPage() {
   })
 
   useEffect(() => {
-  supabase.from('artists').select('id, nome, genero, propensao_compra').order('nome').then(({ data }) => { if (data) setArtists(data) })
-  supabase.from('venues').select('id, nome, capacidade, lat, lng').order('nome').then(({ data }) => { if (data) setVenues(data as Venue[]) })
-  if (!isNew) fetchShow()
-}, [id])
+    supabase.from('artists').select('id, nome, genero, propensao_compra').order('nome').then(({ data }) => { if (data) setArtists(data) })
+    supabase.from('venues').select('id, nome, capacidade, lat, lng').order('nome').then(({ data }) => { if (data) setVenues(data as Venue[]) })
+    if (!isNew) fetchShow()
+  }, [id])
 
   async function fetchShow() {
     const { data: show } = await supabase.from('shows').select('*').eq('id', id).single()
     if (show) setForm({
-  ...show,
-  concorrentes: show.concorrentes ?? '',
-  clima_estimado: show.clima_estimado ?? '',
-  observacoes: show.observacoes ?? '',
-  resultado_geral: show.resultado_geral ?? '',
-  publico_estimado: show.publico_estimado ?? 0,
-  fiscalizacao_score: show.fiscalizacao_score ?? 0,
-})
+      ...show,
+      concorrentes: show.concorrentes ?? '',
+      clima_estimado: show.clima_estimado ?? '',
+      observacoes: show.observacoes ?? '',
+      resultado_geral: show.resultado_geral ?? '',
+      publico_estimado: show.publico_estimado ?? 0,
+      fiscalizacao_score: show.fiscalizacao_score ?? 0,
+    })
     const { data: d } = await supabase.from('designs').select('*').eq('show_id', id)
     if (d) setDesigns(d)
     const { data: p } = await supabase.from('pieces').select('*').eq('show_id', id)
     if (p) setPieces(p)
+
+    // Busca gênero do artista
+    const artistData = artists.find(a => a.id === show.artist_id)
+    if (artistData?.genero) {
+      const { data: genreData } = await supabase
+        .from('genres')
+        .select('*')
+        .ilike('nome', artistData.genero)
+        .single()
+      if (genreData) setGenre(genreData)
+    }
   }
 
   useEffect(() => {
@@ -146,18 +158,18 @@ export default function ShowPage() {
   const artista = artists.find(a => a.id === form.artist_id)
   const venueAtual = venues.find(v => v.id === form.venue_id)
   const inferencia = calculateSuggestedVolume({
-  status_ingresso: form.status_ingresso,
-  publico_estimado: form.publico_estimado,
-  concorrentes: form.concorrentes,
-  qualidade_concorrencia: form.qualidade_concorrencia,
-  fiscalizacao: form.fiscalizacao,
-  fiscalizacao_score: form.fiscalizacao_score ?? 0,
-  chuva_prevista: (clima?.chuva ?? 0) > 2,
-  venue_zona: venueAtual ? getVenueZona(venueAtual.nome) : '',
-  artist_propensao: artists.find(a => a.id === form.artist_id)?.propensao_compra,
-  artist_genero: artists.find(a => a.id === form.artist_id)?.genero,
-  num_artistas: designs.length > 0 ? designs.length : 1,
-})
+    status_ingresso: form.status_ingresso,
+    publico_estimado: form.publico_estimado,
+    concorrentes: form.concorrentes,
+    qualidade_concorrencia: form.qualidade_concorrencia,
+    fiscalizacao: form.fiscalizacao,
+    fiscalizacao_score: form.fiscalizacao_score ?? 0,
+    chuva_prevista: (clima?.chuva ?? 0) > 2,
+    venue_zona: venueAtual ? getVenueZona(venueAtual.nome) : '',
+    artist_propensao: artists.find(a => a.id === form.artist_id)?.propensao_compra,
+    num_artistas: designs.length > 0 ? designs.length : 1,
+    genre,
+  })
 
 
   return (
@@ -318,10 +330,10 @@ export default function ShowPage() {
                     onChange={e => setNewDesign({ ...newDesign, nome: e.target.value })} required />
                 </div>
                 {[
-                  { label: 'Abordagem', key: 'abordagem', opts: ['Canônica','Reinterpretação','Experimental'] },
-                  { label: 'Cromatismo', key: 'cromatismo', opts: ['Monocromático','Bicromático','Tricromático','Gradiente'] },
-                  { label: 'Tamanho', key: 'tamanho_estampa', opts: ['Pequena','Média','Grande'] },
-                  { label: 'Status', key: 'status', opts: ['Pesquisa','Fotolito impresso','Fotolito finalizado','Tela gravada','Pronto'] },
+                  { label: 'Abordagem', key: 'abordagem', opts: ['Canônica', 'Reinterpretação', 'Experimental'] },
+                  { label: 'Cromatismo', key: 'cromatismo', opts: ['Monocromático', 'Bicromático', 'Tricromático', 'Gradiente'] },
+                  { label: 'Tamanho', key: 'tamanho_estampa', opts: ['Pequena', 'Média', 'Grande'] },
+                  { label: 'Status', key: 'status', opts: ['Pesquisa', 'Fotolito impresso', 'Fotolito finalizado', 'Tela gravada', 'Pronto'] },
                 ].map(({ label, key, opts }) => (
                   <div key={key}>
                     <label style={{ fontSize: '11px', display: 'block' }}>{label}:</label>
@@ -361,9 +373,9 @@ export default function ShowPage() {
                   ))}
                 </tbody>
               </table>
-</div>
-        </div>
-      )}
+            </div>
+          </div>
+        )}
 
       </div>  {/* fecha o grid 1fr 1fr */}
 
@@ -420,16 +432,16 @@ export default function ShowPage() {
             <span>👕 Peças</span>
             <span style={{ fontSize: '11px', fontWeight: 'normal' }}>
               Total: {totalPecas} pç
-              {totalVendidas > 0 && ` · Vendidas: ${totalVendidas} · Taxa: ${Math.round(totalVendidas/totalPecas*100)}%`}
+              {totalVendidas > 0 && ` · Vendidas: ${totalVendidas} · Taxa: ${Math.round(totalVendidas / totalPecas * 100)}%`}
             </span>
           </div>
           <div style={{ padding: '8px', background: '#c0c0c0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
 
             <form onSubmit={handleAddPiece} style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
               {[
-                { label: 'Tipo', key: 'tipo', opts: ['Camiseta','Manga longa','Moletom'] },
-                { label: 'Malha', key: 'qualidade_malha', opts: ['Fina','Média','Grossa'] },
-                { label: 'Tamanho', key: 'tamanho', opts: ['PP','P','M','G','GG'] },
+                { label: 'Tipo', key: 'tipo', opts: ['Camiseta', 'Manga longa', 'Moletom'] },
+                { label: 'Malha', key: 'qualidade_malha', opts: ['Fina', 'Média', 'Grossa'] },
+                { label: 'Tamanho', key: 'tamanho', opts: ['PP', 'P', 'M', 'G', 'GG'] },
               ].map(({ label, key, opts }) => (
                 <div key={key}>
                   <label style={{ fontSize: '10px', display: 'block' }}>{label}:</label>
