@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# === RADIANT ===
+# Claude Code
+.claude/
+
+# Supabase CLI local state
+supabase/.temp/
+
+# Data imports (one-time use)
+*.csv
+import.py
+
+# Design prototypes
+design/
+
+# Docs (architecture docs, not code)
+docs/
+
+# Workspace files
+*.code-workspace
