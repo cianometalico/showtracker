@@ -6,43 +6,41 @@
   body {
     font-family: system-ui, -apple-system, sans-serif;
     font-size: 14px;
-    background-color: #0f1117;
-    color: #e2e8f0;
+    background-color: var(--content-bg);
+    color: var(--text);
     margin: 0;
   }
 }
 
 :root {
-  --nav-bg:         #0a0d13;
-  --nav-border:     #1e2433;
-  --nav-text:       #64748b;
-  --nav-text-hover: #94a3b8;
-  --nav-active:     #e2e8f0;
-  --content-bg:     #0f1117;
-  --surface:        #161b27;
-  --surface-2:      #1e2433;
-  --border:         #1e2433;
-  --text:           #e2e8f0;
-  --text-dim:       #64748b;
-  --text-muted:     #334155;
-  --green:          #4ade80;
-  --cyan:           #22d3ee;
-  --amber:          #fbbf24;
-  --red:            #f87171;
-  --blue:           #818cf8;
-  --tag-green-bg:     #1a2a1a;
-  --tag-green-border: #2a3a2a;
-  --tag-blue-bg:      #1a1a2a;
-  --tag-blue-border:  #2a2a3a;
+  --nav-bg:         #080b10;
+  --nav-border:     rgba(255,255,255,0.06);
+  --content-bg:     #0c1018;
+  --surface:        #121a24;
+  --surface-2:      #1a2530;
+  --border:         #1e3040;
+  --text:           #c0dce8;
+  --text-dim:       #5a7888;
+  --text-muted:     #4a6878;
+  --cyan:           #6ec8d8;
+  --lime:           #a0e650;
+  --amber:          #e8b830;
+  --red:            #e85050;
+  --tag-green-bg:   rgba(160,230,80,0.08);
+  --tag-green-border: rgba(160,230,80,0.2);
+  --tag-blue-bg:    rgba(110,200,216,0.08);
+  --tag-blue-border: rgba(110,200,216,0.15);
+  --font-display:   'Cinzel', serif;
+  --font-mono:      'JetBrains Mono', monospace;
 }
 
 .page-container         { padding: 1.5rem; max-width: 720px; }
 .page-container-narrow  { padding: 1.5rem; max-width: 480px; }
 .breadcrumb             { font-size: 0.75rem; color: var(--text-dim); text-decoration: none; }
 .breadcrumb:hover       { color: var(--text); }
-.section-label          { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 0; }
+.section-label          { font-family: var(--font-display); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; margin-top: 0; font-weight: 500; }
 .stat-card              { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; text-align: center; background: var(--surface); flex: 1; min-width: 100px; }
-.stat-value             { font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0; }
+.stat-value             { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0; }
 .stat-label             { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 2px 0 0; }
 
 .nav-link {
@@ -50,14 +48,14 @@
   align-items: center;
   padding: 0.45rem 1rem;
   font-size: 0.8rem;
-  color: var(--nav-text);
+  color: var(--text-dim);
   text-decoration: none;
   letter-spacing: 0.01em;
   transition: color 0.15s;
 }
 
 .nav-link:hover {
-  color: var(--nav-text-hover);
+  color: #8ab4c8;
 }
 
 .app-shell {
@@ -81,13 +79,43 @@
 .sidebar-logo {
   padding: 1.25rem 1rem;
   border-bottom: 1px solid var(--nav-border);
-  font-family: monospace;
-  font-size: 0.7rem;
+}
+.sidebar-logo-text {
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text);
 }
+.sidebar-logo-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: #3a5060;
+  letter-spacing: 0.3em;
+  margin-top: 2px;
+}
+.rizoma {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #2a4050;
+  letter-spacing: 2px;
+  text-align: center;
+  padding: 4px 1rem;
+  line-height: 1;
+  overflow: hidden;
+}
+.nav-glyph {
+  font-size: 13px;
+  width: 22px;
+  text-align: center;
+  color: #4a7888;
+  flex-shrink: 0;
+}
+.nav-link.active { color: var(--text); }
+.nav-link.active .nav-glyph { color: var(--cyan); }
+.font-mono { font-family: var(--font-mono); }
+.font-display { font-family: var(--font-display); }
 
 .sidebar-nav {
   padding: 0.5rem 0;
@@ -103,9 +131,9 @@
 .sidebar-version {
   padding: 1rem;
   border-top: 1px solid var(--nav-border);
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  font-family: monospace;
+  font-size: 10px;
+  color: #2a3a44;
+  font-family: var(--font-mono);
   letter-spacing: 0.05em;
 }
 

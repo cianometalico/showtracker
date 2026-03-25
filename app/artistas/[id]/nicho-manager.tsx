@@ -35,9 +35,7 @@ export function NichoManager({ artistId, allNichos, linkedNichoIds }: Props) {
 
   return (
     <div style={{ marginBottom: '1.5rem' }}>
-      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        Nichos
-      </p>
+      <p className="section-label">Nichos</p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
         {allNichos.map(n => {
           const isLinked = linked.has(n.id)

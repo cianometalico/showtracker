@@ -113,7 +113,7 @@ export default async function GenerosPage() {
       {/* Artistas sem gênero — sem Link aninhado */}
       {(untagged ?? []).length > 0 && (
         <div style={{ marginTop: '2rem' }}>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+          <p className="section-label">
             Sem gênero ({(untagged ?? []).length})
           </p>
           <div style={{ border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', overflow: 'hidden' }}>
