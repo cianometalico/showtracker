@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <span className="nav-glyph">⚗̧</span> ohara
               </Link>
             </nav>
-            <div className="sidebar-version">v0.1.1</div>
+            <div className="sidebar-version">v0.2.0</div>
           </aside>
           <main className="main-content">{children}</main>
         </div>
