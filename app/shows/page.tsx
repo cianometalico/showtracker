@@ -6,7 +6,7 @@ export default async function ShowsPage() {
 
   const { data: rows, error: e1 } = await (supabase as any)
     .from('shows')
-    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, concorrencia, venues(id, nome, cidade)')
+    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, concorrencia, legado, venues(id, nome, cidade)')
     .order('data', { ascending: true })
   if (e1) console.error('[shows]', e1)
 
@@ -47,6 +47,7 @@ export default async function ShowsPage() {
       concorrencia:    row.concorrencia ?? null,
       participou:      row.participou ?? false,
       resultado_geral: row.resultado_geral ?? null,
+      legado:          row.legado ?? false,
     }
   })
 

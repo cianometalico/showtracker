@@ -14,12 +14,7 @@ type Show = {
   concorrencia: string | null
   participou: boolean
   resultado_geral: string | null
-}
-
-const LABEL_STATUS: Record<string, string> = {
-  'sold out':    'Sold Out',
-  'bem vendido': 'Bem Vendido',
-  'mal vendido': 'Mal Vendido',
+  legado: boolean
 }
 
 const LABEL_RESULTADO: Record<string, string> = {
@@ -43,15 +38,6 @@ function corResultado(r: string): string {
   }
 }
 
-function corIngresso(s: string | null): string {
-  switch (s) {
-    case 'sold out':    return 'var(--green)'
-    case 'bem vendido': return 'var(--amber)'
-    case 'mal vendido': return 'var(--red)'
-    default:            return 'var(--text-dim)'
-  }
-}
-
 function formatData(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
@@ -62,13 +48,19 @@ function isPast(iso: string) {
   return new Date(iso + 'T23:59:59') < new Date()
 }
 
-type FilterKey = 'todos' | 'proximos' | 'realizados' | 'sem_resultado'
+function todayMidnight() {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+type FilterKey = 'proximos' | 'agenda' | 'realizados' | 'legado'
 
 const FILTROS: { key: FilterKey; label: string }[] = [
-  { key: 'todos',         label: 'Todos' },
-  { key: 'proximos',      label: 'Próximos' },
-  { key: 'realizados',    label: 'Realizados' },
-  { key: 'sem_resultado', label: 'Sem resultado' },
+  { key: 'proximos',   label: '△ próximos' },
+  { key: 'agenda',     label: '☷ agenda' },
+  { key: 'realizados', label: '▽ realizados' },
+  { key: 'legado',     label: '⟁ legado' },
 ]
 
 export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows: number }) {
@@ -77,17 +69,32 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
 
   const filtered = useMemo(() => {
     let list = [...shows]
+    const today = todayMidnight()
+    const limit5 = new Date(today)
+    limit5.setDate(limit5.getDate() + 5)
+
     switch (filtro) {
       case 'proximos':
-        list = list.filter(s => !isPast(s.data))
+        list = list.filter(s => {
+          const d = new Date(s.data + 'T12:00:00')
+          return d >= today && d <= limit5
+        })
+        // already asc from server
+        break
+      case 'agenda':
+        list = list.filter(s => new Date(s.data + 'T12:00:00') >= today)
+        // already asc from server
         break
       case 'realizados':
-        list = list.filter(s => isPast(s.data) && s.participou).reverse()
+        list = list.filter(s => isPast(s.data) && !s.legado)
+        list.reverse()
         break
-      case 'sem_resultado':
-        list = list.filter(s => s.participou && isPast(s.data) && !s.resultado_geral).reverse()
+      case 'legado':
+        list = list.filter(s => s.legado)
+        list.reverse()
         break
     }
+
     if (busca.trim()) {
       const q = busca.toLowerCase()
       list = list.filter(s =>
@@ -99,7 +106,7 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
     return list
   }, [shows, filtro, busca])
 
-  const semResultado = shows.filter(s => s.participou && isPast(s.data) && !s.resultado_geral)
+  const showClima = filtro === 'proximos'
 
   return (
     <div style={{ padding: '1.5rem', maxWidth: 860 }}>
@@ -113,17 +120,6 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
           + Novo show
         </Link>
       </div>
-
-      {semResultado.length > 0 && filtro !== 'sem_resultado' && (
-        <button onClick={() => setFiltro('sem_resultado')} style={{
-          width: '100%', marginBottom: '1rem', textAlign: 'left',
-          padding: '0.6rem 0.75rem', background: '#1a1500',
-          border: '1px solid var(--amber)', borderRadius: 4,
-          fontSize: '0.8rem', color: 'var(--amber)', cursor: 'pointer',
-        }}>
-          ⚠ {semResultado.length} show{semResultado.length > 1 ? 's' : ''} sem resultado — ver →
-        </button>
-      )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
@@ -154,7 +150,7 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
       <div style={{ display: 'flex', gap: '1rem', padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border)', marginBottom: 2 }}>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 160, flexShrink: 0 }}>Data</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flex: 1 }}>Evento</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 30, flexShrink: 0, textAlign: 'center' }}>Clima</span>
+        {showClima && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 30, flexShrink: 0, textAlign: 'center' }}>Clima</span>}
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>Venue</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 90, flexShrink: 0, textAlign: 'right' }}>Status</span>
       </div>
@@ -163,17 +159,34 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
         <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', padding: '2rem 0.5rem' }}>Nenhum show encontrado.</p>
       ) : (
         <div>
-          {filtered.map(show => <ShowRow key={show.id} show={show} />)}
+          {filtered.map(show => <ShowRow key={show.id} show={show} showClima={showClima} />)}
         </div>
       )}
     </div>
   )
 }
 
-function ShowRow({ show }: { show: Show }) {
+function statusBadge(show: Show): { text: string; color: string } {
+  if (show.legado) {
+    return { text: '⟁', color: 'var(--text-muted)' }
+  }
+  if (!isPast(show.data)) {
+    return { text: '△', color: 'var(--text-dim)' }
+  }
+  if (show.resultado_geral) {
+    return {
+      text: LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral,
+      color: corResultado(show.resultado_geral),
+    }
+  }
+  return { text: '◇', color: 'var(--text-dim)' }
+}
+
+function ShowRow({ show, showClima }: { show: Show; showClima: boolean }) {
   const past      = isPast(show.data)
   const climaIcon = show.clima_estimado ? ICONE_CLIMA[show.clima_estimado] ?? '' : ''
   const opacity   = past && !show.participou ? 0.25 : past ? 0.55 : 1
+  const badge     = statusBadge(show)
 
   return (
     <Link href={`/shows/${show.id}`} style={{
@@ -204,19 +217,14 @@ function ShowRow({ show }: { show: Show }) {
         )}
       </div>
 
-      <span style={{ fontSize: '0.85rem', width: 30, flexShrink: 0, textAlign: 'center' }}>{climaIcon}</span>
+      {showClima && <span style={{ fontSize: '0.85rem', width: 30, flexShrink: 0, textAlign: 'center' }}>{climaIcon}</span>}
 
       <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 140, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {show.venue?.nome ?? '—'}
       </span>
 
-      <span style={{
-        fontSize: '0.75rem', width: 90, flexShrink: 0, textAlign: 'right',
-        color: show.resultado_geral ? corResultado(show.resultado_geral) : corIngresso(show.status_ingresso),
-      }}>
-        {show.resultado_geral
-          ? LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral
-          : LABEL_STATUS[show.status_ingresso ?? ''] ?? show.status_ingresso ?? '—'}
+      <span style={{ fontSize: '0.75rem', width: 90, flexShrink: 0, textAlign: 'right', color: badge.color }}>
+        {badge.text}
       </span>
     </Link>
   )

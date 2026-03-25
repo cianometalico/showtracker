@@ -61,6 +61,10 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
   const venue = Array.isArray(show.venues) ? show.venues[0] : show.venues
   const past = isPast(show.data)
   const nomeShow = show.nome_evento ?? lineup.map((l: any) => l.artist?.nome).filter(Boolean).join(' / ') ?? '—'
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const limit5 = new Date(today); limit5.setDate(limit5.getDate() + 5)
+  const showDate = new Date(show.data + 'T12:00:00')
+  const mostrarClima = showDate >= today && showDate <= limit5
   const singularidades = (show.singularidades as string[] | null) ?? []
 
   return (
@@ -117,15 +121,6 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
           { label: 'Público est.', value: show.publico_estimado ? show.publico_estimado.toLocaleString('pt-BR') : '—' },
           { label: 'Concorrência', value: show.concorrencia ?? '—' },
           { label: past ? 'Realizado' : 'Previsto', value: past ? (show.participou ? 'Sim' : 'Não') : '—' },
-          { label: 'Clima', value: (
-              <WeatherWidget
-                data={show.data}
-                lat={venue?.lat ?? null}
-                lng={venue?.lng ?? null}
-                climaSalvo={show.clima_estimado ?? null}
-              />
-            )
-          }
         ].map(({ label, value }) => (
           <div key={label} className="stat-card">
             <p className="stat-label">{label}</p>
@@ -133,6 +128,19 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
           </div>
         ))}
       </div>
+
+      {/* Previsão climática */}
+      {mostrarClima && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <p className="section-label">☾ previsão</p>
+          <WeatherWidget
+            data={show.data}
+            lat={venue?.lat ?? null}
+            lng={venue?.lng ?? null}
+            climaSalvo={show.clima_estimado ?? null}
+          />
+        </div>
+      )}
 
       {/* Lineup */}
       <div style={{ marginBottom: '1.5rem' }}>
