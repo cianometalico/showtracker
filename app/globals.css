@@ -30,7 +30,20 @@
   --amber:          #fbbf24;
   --red:            #f87171;
   --blue:           #818cf8;
+  --tag-green-bg:     #1a2a1a;
+  --tag-green-border: #2a3a2a;
+  --tag-blue-bg:      #1a1a2a;
+  --tag-blue-border:  #2a2a3a;
 }
+
+.page-container         { padding: 1.5rem; max-width: 720px; }
+.page-container-narrow  { padding: 1.5rem; max-width: 480px; }
+.breadcrumb             { font-size: 0.75rem; color: var(--text-dim); text-decoration: none; }
+.breadcrumb:hover       { color: var(--text); }
+.section-label          { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 0; }
+.stat-card              { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; text-align: center; background: var(--surface); flex: 1; min-width: 100px; }
+.stat-value             { font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0; }
+.stat-label             { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 2px 0 0; }
 
 .nav-link {
   display: flex;

@@ -72,9 +72,9 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   }))
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 720 }}>
+    <div className="page-container">
 
-      <Link href="/artistas" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textDecoration: 'none' }}>
+      <Link href="/artistas" className="breadcrumb">
         ← Artistas
       </Link>
 
@@ -98,12 +98,9 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           { label: 'Participei', value: String(participados.length) },
           { label: 'Taxa sucesso', value: taxaSucesso !== null ? `${taxaSucesso}%` : '—' },
         ].map(({ label, value }) => (
-          <div key={label} style={{
-            flex: 1, border: '1px solid var(--border)', borderRadius: 6,
-            padding: '0.75rem', textAlign: 'center', background: 'var(--surface)',
-          }}>
-            <p style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{value}</p>
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: 2 }}>{label}</p>
+          <div key={label} className="stat-card">
+            <p className="stat-value">{value}</p>
+            <p className="stat-label">{label}</p>
           </div>
         ))}
       </div>
@@ -120,14 +117,12 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         <div style={{ marginBottom: '1.5rem' }}>
           {tags_editorial.length > 0 && (
             <div style={{ marginBottom: '0.75rem' }}>
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                MusicBrainz
-              </p>
+              <p className="section-label">MusicBrainz</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                 {tags_editorial.map((t: string, i: number) => (
                   <span key={i} style={{
-                    background: '#1a2a1a', padding: '0.15rem 0.5rem',
-                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid #2a3a2a', color: 'var(--text)',
+                    background: 'var(--tag-green-bg)', padding: '0.15rem 0.5rem',
+                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid var(--tag-green-border)', color: 'var(--text)',
                   }}>{t}</span>
                 ))}
               </div>
@@ -135,14 +130,12 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           )}
           {tags_behavioral.length > 0 && (
             <div>
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Last.fm
-              </p>
+              <p className="section-label">Last.fm</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                 {tags_behavioral.map((t: any, i: number) => (
                   <span key={i} style={{
-                    background: '#1a1a2a', padding: '0.15rem 0.5rem',
-                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid #2a2a3a', color: 'var(--text)',
+                    background: 'var(--tag-blue-bg)', padding: '0.15rem 0.5rem',
+                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid var(--tag-blue-border)', color: 'var(--text)',
                   }}>
                     {t.name}
                   </span>
@@ -173,9 +166,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
 
       {/* Histórico de shows */}
       <div>
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Histórico de shows
-        </p>
+        <p className="section-label">Histórico de shows</p>
         {shows.length === 0 ? (
           <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Nenhum show cadastrado.</p>
         ) : (

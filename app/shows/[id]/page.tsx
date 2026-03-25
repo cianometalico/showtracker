@@ -64,10 +64,10 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
   const singularidades = (show.singularidades as string[] | null) ?? []
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 680 }}>
+    <div className="page-container">
 
       {/* Breadcrumb */}
-      <Link href="/shows" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textDecoration: 'none' }}>
+      <Link href="/shows" className="breadcrumb">
         ← Shows
       </Link>
 
@@ -127,21 +127,16 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
             )
           }
         ].map(({ label, value }) => (
-          <div key={label} style={{
-            border: '1px solid var(--border)', borderRadius: 6,
-            padding: '0.6rem 0.9rem', background: 'var(--surface)', minWidth: 100,
-          }}>
-            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{label}</p>
-            <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text)', margin: '2px 0 0' }}>{value}</div>
+          <div key={label} className="stat-card">
+            <p className="stat-label">{label}</p>
+            <div className="stat-value">{value}</div>
           </div>
         ))}
       </div>
 
       {/* Lineup */}
       <div style={{ marginBottom: '1.5rem' }}>
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
-          Lineup
-        </p>
+        <p className="section-label">Lineup</p>
         {lineup.length === 0 ? (
           <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Sem artistas cadastrados.</p>
         ) : (
@@ -179,9 +174,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
       {/* Venue */}
       {venue && (
         <div style={{ marginBottom: '1.5rem' }}>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
-            Venue
-          </p>
+          <p className="section-label">Venue</p>
           <Link href={`/locais/${venue.id}`} style={{ textDecoration: 'none' }}>
             <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '0.75rem 1rem', background: 'var(--surface)' }}>
               <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)', margin: 0 }}>{venue.nome}</p>
@@ -198,9 +191,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
       {/* Observações */}
       {show.observacoes && (
         <div style={{ marginBottom: '1.5rem' }}>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            Observações
-          </p>
+          <p className="section-label">Observações</p>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', lineHeight: 1.5 }}>{show.observacoes}</p>
         </div>
       )}

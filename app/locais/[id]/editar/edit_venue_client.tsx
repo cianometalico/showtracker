@@ -48,7 +48,7 @@ export function EditVenueClient({ venue }: Props) {
   }
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 480 }}>
+    <div className="page-container-narrow">
 
       {/* Header com breadcrumb e excluir */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>

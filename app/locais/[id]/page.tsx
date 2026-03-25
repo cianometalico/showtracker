@@ -83,9 +83,9 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   const taxaSucesso  = participados.length > 0 ? Math.round((sucessos.length / participados.length) * 100) : null
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 680 }}>
+    <div className="page-container">
 
-      <Link href="/locais" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textDecoration: 'none' }}>
+      <Link href="/locais" className="breadcrumb">
         ← Locais
       </Link>
 
@@ -111,12 +111,9 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
           { label: 'Participei',   value: String(participados.length) },
           { label: 'Taxa sucesso', value: taxaSucesso !== null ? `${taxaSucesso}%` : '—' },
         ].map(({ label, value }) => (
-          <div key={label} style={{
-            border: '1px solid var(--border)', borderRadius: 6,
-            padding: '0.6rem 0.9rem', background: 'var(--surface)', minWidth: 100,
-          }}>
-            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{label}</p>
-            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text)', margin: '2px 0 0' }}>{value}</p>
+          <div key={label} className="stat-card">
+            <p className="stat-label">{label}</p>
+            <p className="stat-value">{value}</p>
           </div>
         ))}
       </div>
@@ -153,9 +150,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
 
       {/* Histórico de shows */}
       <div>
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
-          Histórico de shows
-        </p>
+        <p className="section-label">Histórico de shows</p>
         {showsEnriquecidos.length === 0 ? (
           <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Nenhum show neste local.</p>
         ) : (
