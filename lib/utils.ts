@@ -1,14 +1,14 @@
-import type { ShowListItem, ShowWithRelations } from '@/types/database'
+// TODO: tipar corretamente quando tipos reais estiverem definidos em @/types/database
 
-/** Retorna o nome de exibição do show: nome_evento ou artistas em billing_order */
+/** Retorna o nome de exibição do show: nome_evento ou artistas em ordem */
 export function getNomeEvento(
-  show: Pick<ShowListItem | ShowWithRelations, 'nome_evento' | 'show_artists'>
+  show: any // TODO: tipar corretamente
 ): string {
   if (show.nome_evento) return show.nome_evento
 
   const artistas = [...(show.show_artists ?? [])]
-    .sort((a, b) => a.billing_order - b.billing_order)
-    .map((sa) => sa.artists.nome)
+    .sort((a: any, b: any) => a.ordem - b.ordem)
+    .map((sa: any) => sa.artists.nome)
 
   if (artistas.length === 0) return 'Show sem artistas'
   if (artistas.length <= 3) return artistas.join(' / ')

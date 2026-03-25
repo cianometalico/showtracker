@@ -121,7 +121,7 @@ function SFBlock({ mbid, artistId, artistNome, showAtualData }: {
   if (error)   return (
     <div>
       <p className="text-xs text-red-400 mb-2">{error}</p>
-      <Link href={`/database/artistas/${artistId}`} className="text-xs text-gray-400 hover:text-gray-600">
+      <Link href={`/artistas/${artistId}`} className="text-xs text-gray-400 hover:text-gray-600">
         Ir para perfil do artista →
       </Link>
     </div>
@@ -130,7 +130,7 @@ function SFBlock({ mbid, artistId, artistNome, showAtualData }: {
   if (shows.length === 0) return (
     <div>
       <p className="text-sm text-gray-400 mb-2">Nenhuma passagem pelo Brasil encontrada no Setlist.fm.</p>
-      <Link href={`/database/artistas/${artistId}`} className="text-xs text-gray-400 hover:text-gray-600">
+      <Link href={`/artistas/${artistId}`} className="text-xs text-gray-400 hover:text-gray-600">
         Ver perfil do artista →
       </Link>
     </div>
@@ -141,7 +141,7 @@ function SFBlock({ mbid, artistId, artistNome, showAtualData }: {
       shows={shows}
       showAtualData={showAtualData}
       footer={
-        <Link href={`/database/artistas/${artistId}`} className="text-xs text-gray-400 hover:text-gray-600 mt-4 inline-block">
+        <Link href={`/artistas/${artistId}`} className="text-xs text-gray-400 hover:text-gray-600 mt-4 inline-block">
           Ver perfil do artista →
         </Link>
       }
@@ -206,7 +206,7 @@ function RotaBlock({ lineup }: {
         <>
           <p className="text-xs text-gray-400 mb-3">{shows.length} shows registrados · {artist.nome}</p>
           {recentes.map((s, i) => <SFRow key={`r${i}`} show={s} opacity={1 - i * 0.07} showPais />)}
-          <Link href={`/database/artistas/${artist.artist_id}`}
+          <Link href={`/artistas/${artist.artist_id}`}
             className="text-xs text-gray-400 hover:text-gray-600 mt-4 inline-block">
             Ver perfil do artista →
           </Link>

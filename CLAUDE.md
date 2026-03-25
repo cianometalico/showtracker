@@ -44,7 +44,9 @@ venues: id, nome, cidade, lat, lng, capacidade_praticavel, tipo_default,
 shows: id, venue_id, data, nome_evento (nullable), status_ingresso
   (sold out|bem vendido|mal vendido), publico_estimado, participou bool,
   resultado_geral, concorrencia, clima_estimado, observacoes, singularidades jsonb,
-  source_url, legado bool
+  source_url, legado bool,
+  fiscalizacao_override (string|null), publico_estimado_manual (bool|null),
+  tipo_venue_override (string|null)
 
 show_artists: show_id, artist_id, ordem int, faz_estampa bool (PK composta)
 
@@ -74,11 +76,18 @@ app/
   page.tsx                          ← Home (PENDENTE fase 2)
   layout.tsx                        ← Nav hierárquico com separadores
   globals.css                       ← Tema escuro
+  agenda/
+    page.tsx + agenda-client.tsx    ← Agenda (calendário)
+  generos/
+    page.tsx                        ← Lista de gêneros (separada de /publicos/generos/[id])
   shows/
     page.tsx + shows-list-client.tsx ← Lista com filtros + busca
     new/page.tsx + new-show-client.tsx + actions.ts
     [id]/page.tsx                   ← Detalhe com clima, lineup, venue
+    [id]/show-client.tsx            ← Componente client do detalhe
+    [id]/show-history-block.tsx     ← Histórico Setlist.fm
     [id]/weather-widget.tsx         ← Clima via OpenWeather (≤5 dias)
+    [id]/actions.ts                 ← updateShow, deleteShow, addArtistToShow, removeArtistFromShow, reorderArtist, searchArtists, searchVenues
     [id]/editar/page.tsx + edit-show-client.tsx + actions.ts
   artistas/
     page.tsx + artistas-list-client.tsx ← Lista com busca
@@ -88,8 +97,9 @@ app/
   locais/
     page.tsx                        ← Lista com capacidade
     [id]/page.tsx                   ← Detalhe + histórico
+    [id]/venue-client.tsx           ← Componente client do venue
     [id]/actions.ts                 ← updateVenue, deleteVenue
-    [id]/editar/page.tsx + edit-venue-client.tsx
+    [id]/editar/page.tsx + edit_venue_client.tsx
   publicos/
     page.tsx                        ← Nichos + gêneros + sem nicho
     [id]/page.tsx                   ← Detalhe do nicho (4 níveis)
@@ -100,7 +110,9 @@ app/
     enrich/route.ts                 ← Enriquecimento individual
     enrich-all/route.ts             ← Enriquecimento em massa (bootstrap)
     artists/route.ts                ← POST com dedup por mbid→nome
+    artist-shows/route.ts           ← Shows por artista
     link-nichos/route.ts            ← Auto-link artista↔nicho por tags
+    scrape/route.ts                 ← Scraping auxiliar
     musicbrainz/route.ts
     lastfm/route.ts
     wikipedia/route.ts
@@ -116,6 +128,17 @@ app/
 lib/
   nicho-color.ts    ← nichoColor(nome, score) e nichoColorAlpha()
                        hue golden ratio, lightness 55-80% por underground_score
+  db/
+    shows.ts        ← getShows, getShow, createShow, updateShow, getShowsInRange
+    artists.ts      ← getArtists, getArtist, upsertArtist, updateArtist
+  utils.ts          ← getNomeEvento, formatDataShow, corResultado, labelStatusIngresso, labelResultado
+
+types/
+  database.ts       ← tipos gerados pelo Supabase CLI
+
+utils/supabase/
+  client.ts         ← cliente browser
+  server.ts         ← cliente server-side
 ```
 
 ---
@@ -167,55 +190,9 @@ OPENWEATHER_API_KEY=...
 
 ---
 
-## FASE 2 — PENDENTE
-
-### 1. Página Home
-Calendário 10 dias à frente com shows agendados.
-Cards compactos por dia: nome evento, venue, status.
-Acesso rápido: último show editado, shows sem resultado, alertas.
-Show só aparece se `participou=false` e data futura.
-
-### 2. Ohara inline na id page do artista
-Hoje: botão redireciona para `/ohara?prefill=nome`.
-Objetivo: painel de enriquecimento embutido na página do artista.
-Busca MB, exibe candidatos, aplica sem sair da página.
-Requer transformar a page em client ou criar componente client separado.
-
-### 3. Setlist.fm na id page do show
-Mostrar histórico de setlists do(s) artista(s) no venue ou no Brasil.
-Já temos a rota `/api/setlistfm`. Falta exibir na página do show.
-Contexto: útil para saber o repertório esperado (fator de decisão de estampa).
-
-### 4. Múltiplas datas por evento
-Bangers Open Air tem datas diferentes (sexta e sábado).
-Hoje cada data é um show separado com mesmo nome_evento.
-Solução futura: tabela `show_dates` com show_id + data + lineup própria.
-Não implementar antes de ter 5+ casos reais — evitar over-engineering.
-
-### 5. Histórico anterior ao app
-Shows antes da planilha Notion — buscar por venue (Cine Joia, Carioca Club etc.)
-no calendário histórico desses locais + memória do usuário.
-Gerar CSV, importar com `legado=true` e `participou=true/false`.
-
-### 6. ML fase 3
-Regressão com scikit-learn quando ~30 shows tiverem `resultado_geral` preenchido.
-Features: listeners, status_ingresso, capacidade, concorrencia, underground_score do nicho.
-Target: resultado_geral ou quantidade vendida (quando tiver o campo).
-Rodar localmente, exportar modelo, Radiant chama via API Python simples.
-
-### 7. Resultado e peças vendidas
-Hoje `resultado_geral` é enum qualitativo (sucesso/fracasso).
-Para o ML funcionar bem: adicionar `pecas_levadas int` e `pecas_vendidas int`.
-Isso destrava a regressão numérica real.
-
-### 8. Songkick API
-Aguardando aprovação. Quando ativa: buscar shows futuros por artista automaticamente.
-
----
-
 ## DECISÕES DE DESIGN
 
-- Inferência descontinuada — substituída por dados reais + ML futuro
+- Inferência removida na v0.1.0 — código deletado na auditoria. ML planejado para fase 3 (ver ROADMAP.md)
 - Participação calculada automaticamente pela data (passado=true, futuro=false)
 - Gênero alimentado pelo ohara (tags MB + Last.fm), não campo manual
 - Nichos são curadoria manual — auto-link é apenas sugestão inicial

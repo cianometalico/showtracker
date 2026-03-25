@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
-import type { Show, ShowWithRelations, ShowListItem } from '@/types/database'
+// TODO: tipar corretamente — Show, ShowWithRelations, ShowListItem removidos de @/types/database
 
-export async function getShows(): Promise<ShowListItem[]> {
+export async function getShows(): Promise<any[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('shows')
@@ -9,17 +9,17 @@ export async function getShows(): Promise<ShowListItem[]> {
       id, data, nome_evento, participou, resultado_geral, status_ingresso,
       venues ( id, nome, cidade ),
       show_artists (
-        billing_order, fez_estampa,
-        artists ( id, nome, porte_fisico )
+        ordem, faz_estampa,
+        artists ( id, nome )
       )
     `)
     .order('data', { ascending: true })
 
   if (error) throw new Error(error.message)
-  return (data ?? []) as ShowListItem[]
+  return data ?? []
 }
 
-export async function getShow(id: string): Promise<ShowWithRelations | null> {
+export async function getShow(id: string): Promise<any | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('shows')
@@ -28,17 +28,16 @@ export async function getShow(id: string): Promise<ShowWithRelations | null> {
       venues (*),
       show_artists (
         *, artists (*)
-      ),
-      designs (*)
+      )
     `)
     .eq('id', id)
     .single()
 
   if (error) return null
-  return data as ShowWithRelations
+  return data
 }
 
-export async function createShow(payload: Partial<Show>): Promise<Show> {
+export async function createShow(payload: any): Promise<any> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('shows')
@@ -50,7 +49,7 @@ export async function createShow(payload: Partial<Show>): Promise<Show> {
   return data
 }
 
-export async function updateShow(id: string, payload: Partial<Show>): Promise<Show> {
+export async function updateShow(id: string, payload: any): Promise<any> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('shows')
@@ -63,7 +62,7 @@ export async function updateShow(id: string, payload: Partial<Show>): Promise<Sh
   return data
 }
 
-export async function getShowsInRange(from: string, to: string): Promise<ShowListItem[]> {
+export async function getShowsInRange(from: string, to: string): Promise<any[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('shows')
@@ -71,8 +70,8 @@ export async function getShowsInRange(from: string, to: string): Promise<ShowLis
       id, data, nome_evento, participou, resultado_geral, status_ingresso,
       venues ( id, nome, cidade ),
       show_artists (
-        billing_order, fez_estampa,
-        artists ( id, nome, porte_fisico )
+        ordem, faz_estampa,
+        artists ( id, nome )
       )
     `)
     .gte('data', from)
@@ -80,5 +79,5 @@ export async function getShowsInRange(from: string, to: string): Promise<ShowLis
     .order('data', { ascending: true })
 
   if (error) throw new Error(error.message)
-  return (data ?? []) as ShowListItem[]
+  return data ?? []
 }

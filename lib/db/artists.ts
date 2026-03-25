@@ -1,18 +1,18 @@
 import { createClient } from '@/utils/supabase/server'
-import type { Artist } from '@/types/database'
+// TODO: tipar corretamente — Artist removido de @/types/database
 
-export async function getArtists(): Promise<Artist[]> {
+export async function getArtists(): Promise<any[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
     .select('*')
-    .order('nome_canonico')
+    .order('nome')
 
   if (error) throw new Error(error.message)
   return data ?? []
 }
 
-export async function getArtist(id: string): Promise<Artist | null> {
+export async function getArtist(id: string): Promise<any | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
@@ -24,11 +24,11 @@ export async function getArtist(id: string): Promise<Artist | null> {
   return data
 }
 
-export async function upsertArtist(payload: Partial<Artist>): Promise<Artist> {
+export async function upsertArtist(payload: any): Promise<any> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
-    .upsert(payload, { onConflict: 'nome_canonico' })
+    .upsert(payload, { onConflict: 'nome' })
     .select()
     .single()
 
@@ -36,7 +36,7 @@ export async function upsertArtist(payload: Partial<Artist>): Promise<Artist> {
   return data
 }
 
-export async function updateArtist(id: string, payload: Partial<Artist>): Promise<Artist> {
+export async function updateArtist(id: string, payload: any): Promise<any> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
