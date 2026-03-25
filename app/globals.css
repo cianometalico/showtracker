@@ -88,23 +88,6 @@
   text-transform: uppercase;
   color: var(--text);
 }
-.sidebar-logo-sub {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: #3a5060;
-  letter-spacing: 0.3em;
-  margin-top: 2px;
-}
-.rizoma {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: #2a4050;
-  letter-spacing: 2px;
-  text-align: center;
-  padding: 4px 1rem;
-  line-height: 1;
-  overflow: hidden;
-}
 .nav-glyph {
   font-size: 13px;
   width: 22px;

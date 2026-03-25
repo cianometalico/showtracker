@@ -18,36 +18,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <aside className="sidebar">
             <div className="sidebar-logo">
               <div className="sidebar-logo-text">R̦adiant</div>
-              <div className="sidebar-logo-sub">̷̢ ̶ ̵ ̴ ̷ sistema operacional</div>
             </div>
             <nav className="sidebar-nav">
               <Link href="/" className="nav-link">
                 <span className="nav-glyph">☰</span> home
               </Link>
-              <div className="rizoma">┊╌╌┊╌╌╌┊╌╌┊</div>
+              <div className="sidebar-separator" />
               <Link href="/agenda" className="nav-link">
                 <span className="nav-glyph">☲</span> calendário
               </Link>
               <Link href="/shows" className="nav-link">
                 <span className="nav-glyph">☷</span> agenda
               </Link>
-              <div className="rizoma">╌┊╌╌╌┊╌╌┊╌╌</div>
+              <div className="sidebar-separator" />
               <Link href="/artistas" className="nav-link">
                 <span className="nav-glyph">☴</span> artistas
               </Link>
               <Link href="/publicos" className="nav-link">
                 <span className="nav-glyph">☵</span> públicos
               </Link>
-              <div className="rizoma">┊╌╌┊╌╌┊╌╌╌┊</div>
+              <div className="sidebar-separator" />
               <Link href="/locais" className="nav-link">
                 <span className="nav-glyph">☶</span> locais
               </Link>
-              <div className="rizoma">╌╌┊╌╌╌╌┊╌╌┊</div>
+              <div className="sidebar-separator" />
               <Link href="/ohara" className="nav-link" style={{ opacity: 0.5, fontStyle: 'italic' }}>
                 <span className="nav-glyph">⚗̧</span> ohara
               </Link>
             </nav>
-            <div className="sidebar-version">v̵0̶.̷1̴.̵1̶</div>
+            <div className="sidebar-version">v0.1.1</div>
           </aside>
           <main className="main-content">{children}</main>
         </div>
