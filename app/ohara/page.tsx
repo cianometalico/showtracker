@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 type MBResult = {
@@ -73,7 +73,7 @@ function ShowLine({ s }: { s: ShowItem }) {
   )
 }
 
-export default function OharaPage() {
+function OharaInner() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<MBResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -328,5 +328,13 @@ useEffect(() => {
         )}
       </div>
     </main>
+  )
+}
+
+export default function OharaPage() {
+  return (
+    <Suspense>
+      <OharaInner />
+    </Suspense>
   )
 }

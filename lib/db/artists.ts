@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
-// TODO: tipar corretamente — Artist removido de @/types/database
+import type { Artist } from '@/types/models'
 
-export async function getArtists(): Promise<any[]> {
+export async function getArtists(): Promise<Artist[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
@@ -9,10 +9,10 @@ export async function getArtists(): Promise<any[]> {
     .order('nome')
 
   if (error) throw new Error(error.message)
-  return data ?? []
+  return (data ?? []) as Artist[]
 }
 
-export async function getArtist(id: string): Promise<any | null> {
+export async function getArtist(id: string): Promise<Artist | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
@@ -24,7 +24,7 @@ export async function getArtist(id: string): Promise<any | null> {
   return data
 }
 
-export async function upsertArtist(payload: any): Promise<any> {
+export async function upsertArtist(payload: any): Promise<Artist> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
@@ -33,10 +33,10 @@ export async function upsertArtist(payload: any): Promise<any> {
     .single()
 
   if (error) throw new Error(error.message)
-  return data
+  return data as Artist
 }
 
-export async function updateArtist(id: string, payload: any): Promise<any> {
+export async function updateArtist(id: string, payload: any): Promise<Artist> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('artists')
@@ -46,5 +46,5 @@ export async function updateArtist(id: string, payload: any): Promise<any> {
     .single()
 
   if (error) throw new Error(error.message)
-  return data
+  return data as Artist
 }

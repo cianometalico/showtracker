@@ -1,8 +1,8 @@
-// TODO: tipar corretamente quando tipos reais estiverem definidos em @/types/database
+import type { ShowWithRelations } from '@/types/models'
 
 /** Retorna o nome de exibição do show: nome_evento ou artistas em ordem */
 export function getNomeEvento(
-  show: any // TODO: tipar corretamente
+  show: ShowWithRelations
 ): string {
   if (show.nome_evento) return show.nome_evento
 
