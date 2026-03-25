@@ -89,10 +89,6 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
         ← Locais
       </Link>
 
-      <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{venue.nome}</h1>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4 }}>{venue.cidade ?? '—'}</p>
-      </div>
 
 <div style={{ marginTop: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
 <div>

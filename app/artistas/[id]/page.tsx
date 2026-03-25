@@ -207,7 +207,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
             })}
           </div>
         )}
-      </div>&&
+      </div>
 
     </div>
   )
