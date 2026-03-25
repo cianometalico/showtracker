@@ -59,3 +59,58 @@
 .nav-link:hover {
   color: var(--nav-text-hover);
 }
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 164px;
+  flex-shrink: 0;
+  background: var(--nav-bg);
+  border-right: 1px solid var(--nav-border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--nav-border);
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.sidebar-nav {
+  padding: 0.5rem 0;
+  flex: 1;
+}
+
+.sidebar-separator {
+  margin: 0.4rem 1rem;
+  border-top: 1px solid var(--nav-border);
+  opacity: 0.5;
+}
+
+.sidebar-version {
+  padding: 1rem;
+  border-top: 1px solid var(--nav-border);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-family: monospace;
+  letter-spacing: 0.05em;
+}
+
+.main-content {
+  flex: 1;
+  overflow: auto;
+  min-height: 100vh;
+}
