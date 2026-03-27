@@ -29,17 +29,21 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
       .from('shows')
       .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, venues(id, nome, cidade)')
       .in('id', showIds)
-      .order('data', { ascending: false })
 
     const saByShow: Record<string, any> = {}
     for (const sa of (saRows ?? [])) saByShow[sa.show_id] = sa
 
-    shows = (showRows ?? []).map((s: any) => ({
+    const mapped = (showRows ?? []).map((s: any) => ({
       ...s,
       venue: Array.isArray(s.venues) ? s.venues[0] : s.venues,
       ordem: saByShow[s.id]?.ordem ?? 1,
       faz_estampa: saByShow[s.id]?.faz_estampa ?? false,
     }))
+
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const future = mapped.filter((s: any) => s.data >= todayStr).sort((a: any, b: any) => a.data.localeCompare(b.data))
+    const past   = mapped.filter((s: any) => s.data < todayStr).sort((a: any, b: any) => b.data.localeCompare(a.data))
+    shows = [...future, ...past]
   }
 
   const participados = shows.filter(s => s.participou)

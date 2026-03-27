@@ -45,7 +45,7 @@ export default async function ShowsPage() {
       status_ingresso: row.status_ingresso ?? null,
       clima_estimado:  row.clima_estimado ?? null,
       concorrencia:    row.concorrencia ?? null,
-      participou:      row.participou ?? false,
+      participou:      row.participou as boolean | null,
       resultado_geral: row.resultado_geral ?? null,
       legado:          row.legado ?? false,
     }

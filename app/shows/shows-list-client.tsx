@@ -79,19 +79,19 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
           const d = new Date(s.data + 'T12:00:00')
           return d >= today && d <= limit5
         })
-        // already asc from server
+        list.sort((a, b) => a.data.localeCompare(b.data))
         break
       case 'agenda':
         list = list.filter(s => new Date(s.data + 'T12:00:00') >= today)
-        // already asc from server
+        list.sort((a, b) => a.data.localeCompare(b.data))
         break
       case 'realizados':
-        list = list.filter(s => isPast(s.data) && !s.legado)
-        list.reverse()
+        list = list.filter(s => isPast(s.data))
+        list.sort((a, b) => b.data.localeCompare(a.data))
         break
       case 'legado':
         list = list.filter(s => s.legado)
-        list.reverse()
+        list.sort((a, b) => b.data.localeCompare(a.data))
         break
     }
 
@@ -182,8 +182,11 @@ function statusBadge(show: Show): { text: string; color: string } {
       color: corResultado(show.resultado_geral),
     }
   }
-  // Past non-participant: muted ▽
-  if (!show.participou) {
+  // Past without confirmed participation
+  if (show.participou === null) {
+    return { text: '◇ confirmar', color: 'var(--amber)' }
+  }
+  if (show.participou === false) {
     return { text: '▽', color: 'var(--text-muted)' }
   }
   return { text: '◇', color: 'var(--text-dim)' }
