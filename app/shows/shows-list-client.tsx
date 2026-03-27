@@ -12,7 +12,7 @@ type Show = {
   status_ingresso: string | null
   clima_estimado: string | null
   concorrencia: string | null
-  participou: boolean
+  participou: boolean | null
   resultado_geral: string | null
   legado: boolean
 }
@@ -106,8 +106,6 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
     return list
   }, [shows, filtro, busca])
 
-  const showClima = filtro === 'proximos'
-
   return (
     <div style={{ padding: '1.5rem', maxWidth: 860 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
@@ -150,7 +148,6 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
       <div style={{ display: 'flex', gap: '1rem', padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border)', marginBottom: 2 }}>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 160, flexShrink: 0 }}>Data</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flex: 1 }}>Evento</span>
-        {showClima && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 30, flexShrink: 0, textAlign: 'center' }}>Clima</span>}
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>Venue</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 90, flexShrink: 0, textAlign: 'right' }}>Status</span>
       </div>
@@ -159,7 +156,7 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
         <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', padding: '2rem 0.5rem' }}>Nenhum show encontrado.</p>
       ) : (
         <div>
-          {filtered.map(show => <ShowRow key={show.id} show={show} showClima={showClima} />)}
+          {filtered.map(show => <ShowRow key={show.id} show={show} />)}
         </div>
       )}
     </div>
@@ -167,10 +164,16 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
 }
 
 function statusBadge(show: Show): { text: string; color: string } {
+  const past = isPast(show.data)
+  // Legado not yet confirmed
+  if (show.legado && show.participou === null && past) {
+    return { text: '◇ confirmar', color: 'var(--amber)' }
+  }
   if (show.legado) {
     return { text: '⟁', color: 'var(--text-muted)' }
   }
-  if (!isPast(show.data)) {
+  // Future: no participou badge
+  if (!past) {
     return { text: '△', color: 'var(--text-dim)' }
   }
   if (show.resultado_geral) {
@@ -179,14 +182,17 @@ function statusBadge(show: Show): { text: string; color: string } {
       color: corResultado(show.resultado_geral),
     }
   }
+  // Past non-participant: muted ▽
+  if (!show.participou) {
+    return { text: '▽', color: 'var(--text-muted)' }
+  }
   return { text: '◇', color: 'var(--text-dim)' }
 }
 
-function ShowRow({ show, showClima }: { show: Show; showClima: boolean }) {
-  const past      = isPast(show.data)
-  const climaIcon = show.clima_estimado ? ICONE_CLIMA[show.clima_estimado] ?? '' : ''
-  const opacity   = past && !show.participou ? 0.25 : past ? 0.55 : 1
-  const badge     = statusBadge(show)
+function ShowRow({ show }: { show: Show }) {
+  const past    = isPast(show.data)
+  const opacity = !past ? 1 : show.participou === false ? 0.45 : 0.55
+  const badge   = statusBadge(show)
 
   return (
     <Link href={`/shows/${show.id}`} style={{
@@ -216,8 +222,6 @@ function ShowRow({ show, showClima }: { show: Show; showClima: boolean }) {
           </p>
         )}
       </div>
-
-      {showClima && <span style={{ fontSize: '0.85rem', width: 30, flexShrink: 0, textAlign: 'center' }}>{climaIcon}</span>}
 
       <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 140, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {show.venue?.nome ?? '—'}

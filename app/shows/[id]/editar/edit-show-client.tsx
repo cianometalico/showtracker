@@ -6,6 +6,7 @@ import {
   addArtistToShow, removeArtistFromShow, reorderArtist,
 } from '../actions'
 import type { UpdateShowInput } from '../actions'
+import { isShowPast, participacaoLabel } from '@/lib/show-utils'
 
 type Venue    = { id: string; nome: string; cidade: string }
 type Artist   = { id: string; nome: string }
@@ -107,7 +108,7 @@ export function EditShowClient({ show, venue: initialVenue, lineup: initialLineu
       nome_evento: nome_evento || null, data,
       venue_id: venueId, status_ingresso: status || null,
       concorrencia: concorrencia || null, clima_estimado: clima || null,
-      resultado_geral: resultado || null, participou, observacoes: observacoes || null,
+      resultado_geral: resultado || null, participou: isShowPast(data) ? participou : false, observacoes: observacoes || null,
     }
     startSave(async () => { await updateShow(show.id, input) })
   }
@@ -225,7 +226,7 @@ export function EditShowClient({ show, venue: initialVenue, lineup: initialLineu
           </Field>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isShowPast(data) ? '1fr 1fr' : '1fr', gap: '1rem' }}>
           <Field label="Resultado">
             <select value={resultado} onChange={e => setResultado(e.target.value)} style={inputStyle}>
               <option value="">—</option>
@@ -235,12 +236,14 @@ export function EditShowClient({ show, venue: initialVenue, lineup: initialLineu
               <option value="fracasso">Fracasso</option>
             </select>
           </Field>
-          <Field label="Participação">
-            <select value={participou ? 'sim' : 'nao'} onChange={e => setParticipou(e.target.value === 'sim')} style={inputStyle}>
-              <option value="sim">Participei</option>
-              <option value="nao">Não participei</option>
-            </select>
-          </Field>
+          {isShowPast(data) && (
+            <Field label="Participação">
+              <select value={participou ? 'sim' : 'nao'} onChange={e => setParticipou(e.target.value === 'sim')} style={inputStyle}>
+                <option value="sim">{participacaoLabel(data).sim}</option>
+                <option value="nao">{participacaoLabel(data).nao}</option>
+              </select>
+            </Field>
+          )}
         </div>
 
         <Field label="Observações">

@@ -1,0 +1,47 @@
+v0.4.0 — Schema resultado + Ohara inline (próximo chat Sonnet)
+Schema:
+
+Adicionar pecas_levadas int e pecas_vendidas int em shows
+Migration Supabase
+Tela de registro de resultado: substituir resultado_geral enum qualitativo por campos numéricos + calcular resultado automaticamente
+
+Ohara inline:
+
+Novo Show: quando artista não existe, abrir painel enrichment inline (não redirecionar)
+Home: barra busca Ohara integrada ao dashboard
+Artista id page: toggle modo edição → botão "reenriquecer" aparece
+Eliminar rotas /editar separadas (edição inline, mesma URL)
+
+
+v0.5.0 — Calendário dark + polish (Opus decide, Sonnet executa)
+
+Grid calendário: paleta escura (remover branco)
+Cards de show no calendário: venue + status + badge participação
+Faxina visual geral: "US · listeners" → "global listeners", revisão de labels
+
+
+v0.6.0 — Polish geral (Sonnet)
+
+Revisão completa de todas as páginas
+Consistência de badges e estados visuais
+Responsividade
+
+
+v1.0.0 — Release
+
+
+
+Para o Opus pensar quando chegar a hora:
+MÓDULO PRODUÇÃO + ESTOQUE — visão para v1.5 / v2.0
+────────────────────────────────────────────────────
+Entidades novas: designs, screens, stock_items, production_runs
+
+Design tem: arte, tags (artista/nicho), status_stage
+Screen tem: design_id, estado (virgem/preparada/desgastada)
+Stock item tem: design_id, quantidade, stage (estampada/pronta)
+Production run: show_id, lista de designs, meta de peças
+
+UI: progress bars estilo crafting — não tabelas
+Badge de stage: ícones distintos por etapa
+Decisão pré-show: "você tem X prontas, Y em tinta, show em 3 dias"
+Intel: quais designs vendem mais por nicho/artista

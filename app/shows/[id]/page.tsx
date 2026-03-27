@@ -39,7 +39,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   const { data: show, error } = await supabase
     .from('shows')
-    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, concorrencia, observacoes, publico_estimado, singularidades, venue_id, venues(id, nome, cidade, capacidade_praticavel, zona_risco, lat, lng)')
+    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, concorrencia, observacoes, publico_estimado, singularidades, legado, venue_id, venues(id, nome, cidade, capacidade_praticavel, zona_risco, lat, lng)')
     .eq('id', id)
     .single() as any
 
@@ -81,6 +81,15 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
           <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: 0, lineHeight: 1.3 }}>
             {nomeShow}
           </h1>
+          {show.legado && show.participou === null && past && (
+            <span style={{
+              fontSize: '0.75rem', fontWeight: 600, flexShrink: 0,
+              color: 'var(--amber)', border: '1px solid var(--amber)',
+              padding: '0.2rem 0.6rem', borderRadius: 4,
+            }}>
+              ◇ confirmar presença
+            </span>
+          )}
           {show.resultado_geral && (
             <span style={{
               fontSize: '0.75rem', fontWeight: 600, flexShrink: 0,

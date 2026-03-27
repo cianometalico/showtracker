@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { createShow, searchArtists, searchVenues } from './actions'
 import type { CreateShowInput } from './actions'
+import { isShowPast, participacaoLabel } from '@/lib/show-utils'
 
 type Artist = { id: string; nome: string }
 type Venue  = { id: string; nome: string; cidade: string }
@@ -24,6 +25,7 @@ export function NewShowClient() {
   const [artistQuery,  setArtistQuery] = useState('')
   const [artistRes,    setArtistRes]   = useState<Artist[]>([])
 
+  const [participou,   setParticipou]  = useState(false)
   const [saving, startSave] = useTransition()
   const [error,  setError]  = useState<string | null>(null)
 
@@ -82,7 +84,7 @@ export function NewShowClient() {
       venue_nome_novo:     venueNovo ? venueNome : null,
       venue_cidade_novo:   venueNovo ? venueCidade : null,
       status_ingresso:     status,
-      participou: data ? new Date(data + 'T23:59:59') < new Date() : false,
+      participou: isShowPast(data) ? participou : false,
       artista_ids:         artistIds.map(a => a.id),
       artista_nomes_novos: artistNovos,
     }
@@ -121,6 +123,16 @@ export function NewShowClient() {
             </select>
           </Field>
         </div>
+
+        {/* Participação — only for past dates */}
+        {data && isShowPast(data) && (
+          <Field label="Participação">
+            <select value={participou ? 'sim' : 'nao'} onChange={e => setParticipou(e.target.value === 'sim')} style={inputStyle}>
+              <option value="sim">{participacaoLabel(data).sim}</option>
+              <option value="nao">{participacaoLabel(data).nao}</option>
+            </select>
+          </Field>
+        )}
 
         {/* Venue */}
         <Field label="Venue *">

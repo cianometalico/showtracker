@@ -1,13 +1,33 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import './globals.css'
+import { WeatherBar } from '@/components/weather-bar'
+import type { WeatherData } from '@/components/weather-bar'
 
 export const metadata: Metadata = {
   title: 'Radiant',
   description: 'Sistema operacional para vendas em shows',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+async function fetchCurrentWeather(): Promise<WeatherData | null> {
+  try {
+    const origin = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
+    const res = await fetch(
+      `${origin}/api/weather?mode=current&lat=-23.5505&lng=-46.6333`,
+      { next: { revalidate: 1800 } }
+    )
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const weather = await fetchCurrentWeather()
+
   return (
     <html lang="pt-BR">
       <head>
@@ -46,9 +66,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <span className="nav-glyph">⚗̧</span> ohara
               </Link>
             </nav>
-            <div className="sidebar-version">v0.2.0</div>
+            <div className="sidebar-version">v0.3.1</div>
           </aside>
-          <main className="main-content">{children}</main>
+          <main className="main-content">
+            {weather && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 1.5rem 0' }}>
+                <WeatherBar weather={weather} />
+              </div>
+            )}
+            {children}
+          </main>
         </div>
       </body>
     </html>
