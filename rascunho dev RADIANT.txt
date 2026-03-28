@@ -1,47 +1,29 @@
-v0.4.0 — Schema resultado + Ohara inline (próximo chat Sonnet)
-Schema:
+Framework 1: Bourdieu — Os Três Capitais (1979)
 
-Adicionar pecas_levadas int e pecas_vendidas int em shows
-Migration Supabase
-Tela de registro de resultado: substituir resultado_geral enum qualitativo por campos numéricos + calcular resultado automaticamente
+Capital cultural. estampa explícita ou críptica: isso é interessante para inferir o design da estampa no app. algo como medir o grau de intelectualidade do público.
 
-Ohara inline:
+Capital econômico: isso aqui q vc disse "Millennial empregado numa terça = bolso cheio. Gen Z no Lolla no domingo = bolso esvaziado." não é verdade. quanto a ao cap econ podemos estudar fluxo financeiro mensal das pessoas, por serem majoritariamente clt ganham em certos dias do mes. e sim, punk veio é duro, gen z gasta mesmo se n tiver, millenium normalmente tem dinheiro, gen x crítica chata imunda, babyboomer então... mas isso n são regras, n posso ter a visão do todo e em detalhes, ainda mais contando só com minha experiencia individual. o metodo aqui n é tão antropologico, o que acha?
 
-Novo Show: quando artista não existe, abrir painel enrichment inline (não redirecionar)
-Home: barra busca Ohara integrada ao dashboard
-Artista id page: toggle modo edição → botão "reenriquecer" aparece
-Eliminar rotas /editar separadas (edição inline, mesma URL)
+Capital social: vc disse "Quando capital social é dominante, a camiseta precisa ser reconhecível pelo grupo. Quando é baixo, a estampa pode ser pessoal, nichada." isso ressoa qualificando com capital cultural, pois uma estampa explícita tem duas ramificações pelo menos: arte iconica (caso do interpol, limp bizkit) ou puramente o capital cultural, e neste ultimo caso normalmente não existe identificação visual de estilo de se vestir, exemplo: shakira (foi péssimo o show) se faltar alguma conexão q n explicitei na argumentação, avise.
 
 
-v0.5.0 — Calendário dark + polish (Opus decide, Sonnet executa)
+Framework 2: Thornton — Capital Subcultural (1995)
 
-Grid calendário: paleta escura (remover branco)
-Cards de show no calendário: venue + status + badge participação
-Faxina visual geral: "US · listeners" → "global listeners", revisão de labels
+sobre esse incremento no framework 1: isso é vdd: "Em nichos com alto capital subcultural, merch ambulante com referências internas (um verso, um símbolo do selo, um insider joke) vende mais que o logo genérico." vide turnstile, the fall of troy, refused, etc. esse mapeamento q vc fez deste framework achei interessante, mas seria o caso de pensarmos por conceitos(=frameworks) e não por pensadores? aí unir framework 1 e 2. sendo a contribuição do 2 pro 1. no sentido dessa distinção teórica: "underground_score é uma propriedade do nicho, capital subcultural é do público que orbita aquele nicho."
 
 
-v0.6.0 — Polish geral (Sonnet)
+Framework 3: Hebdige — Bricolage e o Ciclo de Comodificação (1979)
 
-Revisão completa de todas as páginas
-Consistência de badges e estados visuais
-Responsividade
+ciclo de comodificação: vc citou "subculturas inicialmente se formam por resistência comum, mas eventualmente empreendedores encontram formas de mercantilizar o estilo e a música" isso é uma verdade abissal, inclusive novos artistas pop são muito bons para vender, já os saturados... e existe o caso q falei em algum chat passado sobre lady gaga ser um nicho antigo no pop, e mesmo assim vender bem, por motivos da relação com o eixo underground vs mídia entre outras coisas q ressoam q vc disse aqui no caos do subgenero dela ser dark pop, o dark entra em contracultura estetica etc.
 
+bricolage é um elemento riquíssimo e está muito atrelado ao design da estampa tmb, seria loco poder mostrar num campo para insights q indicaria q bricolage é uma coisa aceita no nicho ou subcultura juntando ao conceito do framework 2
 
-v1.0.0 — Release
-
+e isso aqui "um campo numérico de onde o nicho está no ciclo de comodificação. 1 = cena nascente/DIY, a estampa ambulante tem valor de originalidade. 5 = cena totalmente comodificada, merch oficial domina, ambulante compete por preço." é ouro.
 
 
-Para o Opus pensar quando chegar a hora:
-MÓDULO PRODUÇÃO + ESTOQUE — visão para v1.5 / v2.0
-────────────────────────────────────────────────────
-Entidades novas: designs, screens, stock_items, production_runs
+Framework 4: Cova & Kozinets — Marketing Tribal e Valor de Vínculo (1997-2007)
 
-Design tem: arte, tags (artista/nicho), status_stage
-Screen tem: design_id, estado (virgem/preparada/desgastada)
-Stock item tem: design_id, quantidade, stage (estampada/pronta)
-Production run: show_id, lista de designs, meta de peças
+isso do valor de vínculo é ouro. junto a " O que define a vida não é o consumo individual de produtos, mas que essa atividade facilita relações sociais significativas" e isso "Assim como toda relação social duradoura requer algum tipo de ritual, uma tribo depende de rituais para pronunciar sua existência"
 
-UI: progress bars estilo crafting — não tabelas
-Badge de stage: ícones distintos por etapa
-Decisão pré-show: "você tem X prontas, Y em tinta, show em 3 dias"
-Intel: quais designs vendem mais por nicho/artista
+dois campos operacionais — valor_vinculo (quanto a camiseta funciona como badge tribal vs objeto estético puro)
+e intensidade_ritual (quão intensa é a experiência coletiva no show).

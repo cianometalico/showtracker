@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { removeAccents } from '@/lib/text-utils'
 
 type Artist = {
   id: string
@@ -17,11 +18,11 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
 
   const filtered = useMemo(() => {
     if (!busca.trim()) return artists
-    const q = busca.toLowerCase()
+    const q = removeAccents(busca.toLowerCase())
     return artists.filter(a =>
-      a.nome.toLowerCase().includes(q) ||
-      (a.pais ?? '').toLowerCase().includes(q) ||
-      (a.top_tag ?? '').toLowerCase().includes(q)
+      removeAccents(a.nome.toLowerCase()).includes(q) ||
+      removeAccents((a.pais ?? '').toLowerCase()).includes(q) ||
+      removeAccents((a.top_tag ?? '').toLowerCase()).includes(q)
     )
   }, [artists, busca])
 
@@ -30,10 +31,17 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Artistas</h1>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <Link href="/artistas?abrir=artista" style={{
+            fontSize: '0.8rem', color: 'var(--text-dim)',
+            border: '1px solid var(--border)', borderRadius: 4,
+            padding: '0.25rem 0.7rem', textDecoration: 'none',
+          }}>
+            + novo artista
+          </Link>
           <input
             value={busca}
             onChange={e => setBusca(e.target.value)}
-            placeholder="Buscar..."
+            placeholder="buscar..."
             style={{
               fontSize: '0.8rem', background: 'none',
               border: 'none', borderBottom: '1px solid var(--border)',
@@ -44,13 +52,6 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
           <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
             {filtered.length} de {artists.length}
           </span>
-          <Link href="/ohara" style={{
-            padding: '0.35rem 0.85rem', fontSize: '0.8rem',
-            background: 'var(--surface-2)', color: 'var(--text-dim)',
-            border: '1px solid var(--border)', borderRadius: 4, textDecoration: 'none',
-          }}>
-            + via ohara
-          </Link>
         </div>
       </div>
 
@@ -58,7 +59,7 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flex: 1 }}>Nome</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 80, flexShrink: 0 }}>País</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 120, flexShrink: 0 }}>Tag principal</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 80, flexShrink: 0 }}>Listeners</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 80, flexShrink: 0 }}>ouvintes</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 50, flexShrink: 0, textAlign: 'right' }}>Shows</span>
       </div>
 

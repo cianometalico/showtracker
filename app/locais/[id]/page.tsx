@@ -1,32 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-
-const LABEL_RESULTADO: Record<string, string> = {
-  sucesso_total: 'Sucesso Total',
-  sucesso:       'Sucesso',
-  medio:         'Médio',
-  fracasso:      'Fracasso',
-}
-
-const COR_RESULTADO: Record<string, string> = {
-  sucesso_total: 'var(--green)',
-  sucesso:       'var(--green)',
-  medio:         'var(--amber)',
-  fracasso:      'var(--red)',
-}
-
-const LABEL_STATUS: Record<string, string> = {
-  'sold out':    'Sold Out',
-  'bem vendido': 'Bem Vendido',
-  'mal vendido': 'Mal Vendido',
-}
-
-const RISCO_COR: Record<string, string> = {
-  low:    'var(--green)',
-  medium: 'var(--amber)',
-  high:   'var(--red)',
-}
+import { VenueDetailClient } from './venue-detail-client'
 
 export default async function VenuePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -34,11 +8,13 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
 
   const { data: venue, error } = await (supabase as any)
     .from('venues')
-    .select('id, nome, cidade, lat, lng, capacidade_praticavel, tipo_default, zona_risco, risco_fiscalizacao')
+    .select('id, nome, cidade, bairro, lat, lng, capacidade_praticavel, tipo_default, zona_risco, risco_fiscalizacao, subprefeituras(id, nome, risco_base, notas, perfil)')
     .eq('id', id)
     .single()
 
   if (error || !venue) notFound()
+
+  const sub = Array.isArray(venue.subprefeituras) ? venue.subprefeituras[0] : venue.subprefeituras
 
   const { data: showRows } = await (supabase as any)
     .from('shows')
@@ -74,118 +50,18 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   }
 
   const showsEnriquecidos = shows.map((s: any) => ({
-    ...s,
-    artistas: artistsByShow[s.id] ?? [],
+    id:              s.id,
+    data:            s.data,
+    nome_evento:     s.nome_evento ?? null,
+    status_ingresso: s.status_ingresso ?? null,
+    participou:      s.participou ?? null,
+    resultado_geral: s.resultado_geral ?? null,
+    artistas:        artistsByShow[s.id] ?? [],
   }))
-
-  const participados = showsEnriquecidos.filter((s: any) => s.participou)
-  const sucessos     = participados.filter((s: any) => ['sucesso', 'sucesso_total'].includes(s.resultado_geral))
-  const taxaSucesso  = participados.length > 0 ? Math.round((sucessos.length / participados.length) * 100) : null
 
   return (
     <div className="page-container">
-
-      <Link href="/locais" className="breadcrumb">
-        ← Locais
-      </Link>
-
-
-<div style={{ marginTop: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-<div>
-  <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{venue.nome}</h1>
-  <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4 }}>{venue.cidade ?? '—'}</p>
-</div>
-<Link href={`/locais/${id}/editar`} style={{
-  fontSize: '0.78rem', color: 'var(--text-dim)', textDecoration: 'none',
-  border: '1px solid var(--border)', padding: '0.3rem 0.75rem',
-  borderRadius: 4, background: 'var(--surface-2)', flexShrink: 0,
-}}>
-  Editar local
-</Link>
-</div>
-
-      {/* Stats */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        {[
-          { label: 'Shows',        value: String(shows.length) },
-          { label: 'Participei',   value: String(participados.length) },
-          { label: 'Taxa sucesso', value: taxaSucesso !== null ? `${taxaSucesso}%` : '—' },
-        ].map(({ label, value }) => (
-          <div key={label} className="stat-card">
-            <p className="stat-label">{label}</p>
-            <p className="stat-value">{value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Info do venue */}
-      <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '1rem', background: 'var(--surface)', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
-          <div>
-            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Capacidade</p>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text)', margin: '2px 0 0' }}>
-              {venue.capacidade_praticavel ? venue.capacidade_praticavel.toLocaleString('pt-BR') : '—'}
-            </p>
-          </div>
-          <div>
-            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Tipo</p>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text)', margin: '2px 0 0' }}>{venue.tipo_default ?? '—'}</p>
-          </div>
-          <div>
-            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Zona de risco</p>
-            <p style={{ fontSize: '0.9rem', color: venue.zona_risco ? 'var(--red)' : 'var(--text-dim)', margin: '2px 0 0' }}>
-              {venue.zona_risco ? 'Sim' : 'Não'}
-            </p>
-          </div>
-          {venue.risco_fiscalizacao && (
-            <div>
-              <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Fiscalização</p>
-              <p style={{ fontSize: '0.9rem', color: RISCO_COR[venue.risco_fiscalizacao] ?? 'var(--text)', margin: '2px 0 0' }}>
-                {venue.risco_fiscalizacao}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Histórico de shows */}
-      <div>
-        <p className="section-label">Histórico de shows</p>
-        {showsEnriquecidos.length === 0 ? (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Nenhum show neste local.</p>
-        ) : (
-          <div>
-            {showsEnriquecidos.map((s: any) => {
-              const past = new Date(s.data + 'T23:59:59') < new Date()
-              const nome = s.nome_evento ?? s.artistas.join(' / ') ?? '—'
-              return (
-                <Link key={s.id} href={`/shows/${s.id}`} style={{
-                  display: 'flex', alignItems: 'center', gap: '1rem',
-                  padding: '0.5rem 0', borderBottom: '1px solid var(--border)',
-                  textDecoration: 'none',
-                  opacity: past && !s.participou ? 0.3 : past ? 0.6 : 1,
-                }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 90, flexShrink: 0, fontFamily: 'monospace' }}>
-                    {new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </span>
-                  <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {nome}
-                  </span>
-                  <span style={{
-                    fontSize: '0.75rem', flexShrink: 0,
-                    color: s.resultado_geral ? COR_RESULTADO[s.resultado_geral] ?? 'var(--text-dim)' : 'var(--text-dim)',
-                  }}>
-                    {s.resultado_geral
-                      ? LABEL_RESULTADO[s.resultado_geral] ?? s.resultado_geral
-                      : LABEL_STATUS[s.status_ingresso] ?? s.status_ingresso ?? '—'}
-                  </span>
-                </Link>
-              )
-            })}
-          </div>
-        )}
-      </div>
+      <VenueDetailClient venue={venue} subprefeitura={sub ?? null} shows={showsEnriquecidos} />
     </div>
-    
   )
 }

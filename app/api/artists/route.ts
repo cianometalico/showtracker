@@ -72,14 +72,21 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, id: data.id, nome: data.nome, merged: false })
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const search = req.nextUrl.searchParams.get('search')
 
-  const { data, error } = await (supabase as any)
+  let query = (supabase as any)
     .from('artists')
     .select('id, nome, mbid, pais, tags_editorial, tags_behavioral, lastfm_listeners, genre_id, ultima_atualizacao')
-    .order('nome', { ascending: true })
 
+  if (search && search.length >= 2) {
+    const { data, error } = await (supabase as any).rpc('search_artists', { search_term: search })
+    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true, artists: data })
+  }
+
+  const { data, error } = await query.order('nome', { ascending: true })
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true, artists: data })
 }

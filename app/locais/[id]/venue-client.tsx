@@ -34,7 +34,9 @@ export function EditVenueClient({ venue }: Props) {
     const input: UpdateVenueInput = {
       nome:                  nome.trim(),
       cidade:                cidade.trim(),
+      bairro:                null,
       capacidade_praticavel: cap ? parseInt(cap) : null,
+      tipo_default:          null,
       risco_fiscalizacao:    risco || null,
       lat:                   lat ? parseFloat(lat) : null,
       lng:                   lng ? parseFloat(lng) : null,

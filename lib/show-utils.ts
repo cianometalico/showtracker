@@ -1,3 +1,9 @@
+/** Returns display name for a show: nome_evento if set, otherwise artistas joined with ' + ' */
+export function getShowDisplayName(nome_evento: string | null | undefined, artistas: string[]): string {
+  if (nome_evento && nome_evento.trim()) return nome_evento
+  return artistas.length > 0 ? artistas.join(' + ') : '—'
+}
+
 /** Returns true if the show date is in the past (before today midnight) */
 export function isShowPast(data: string): boolean {
   return new Date(data + 'T23:59:59') < new Date()

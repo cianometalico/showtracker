@@ -137,7 +137,7 @@ export function AgendaClient({ shows }: { shows: Show[] }) {
       {/* Legenda */}
       <div className="flex items-center gap-4 mt-4 text-xs text-gray-400 flex-wrap">
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-50 border border-gray-200 inline-block"/>Não participei</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-100 border border-blue-200 inline-block"/>Sold Out</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-100 border border-blue-200 inline-block"/>esgotado</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-50 border border-gray-200 inline-block"/>Intermediário</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-200 inline-block"/>Sucesso Total</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-100 border border-green-200 inline-block"/>Sucesso</span>

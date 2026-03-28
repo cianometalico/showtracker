@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { NichoManager } from './nicho-manager'
 import { nichoColor } from '@/lib/nicho-color'
+import { EnrichButton } from './enrich-button'
+import { ArtistDetailClient } from './artist-detail-client'
+import { OverrideSectionClient } from './override-section-client'
 
 export default async function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -10,7 +13,11 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
 
   const { data: artist, error } = await (supabase as any)
     .from('artists')
-    .select('id, nome, pais, mbid, tags_editorial, tags_behavioral, lastfm_listeners, wikipedia_url, genre_id, ultima_atualizacao')
+    .select(`
+      id, nome, pais, mbid, tags_editorial, tags_behavioral, lastfm_listeners, wikipedia_url, genre_id, ultima_atualizacao,
+      energia, receptividade_autoral, commodificacao, letramento, abertura_experimental,
+      geracao_override, estetica_override, cor_dominante_override, tipo_nostalgia_override
+    `)
     .eq('id', id)
     .single()
 
@@ -57,16 +64,25 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   // todos os nichos disponíveis
   const { data: allNichos } = await (supabase as any)
     .from('nichos')
-    .select('id, nome, underground_score')
+    .select('id, nome, underground_score, letramento, receptividade_autoral, commodificacao, energia, abertura_experimental')
     .order('underground_score', { ascending: true })
 
-  // nichos já vinculados a este artista
+  // nichos já vinculados a este artista (com score para determinar nicho principal)
   const { data: artistNichos } = await (supabase as any)
     .from('artist_nichos')
-    .select('nicho_id')
+    .select('nicho_id, score')
     .eq('artist_id', id)
 
   const linkedNichoIds = (artistNichos ?? []).map((an: any) => an.nicho_id)
+
+  // Nicho principal = maior score
+  const primaryNichoId = (artistNichos ?? []).length > 0
+    ? (artistNichos ?? []).reduce((best: any, cur: any) => ((cur.score ?? 0) > (best.score ?? 0) ? cur : best)).nicho_id
+    : null
+
+  const primaryNicho = primaryNichoId
+    ? (allNichos ?? []).find((n: any) => n.id === primaryNichoId) ?? null
+    : null
 
   const nichosForManager = (allNichos ?? []).map((n: any) => ({
     id: n.id,
@@ -75,6 +91,14 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
     cor: nichoColor(n.nome, n.underground_score ?? 5),
   }))
 
+  // Designs do artista
+  const { data: designRows } = await (supabase as any)
+    .from('design_stock')
+    .select('design_id, nome, ativo, total_vendido, saldo_atual')
+    .eq('artist_id', id)
+    .order('nome')
+  const artistDesigns = (designRows ?? []) as any[]
+
   return (
     <div className="page-container">
 
@@ -82,18 +106,13 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         ← Artistas
       </Link>
 
-      <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{artist.nome}</h1>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4 }}>
-          {[artist.pais, artist.lastfm_listeners ? artist.lastfm_listeners.toLocaleString('pt-BR') + ' listeners' : null]
-            .filter(Boolean).join(' · ') || '—'}
-        </p>
-        {artist.mbid && (
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'monospace' }}>
-            mbid: {artist.mbid}
-          </p>
-        )}
-      </div>
+      <ArtistDetailClient artist={{
+        id: artist.id,
+        nome: artist.nome,
+        pais: artist.pais ?? null,
+        mbid: artist.mbid ?? null,
+        lastfm_listeners: artist.lastfm_listeners ?? null,
+      }} />
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -114,6 +133,33 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         artistId={id}
         allNichos={nichosForManager}
         linkedNichoIds={linkedNichoIds}
+      />
+
+      {/* Overrides */}
+      <OverrideSectionClient
+        artistId={id}
+        overrides={{
+          letramento:            artist.letramento ?? null,
+          receptividade_autoral: artist.receptividade_autoral ?? null,
+          commodificacao:        artist.commodificacao ?? null,
+          energia:               artist.energia ?? null,
+          abertura_experimental: artist.abertura_experimental ?? null,
+          geracao_override:       artist.geracao_override ?? null,
+          estetica_override:      artist.estetica_override ?? null,
+          cor_dominante_override: artist.cor_dominante_override ?? null,
+          tipo_nostalgia_override: artist.tipo_nostalgia_override ?? null,
+        }}
+        nichoRef={primaryNicho ? {
+          id:                    primaryNicho.id,
+          nome:                  primaryNicho.nome,
+          cor:                   nichoColor(primaryNicho.nome, primaryNicho.underground_score ?? 5),
+          underground_score:     primaryNicho.underground_score ?? 5,
+          letramento:            primaryNicho.letramento ?? null,
+          receptividade_autoral: primaryNicho.receptividade_autoral ?? null,
+          commodificacao:        primaryNicho.commodificacao ?? null,
+          energia:               primaryNicho.energia ?? null,
+          abertura_experimental: primaryNicho.abertura_experimental ?? null,
+        } : null}
       />
 
       {/* Tags */}
@@ -151,22 +197,37 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
       )}
 
       {/* Enriquecer */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <Link href={`/ohara?prefill=${encodeURIComponent(artist.nome)}`}
-          style={{
-            display: 'inline-block', padding: '0.4rem 1rem',
-            fontSize: '0.8rem', background: 'var(--surface-2)',
-            color: 'var(--text-dim)', border: '1px solid var(--border)',
-            borderRadius: 4, textDecoration: 'none',
-          }}>
-          Re-enriquecer via ohara →
-        </Link>
-        {artist.ultima_atualizacao && (
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '0.75rem' }}>
-            atualizado {new Date(artist.ultima_atualizacao).toLocaleDateString('pt-BR')}
-          </span>
-        )}
-      </div>
+      <EnrichButton
+        artistId={id}
+        artistNome={artist.nome}
+        artistMbid={artist.mbid ?? null}
+        ultimaAtualizacao={artist.ultima_atualizacao ?? null}
+      />
+
+      {/* Designs */}
+      {artistDesigns.length > 0 && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <p className="section-label" style={{ margin: 0 }}>Designs</p>
+            <a href="/estoque/new" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textDecoration: 'none' }}>+ novo design</a>
+          </div>
+          <div>
+            {artistDesigns.map((d: any) => (
+              <a key={d.design_id} href={`/estoque/${d.design_id}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.45rem 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', opacity: d.ativo ? 1 : 0.5 }}>
+                <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)' }}>{d.nome}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--cyan)', fontFamily: 'monospace' }}>{d.total_vendido} vendidas</span>
+                <span style={{
+                  fontSize: '0.75rem', fontFamily: 'monospace',
+                  color: d.saldo_atual > 0 ? 'var(--green)' : 'var(--text-muted)',
+                }}>
+                  {d.saldo_atual} em estoque
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Histórico de shows */}
       <div>

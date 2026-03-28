@@ -40,9 +40,7 @@ export default async function GenerosPage() {
 
       {genreList.length === 0 && (
         <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '2rem' }}>
-          Nenhum gênero cadastrado. Enriqueça artistas via{' '}
-          <Link href="/ohara" style={{ color: 'var(--cyan)', textDecoration: 'none' }}>ohara</Link>{' '}
-          para popular automaticamente.
+          Nenhum gênero cadastrado. Enriqueça artistas para popular automaticamente.
         </p>
       )}
 
@@ -126,8 +124,8 @@ export default async function GenerosPage() {
                 <Link href={`/artistas/${a.id}`} style={{ flex: 1, fontSize: '0.85rem', color: 'var(--text)', textDecoration: 'none' }}>
                   {a.nome}
                 </Link>
-                <Link href={`/ohara?prefill=${encodeURIComponent(a.nome)}`} style={{ fontSize: '0.72rem', color: 'var(--cyan)', textDecoration: 'none' }}>
-                  enriquecer →
+                <Link href={`/artistas/${a.id}`} style={{ fontSize: '0.72rem', color: 'var(--cyan)', textDecoration: 'none' }}>
+                  ver artista →
                 </Link>
               </div>
             ))}

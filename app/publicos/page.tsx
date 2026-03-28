@@ -7,7 +7,13 @@ export default async function PublicosPage() {
 
   const { data: nichos } = await (supabase as any)
     .from('nichos')
-    .select('id, nome, underground_score, descritores, corporalidade, mentalidade, tags')
+    .select(`
+      id, nome, underground_score, tags,
+      coesao, identidade_visual, maturidade,
+      letramento, receptividade_autoral, commodificacao, energia,
+      geracao, faixa_etaria, estetica, cor_dominante,
+      fator_compra, concorrencia_merch, abertura_experimental, tipo_nostalgia
+    `)
     .order('underground_score', { ascending: true })
 
   const { data: artistNichos } = await (supabase as any)
@@ -50,9 +56,18 @@ export default async function PublicosPage() {
             leitura de tribos — nichos · gêneros
           </p>
         </div>
-        <span style={{ fontSize: '0.75rem', color: dimText }}>
-          {(nichos ?? []).length} nichos · {(generos ?? []).length} gêneros
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '0.75rem', color: dimText }}>
+            {(nichos ?? []).length} nichos · {(generos ?? []).length} gêneros
+          </span>
+          <Link href="/publicos/novo" style={{
+            fontSize: '0.75rem', color: dimText,
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
+            padding: '0.2rem 0.65rem', borderRadius: 4, textDecoration: 'none',
+          }}>
+            + novo nicho
+          </Link>
+        </div>
       </div>
 
       {/* nichos */}
@@ -64,9 +79,6 @@ export default async function PublicosPage() {
           {(nichos ?? []).map((n: any) => {
             const score = n.underground_score ?? 5
             const cor   = nichoColor(n.nome, score)
-            const corp  = n.corporalidade as Record<string, any> | null
-            const ment  = n.mentalidade  as Record<string, any> | null
-            const descs = (n.descritores as string[] | null) ?? []
 
             const arts = (artistsByNicho[n.id] ?? [])
               .sort((a: any, b: any) => (b.artist?.lastfm_listeners ?? 0) - (a.artist?.lastfm_listeners ?? 0))
@@ -82,7 +94,7 @@ export default async function PublicosPage() {
                   padding: '1.25rem',
                   height: '100%', boxSizing: 'border-box',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
                     <span style={{ fontSize: '1.05rem', fontWeight: 700, color: cor, letterSpacing: '-0.01em' }}>
                       {n.nome}
                     </span>
@@ -91,39 +103,27 @@ export default async function PublicosPage() {
                     </span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-                    {corp && (
-                      <div>
-                        <p style={{ fontSize: '0.6rem', color: dimText, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>corporalidade</p>
-                        {Object.entries(corp).map(([k, v]) => (
-                          <p key={k} style={{ fontSize: '0.78rem', color: bodyText, margin: '3px 0' }}>
-                            <span style={{ color: dimText }}>{k.replace(/_/g, ' ')}: </span>{String(v)}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-                    {ment && (
-                      <div>
-                        <p style={{ fontSize: '0.6rem', color: dimText, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>mentalidade</p>
-                        {ment.comportamento_compra && (
-                          <p style={{ fontSize: '0.78rem', color: bodyText, margin: '3px 0' }}>
-                            <span style={{ color: dimText }}>compra: </span>{String(ment.comportamento_compra)}
-                          </p>
-                        )}
-                        {ment.concorrencia_tipica && (
-                          <p style={{ fontSize: '0.78rem', color: bodyText, margin: '3px 0' }}>
-                            <span style={{ color: dimText }}>concorrência: </span>{String(ment.concorrencia_tipica)}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  {/* Mini scores */}
+                  {(n.coesao || n.energia || n.commodificacao) && (
+                    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                      {n.coesao && <span style={{ fontSize: '0.7rem', color: dimText }}>coesão <span style={{ color: cor }}>{n.coesao}</span></span>}
+                      {n.energia && <span style={{ fontSize: '0.7rem', color: dimText }}>energia <span style={{ color: cor }}>{n.energia}</span></span>}
+                      {n.commodificacao && <span style={{ fontSize: '0.7rem', color: dimText }}>merch <span style={{ color: cor }}>{n.commodificacao}</span></span>}
+                      {n.concorrencia_merch && <span style={{ fontSize: '0.7rem', color: dimText }}>concorrência <span style={{ color: bodyText }}>{n.concorrencia_merch}</span></span>}
+                    </div>
+                  )}
+
+                  {/* Geração + faixa */}
+                  {(n.geracao?.length > 0 || n.faixa_etaria) && (
+                    <div style={{ marginBottom: '0.6rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: dimText }}>
+                        {n.geracao?.join(', ')}{n.faixa_etaria ? ` · ${n.faixa_etaria}` : ''}
+                      </span>
+                    </div>
+                  )}
 
                   {topArts.length > 0 && (
-                    <div style={{ marginBottom: '0.85rem', paddingTop: '0.75rem', borderTop: `1px solid ${nichoColorAlpha(n.nome, score, 0.2)}` }}>
-                      <p style={{ fontSize: '0.6rem', color: dimText, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.4rem' }}>
-                        referências
-                      </p>
+                    <div style={{ paddingTop: '0.65rem', borderTop: `1px solid ${nichoColorAlpha(n.nome, score, 0.2)}` }}>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                         {topArts.map((a: any) => (
                           <span key={a.artist_id} style={{
@@ -141,19 +141,6 @@ export default async function PublicosPage() {
                           </span>
                         )}
                       </div>
-                    </div>
-                  )}
-
-                  {descs.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                      {descs.slice(0, 7).map((d: string) => (
-                        <span key={d} style={{
-                          fontSize: '0.65rem', padding: '0.1rem 0.4rem',
-                          background: nichoColorAlpha(n.nome, score, 0.12),
-                          border: `1px solid ${nichoColorAlpha(n.nome, score, 0.3)}`,
-                          borderRadius: 3, color: cor,
-                        }}>{d}</span>
-                      ))}
                     </div>
                   )}
                 </div>
@@ -187,7 +174,7 @@ export default async function PublicosPage() {
       {artistasSemNicho.length > 0 && (
         <div>
           <p style={{ fontSize: '0.62rem', color: dimText, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
-            sem nicho — {artistasSemNicho.length}
+            artistas pendentes de nicho — {artistasSemNicho.length}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
             {artistasSemNicho.map((a: any) => (

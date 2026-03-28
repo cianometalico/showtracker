@@ -59,3 +59,4 @@ docs/
 
 # Workspace files
 *.code-workspace
+.vercel

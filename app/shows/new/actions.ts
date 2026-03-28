@@ -2,17 +2,23 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { isShowPast } from '@/lib/show-utils'
+
+export type DateEntry = {
+  data: string
+  artistas: { artist_id: string; ordem: number; faz_estampa: boolean }[]
+}
 
 export type CreateShowInput = {
-  nome_evento:         string | null
-  data:                string
-  venue_id:            string | null
-  venue_nome_novo:     string | null
-  venue_cidade_novo:   string | null
-  status_ingresso:     string
-  participou:          boolean
-  artista_ids:         string[]
-  artista_nomes_novos: string[]
+  nome_evento:       string | null
+  venue_id:          string | null
+  venue_nome_novo:   string | null
+  venue_cidade_novo: string | null
+  status_ingresso:   string | null
+  concorrencia:      string | null
+  source_url:        string | null
+  observacoes:       string | null
+  dates:             DateEntry[]
 }
 
 export async function createShow(input: CreateShowInput): Promise<void> {
@@ -30,80 +36,52 @@ export async function createShow(input: CreateShowInput): Promise<void> {
     venueId = (v as any).id
   }
 
-  // 2. Criar show
-  const { data: show, error: showErr } = await supabase
-    .from('shows')
-    .insert({
-      nome_evento:     input.nome_evento || null,
-      data:            input.data,
-      venue_id:        venueId,
-      status_ingresso: input.status_ingresso as any,
-      participou: input.participou,
-    } as any)
-    .select('id')
-    .single()
+  // 2. Criar um show por date entry
+  const createdIds: string[] = []
 
-  if (showErr || !show) throw new Error(showErr?.message ?? 'Erro ao criar show')
-  const showId = (show as any).id as string
+  for (const entry of input.dates) {
+    const participou = isShowPast(entry.data)
 
-  // 3. Criar artistas novos e coletar IDs
-  const artistIds = [...input.artista_ids]
-  for (const nome of input.artista_nomes_novos) {
-    if (!nome.trim()) continue
-    // verifica se já existe por nome exato (case insensitive)
-    const { data: existing } = await supabase
-      .from('artists')
+    const { data: show, error: showErr } = await supabase
+      .from('shows')
+      .insert({
+        nome_evento:     input.nome_evento || null,
+        data:            entry.data,
+        venue_id:        venueId,
+        status_ingresso: input.status_ingresso || null,
+        concorrencia:    input.concorrencia || null,
+        source_url:      input.source_url || null,
+        observacoes:     input.observacoes || null,
+        participou,
+      } as any)
       .select('id')
-      .ilike('nome', nome.trim())
-      .maybeSingle()
+      .single()
 
-    if (existing) {
-      artistIds.push((existing as any).id)
-    } else {
-      const { data: newA, error: aErr } = await supabase
-        .from('artists')
-        .insert({ nome: nome.trim() } as any)
-        .select('id')
-        .single()
-      if (!aErr && newA) artistIds.push((newA as any).id)
+    if (showErr || !show) throw new Error(showErr?.message ?? 'Erro ao criar show')
+    const showId = (show as any).id as string
+    createdIds.push(showId)
+
+    // 3. Inserir show_artists
+    if (entry.artistas.length > 0) {
+      const saRows = entry.artistas.map(a => ({
+        show_id:     showId,
+        artist_id:   a.artist_id,
+        ordem:       a.ordem,
+        faz_estampa: a.faz_estampa,
+      }))
+      const { error: saErr } = await supabase
+        .from('show_artists')
+        .insert(saRows as any)
+      if (saErr) console.error('[show_artists insert]', saErr)
     }
   }
 
-  // 4. Inserir show_artists com ordem
-  if (artistIds.length > 0) {
-    const saRows = artistIds.map((id, i) => ({
-      show_id:     showId,
-      artist_id:   id,
-      ordem:       i + 1,
-      faz_estampa: false,
-    }))
-    const { error: saErr } = await supabase
-      .from('show_artists')
-      .insert(saRows as any)
-    if (saErr) console.error('[show_artists insert]', saErr)
-  }
-
-  redirect(`/shows/${showId}`)
-}
-
-export async function searchArtists(q: string): Promise<{ id: string; nome: string }[]> {
-  if (!q || q.length < 2) return []
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('artists')
-    .select('id, nome')
-    .ilike('nome', `%${q}%`)
-    .limit(8)
-  return ((data ?? []) as any[]).map(a => ({ id: a.id, nome: a.nome }))
+  redirect(`/shows/${createdIds[0]}`)
 }
 
 export async function searchVenues(q: string): Promise<{ id: string; nome: string; cidade: string }[]> {
   if (!q || q.length < 2) return []
   const supabase = await createClient()
-  const { data } = await supabase
-    .from('venues')
-    .select('id, nome, cidade')
-    .ilike('nome', `%${q}%`)
-    .limit(6)
+  const { data } = await (supabase as any).rpc('search_venues', { search_term: q })
   return ((data ?? []) as any[]).map(v => ({ id: v.id, nome: v.nome, cidade: v.cidade }))
 }

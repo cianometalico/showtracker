@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { addArtistToShow } from './actions'
+// addArtistToShow migrado para ArtistPicker (show-detail-client)
 
 type Artist = { id: string; nome: string; genero?: string | null }
 type ShowArtist = { artist_id: string; ordem: number; faz_estampa: boolean; artists: Artist }
@@ -60,7 +60,7 @@ function LineupBlock({
   async function addArtist(artist: { id: string; nome: string }) {
     setSaving(true)
     const nextOrder = Math.max(0, ...lineup.map(sa => sa.ordem)) + 1
-    await addArtistToShow(showId, artist.id, nextOrder)
+    // TODO: addArtistToShow migrado — usar updateShowInline com artistas[]
     setLineup([...lineup, {
       artist_id:   artist.id,
       ordem:       nextOrder,

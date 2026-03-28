@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { getShowDisplayName } from '@/lib/show-utils'
+import { removeAccents } from '@/lib/text-utils'
 
 type Show = {
   id: string
@@ -96,11 +98,11 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
     }
 
     if (busca.trim()) {
-      const q = busca.toLowerCase()
+      const q = removeAccents(busca.toLowerCase())
       list = list.filter(s =>
-        (s.nome_evento ?? '').toLowerCase().includes(q) ||
-        s.artistas.some(a => a.toLowerCase().includes(q)) ||
-        (s.venue?.nome ?? '').toLowerCase().includes(q)
+        removeAccents((s.nome_evento ?? '').toLowerCase()).includes(q) ||
+        s.artistas.some(a => removeAccents(a.toLowerCase()).includes(q)) ||
+        removeAccents((s.venue?.nome ?? '').toLowerCase()).includes(q)
       )
     }
     return list
@@ -115,7 +117,7 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
           background: 'var(--surface-2)', color: 'var(--text)',
           border: '1px solid var(--border)', borderRadius: 4, textDecoration: 'none',
         }}>
-          + Novo show
+          + novo show
         </Link>
       </div>
 
@@ -132,7 +134,7 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
             </button>
           ))}
         </div>
-        <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar..."
+        <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="buscar..."
           style={{
             marginLeft: 'auto', fontSize: '0.8rem', background: 'none',
             border: 'none', borderBottom: '1px solid var(--border)',
@@ -148,8 +150,8 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
       <div style={{ display: 'flex', gap: '1rem', padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border)', marginBottom: 2 }}>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 160, flexShrink: 0 }}>Data</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flex: 1 }}>Evento</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>Venue</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 90, flexShrink: 0, textAlign: 'right' }}>Status</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>local</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 90, flexShrink: 0, textAlign: 'right' }}>status</span>
       </div>
 
       {filtered.length === 0 ? (
@@ -208,20 +210,12 @@ function ShowRow({ show }: { show: Show }) {
       </span>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        {show.nome_evento ? (
-          <>
-            <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {show.nome_evento}
-            </p>
-            {show.artistas.length > 0 && (
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {show.artistas.join(' / ')}
-              </p>
-            )}
-          </>
-        ) : (
-          <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {show.artistas.length > 0 ? show.artistas.join(' / ') : '(sem nome)'}
+        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {getShowDisplayName(show.nome_evento, show.artistas)}
+        </p>
+        {show.nome_evento && show.artistas.length > 0 && (
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {show.artistas.join(' / ')}
           </p>
         )}
       </div>

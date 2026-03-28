@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import { Suspense } from 'react'
 import './globals.css'
 import { WeatherBar } from '@/components/weather-bar'
 import type { WeatherData } from '@/components/weather-bar'
+import { SidebarNav } from '@/components/sidebar-nav'
+import { OharaSearch } from '@/components/ohara-search'
 
 export const metadata: Metadata = {
   title: 'Radiant',
@@ -39,41 +41,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="sidebar-logo">
               <div className="sidebar-logo-text">R̦adiant</div>
             </div>
-            <nav className="sidebar-nav">
-              <Link href="/" className="nav-link">
-                <span className="nav-glyph">☰</span> home
-              </Link>
-              <div className="sidebar-separator" />
-              <Link href="/agenda" className="nav-link">
-                <span className="nav-glyph">☲</span> calendário
-              </Link>
-              <Link href="/shows" className="nav-link">
-                <span className="nav-glyph">☷</span> agenda
-              </Link>
-              <div className="sidebar-separator" />
-              <Link href="/artistas" className="nav-link">
-                <span className="nav-glyph">☴</span> artistas
-              </Link>
-              <Link href="/publicos" className="nav-link">
-                <span className="nav-glyph">☵</span> públicos
-              </Link>
-              <div className="sidebar-separator" />
-              <Link href="/locais" className="nav-link">
-                <span className="nav-glyph">☶</span> locais
-              </Link>
-              <div className="sidebar-separator" />
-              <Link href="/ohara" className="nav-link" style={{ opacity: 0.5, fontStyle: 'italic' }}>
-                <span className="nav-glyph">⚗̧</span> ohara
-              </Link>
-            </nav>
-            <div className="sidebar-version">v0.3.1</div>
+            <SidebarNav />
+            <div className="sidebar-version">v0.6.0</div>
           </aside>
           <main className="main-content">
-            {weather && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 1.5rem 0' }}>
-                <WeatherBar weather={weather} />
-              </div>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '0.5rem 1.5rem 0', gap: '1rem' }}>
+              <Suspense fallback={null}>
+                <OharaSearch />
+              </Suspense>
+              {weather && <WeatherBar weather={weather} />}
+            </div>
             {children}
           </main>
         </div>

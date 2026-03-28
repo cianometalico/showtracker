@@ -1,14 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import { HomeCalendar, type CalShow } from './home-calendar'
 
-function formatDayShort(dateStr: string, hojeStr: string): string {
-  if (dateStr === hojeStr) return 'hoje'
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(y, m - 1, d)
-  const weekday = date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')
-  const month = date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
-  return `${weekday}, ${d} ${month}`
-}
+// ── Utilities ─────────────────────────────────────────────────
 
 function formatDataMono(dateStr: string): string {
   const [, m, d] = dateStr.split('-')
@@ -16,67 +10,95 @@ function formatDataMono(dateStr: string): string {
 }
 
 function getNomeShow(
-  show: any,
+  show: { id: string; nome_evento: string | null },
   artistById: Record<string, string>,
   saByShow: Record<string, { artist_id: string; ordem: number }[]>
 ): string {
   if (show.nome_evento) return show.nome_evento
-  const sas = (saByShow[show.id] ?? []).sort((a, b) => a.ordem - b.ordem)
+  const sas   = (saByShow[show.id] ?? []).sort((a, b) => a.ordem - b.ordem)
   const names = sas.map(sa => artistById[sa.artist_id]).filter(Boolean)
-  return names.length > 0 ? names.join(' / ') : '(sem nome)'
+  return names.length > 0 ? names.join(' + ') : '—'
 }
 
-function resultadoColor(r: string): string {
-  if (r === 'sucesso_total' || r === 'sucesso') return 'var(--lime)'
-  if (r === 'medio') return 'var(--amber)'
-  if (r === 'fracasso') return 'var(--red)'
-  return 'var(--text-dim)'
-}
+// ── Main Component ─────────────────────────────────────────────
 
-function resultadoLabel(r: string): string {
-  if (r === 'sucesso_total') return 'sucesso total'
-  if (r === 'sucesso') return 'sucesso'
-  if (r === 'medio') return 'médio'
-  if (r === 'fracasso') return 'fracasso'
-  return r
-}
-
-export default async function HomePage() {
-  const hoje = new Date()
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mes?: string }>
+}) {
+  const hoje    = new Date()
   const hojeStr = hoje.toISOString().slice(0, 10)
 
-  const em5 = new Date(hoje)
-  em5.setDate(hoje.getDate() + 5)
-  const em5Str = em5.toISOString().slice(0, 10)
+  // ── Resolve displayed month ───────────────────────────────────
 
-  const em15 = new Date(hoje)
-  em15.setDate(hoje.getDate() + 15)
-  const em15Str = em15.toISOString().slice(0, 10)
+  const params   = await searchParams
+  const rawMes   = typeof params?.mes === 'string' ? params.mes : null
+  const mesValido = rawMes?.match(/^\d{4}-\d{2}$/) ? rawMes : null
+  const [mesAno, mesMes] = mesValido
+    ? mesValido.split('-').map(Number)
+    : [hoje.getFullYear(), hoje.getMonth() + 1]
+
+  const mesStr    = `${mesAno}-${String(mesMes).padStart(2, '0')}`
+  const primeiroDia = `${mesStr}-01`
+  const ultimoDia   = `${mesAno}-${String(mesMes).padStart(2, '0')}-${new Date(mesAno, mesMes, 0).getDate()}`
 
   const supabase = await createClient()
   const db = supabase as any
 
+  // ── Parallel fetches ─────────────────────────────────────────
+
   const [
     { count: countHoje },
-    { count: countProx15 },
-    { count: countPendentes },
+    { count: countEsteMes },
     { count: countTotal },
-    { data: proximosRows },
-    { data: pendentesRows },
-    { data: recentesRows },
-    { data: saRows },
+    { data: calendarRows },
+    { data: semResultadoRows },
+    { data: semParticipouRows },
     { data: artistRows },
+    { data: semEstoqueRows },
   ] = await Promise.all([
+    // Stats
     db.from('shows').select('*', { count: 'exact', head: true }).eq('data', hojeStr),
-    db.from('shows').select('*', { count: 'exact', head: true }).gte('data', hojeStr).lte('data', em15Str),
-    db.from('shows').select('*', { count: 'exact', head: true }).lt('data', hojeStr).eq('participou', true).is('resultado_geral', null).eq('legado', false),
+    db.from('shows').select('*', { count: 'exact', head: true }).gte('data', primeiroDia).lte('data', ultimoDia),
     db.from('shows').select('*', { count: 'exact', head: true }),
-    db.from('shows').select('id, data, nome_evento, venues(id, nome)').gte('data', hojeStr).lte('data', em5Str).order('data', { ascending: true }),
-    db.from('shows').select('id, data, nome_evento').lt('data', hojeStr).eq('participou', true).is('resultado_geral', null).eq('legado', false).order('data', { ascending: false }).limit(5),
-    db.from('shows').select('id, data, nome_evento, resultado_geral').not('resultado_geral', 'is', null).order('data', { ascending: false }).limit(5),
-    db.from('show_artists').select('show_id, artist_id, ordem'),
+    // Calendar: full month
+    db.from('shows')
+      .select('id, data, nome_evento, resultado_geral, status_ingresso, venues(id, nome, bairro)')
+      .gte('data', primeiroDia).lte('data', ultimoDia)
+      .order('data', { ascending: true }),
+    // Alerts: shows sem resultado (always current real date, not displayed month)
+    db.from('shows')
+      .select('id, data, nome_evento')
+      .lt('data', hojeStr).eq('participou', true).is('resultado_geral', null).eq('legado', false)
+      .order('data', { ascending: false }).limit(10),
+    // Alerts: shows futuros sem participou
+    db.from('shows')
+      .select('id, data, nome_evento')
+      .gte('data', hojeStr).is('participou', null).eq('legado', false)
+      .order('data', { ascending: true }).limit(5),
+    // Artists lookup
     db.from('artists').select('id, nome'),
+    // Designs sem estoque
+    db.from('design_stock')
+      .select('design_id, nome, artist_id, saldo_atual')
+      .eq('ativo', true)
+      .lte('saldo_atual', 0),
   ])
+
+  // ── Show artists lookup ───────────────────────────────────────
+
+  const allShowIds = [...new Set([
+    ...(calendarRows     ?? []).map((s: any) => s.id),
+    ...(semResultadoRows ?? []).map((s: any) => s.id),
+    ...(semParticipouRows ?? []).map((s: any) => s.id),
+  ])]
+
+  let saRows: any[] = []
+  if (allShowIds.length > 0) {
+    const { data } = await db.from('show_artists').select('show_id, artist_id, ordem').in('show_id', allShowIds)
+    saRows = data ?? []
+  }
 
   const artistById: Record<string, string> = {}
   for (const a of (artistRows ?? []) as { id: string; nome: string }[]) {
@@ -84,22 +106,50 @@ export default async function HomePage() {
   }
 
   const saByShow: Record<string, { artist_id: string; ordem: number }[]> = {}
-  for (const sa of (saRows ?? []) as { show_id: string; artist_id: string; ordem: number }[]) {
+  for (const sa of saRows as { show_id: string; artist_id: string; ordem: number }[]) {
     if (!saByShow[sa.show_id]) saByShow[sa.show_id] = []
     saByShow[sa.show_id].push(sa)
   }
 
-  const diaSemana = hoje.toLocaleDateString('pt-BR', { weekday: 'long' })
-  const diaNum = hoje.getDate()
-  const mesNome = hoje.toLocaleDateString('pt-BR', { month: 'long' })
-  const anoNum = hoje.getFullYear()
-  const dataLabel = `${diaSemana}, ${diaNum} de ${mesNome} de ${anoNum}`
+  // ── Build showsByDate for calendar ────────────────────────────
+
+  const showsByDate: Record<string, CalShow[]> = {}
+  for (const s of (calendarRows ?? []) as any[]) {
+    const venue = Array.isArray(s.venues) ? s.venues[0] : s.venues
+    const show: CalShow = {
+      id:             s.id,
+      nome:           getNomeShow(s, artistById, saByShow),
+      venueNome:      venue?.nome ?? null,
+      venueBairro:    venue?.bairro ?? null,
+      statusIngresso: s.status_ingresso,
+      resultadoGeral: s.resultado_geral,
+    }
+    if (!showsByDate[s.data]) showsByDate[s.data] = []
+    showsByDate[s.data].push(show)
+  }
+
+  // ── Pendências ────────────────────────────────────────────────
+
+  const hasPendencias =
+    (semResultadoRows?.length ?? 0) > 0 ||
+    (semParticipouRows?.length ?? 0) > 0 ||
+    (semEstoqueRows?.length ?? 0) > 0
+
+  // ── Header date ───────────────────────────────────────────────
+
+  const dataLabel = hoje.toLocaleDateString('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
 
   return (
     <div className="page-container">
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text)', margin: 0 }}>
+        <h1 style={{
+          fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700,
+          letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text)', margin: 0,
+        }}>
           ☰ painel
         </h1>
         <span className="font-mono" style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
@@ -107,118 +157,150 @@ export default async function HomePage() {
         </span>
       </div>
 
-      {/* Stats grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '2rem' }}>
-        <div className="stat-card">
-          <p className="stat-value">{countHoje ?? 0}</p>
-          <p className="stat-label">△ hoje</p>
-        </div>
-        <div className="stat-card">
-          <p className="stat-value">{countProx15 ?? 0}</p>
-          <p className="stat-label">☷ próx. 15d</p>
-        </div>
-        <div className="stat-card">
-          <p className="stat-value">{countPendentes ?? 0}</p>
-          <p className="stat-label">◇ pendentes</p>
-        </div>
-        <div className="stat-card">
-          <p className="stat-value">{countTotal ?? 0}</p>
-          <p className="stat-label">⟁ acervo</p>
-        </div>
+      {/* Stats — 3 cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
+        {[
+          { value: countHoje ?? 0,     label: '△ hoje' },
+          { value: countEsteMes ?? 0,  label: '☷ este mês' },
+          { value: countTotal ?? 0,    label: '⟁ acervo' },
+        ].map(({ value, label }) => (
+          <div key={label} className="stat-card">
+            <p className="stat-value">{value}</p>
+            <p className="stat-label">{label}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Próximos 5 dias */}
+      {/* Calendário mensal */}
       <section style={{ marginBottom: '2rem' }}>
-        <p className="section-label">△ próximos 5 dias</p>
-        {!proximosRows || proximosRows.length === 0 ? (
-          <p style={{ fontStyle: 'italic', color: 'var(--text-dim)', fontSize: '13px', margin: 0 }}>
-            nenhum show nos próximos 5 dias
-          </p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {proximosRows.map((show: any) => {
-              const isHoje = show.data === hojeStr
-              const venue = Array.isArray(show.venues) ? show.venues[0] : show.venues
-              const nome = getNomeShow(show, artistById, saByShow)
-              const dayLabel = formatDayShort(show.data, hojeStr)
-              return (
-                <Link key={show.id} href={`/shows/${show.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    border: `1px solid ${isHoje ? 'rgba(110,200,216,0.2)' : 'var(--border)'}`,
-                    borderRadius: '6px',
-                    padding: '12px 14px',
-                    background: isHoje ? 'rgba(110,200,216,0.04)' : 'var(--surface)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                  }}>
-                    <span style={{ fontSize: '13px', width: '16px', textAlign: 'center', flexShrink: 0, color: isHoje ? 'var(--cyan)' : 'var(--text-dim)' }}>△</span>
-                    <span className="font-mono" style={{ fontSize: '11px', color: 'var(--text-dim)', flexShrink: 0, minWidth: '90px' }}>{dayLabel}</span>
-                    <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nome}</span>
-                    {venue?.nome && (
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', flexShrink: 0, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {venue.nome}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+        <HomeCalendar showsByDate={showsByDate} hojeStr={hojeStr} mes={mesStr} />
       </section>
 
-      {/* Pendente registrar resultado */}
-      <section style={{ marginBottom: '2rem' }}>
-        <p className="section-label">◇ pendente registrar resultado</p>
-        {!pendentesRows || pendentesRows.length === 0 ? (
-          <p style={{ fontStyle: 'italic', color: 'var(--text-dim)', fontSize: '13px', margin: 0 }}>
-            tudo registrado ⊙
+      {/* Pendências */}
+      {hasPendencias && <section style={{ marginBottom: '2rem' }}>
+        <p className="section-label">◇ pendências</p>
+
+        {/* Shows sem resultado */}
+        <div style={{ marginBottom: '1rem' }}>
+          <p style={{
+            fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase',
+            letterSpacing: '0.06em', margin: '0 0 6px',
+          }}>
+            shows sem resultado ({semResultadoRows?.length ?? 0})
           </p>
-        ) : (
-          <div>
-            {pendentesRows.map((show: any) => {
-              const nome = getNomeShow(show, artistById, saByShow)
-              return (
-                <div key={show.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ fontSize: '13px', width: '16px', textAlign: 'center', flexShrink: 0, color: 'var(--text-dim)' }}>◇</span>
-                  <span className="font-mono" style={{ fontSize: '11px', color: 'var(--text-dim)', flexShrink: 0 }}>{formatDataMono(show.data)}</span>
-                  <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nome}</span>
-                  <Link href={`/shows/${show.id}/editar`} style={{ fontSize: '11px', color: 'var(--cyan)', textDecoration: 'none', flexShrink: 0 }}>
+          {!semResultadoRows || semResultadoRows.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum ⊙</p>
+          ) : (
+            <div>
+              {(semResultadoRows as any[]).map(show => (
+                <div key={show.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '7px 0', borderBottom: '1px solid var(--border)',
+                }}>
+                  <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)', flexShrink: 0, minWidth: 36 }}>
+                    {formatDataMono(show.data)}
+                  </span>
+                  <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {getNomeShow(show, artistById, saByShow)}
+                  </span>
+                  <Link href={`/shows/${show.id}`} style={{ fontSize: '11px', color: 'var(--cyan)', textDecoration: 'none', flexShrink: 0 }}>
                     registrar →
                   </Link>
                 </div>
-              )
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Participação indefinida */}
+        <div style={{ marginBottom: '1rem' }}>
+          <p style={{
+            fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase',
+            letterSpacing: '0.06em', margin: '0 0 6px',
+          }}>
+            participação indefinida ({semParticipouRows?.length ?? 0})
+          </p>
+          {!semParticipouRows || semParticipouRows.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum ⊙</p>
+          ) : (
+            <div>
+              {(semParticipouRows as any[]).map(show => (
+                <div key={show.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '7px 0', borderBottom: '1px solid var(--border)',
+                }}>
+                  <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)', flexShrink: 0, minWidth: 36 }}>
+                    {formatDataMono(show.data)}
+                  </span>
+                  <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {getNomeShow(show, artistById, saByShow)}
+                  </span>
+                  <Link href={`/shows/${show.id}`} style={{ fontSize: '11px', color: 'var(--cyan)', textDecoration: 'none', flexShrink: 0 }}>
+                    confirmar →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Designs sem estoque */}
+        <div>
+          <p style={{
+            fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase',
+            letterSpacing: '0.06em', margin: '0 0 6px',
+          }}>
+            designs sem estoque ({semEstoqueRows?.length ?? 0})
+          </p>
+          {!semEstoqueRows || semEstoqueRows.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum ⊙</p>
+          ) : (
+            <div>
+              {(semEstoqueRows as any[]).map(d => {
+                const artistNome = d.artist_id ? (artistById[d.artist_id] ?? null) : null
+                return (
+                  <div key={d.design_id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '7px 0', borderBottom: '1px solid var(--border)',
+                  }}>
+                    <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {d.nome}{artistNome ? ` · ${artistNome}` : ''}
+                    </span>
+                    <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--amber)', flexShrink: 0 }}>
+                      {d.saldo_atual ?? 0}
+                    </span>
+                    <Link href={`/estoque/${d.design_id}`} style={{ fontSize: '11px', color: 'var(--cyan)', textDecoration: 'none', flexShrink: 0 }}>
+                      ver →
+                    </Link>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </section>}
+
+      {/* Ações rápidas */}
+      <section style={{ marginBottom: '1rem' }}>
+        <p className="section-label">⊕ ações rápidas</p>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {[
+            { href: '/shows/new',   label: '+ novo show'    },
+            { href: '/?abrir=artista', label: '+ novo artista' },
+            { href: '/estoque/new', label: '+ novo design'  },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} style={{
+              padding: '0.45rem 1.1rem', fontSize: '0.8rem',
+              background: 'var(--surface)', color: 'var(--text)',
+              border: '1px solid var(--border)', borderRadius: 4,
+              textDecoration: 'none',
+            }}>
+              {label}
+            </Link>
+          ))}
+        </div>
       </section>
 
-      {/* Resultados recentes */}
-      <section>
-        <p className="section-label">⊙ resultados recentes</p>
-        {!recentesRows || recentesRows.length === 0 ? (
-          <p style={{ fontStyle: 'italic', color: 'var(--text-dim)', fontSize: '13px', margin: 0 }}>
-            nenhum resultado registrado
-          </p>
-        ) : (
-          <div>
-            {recentesRows.map((show: any) => {
-              const nome = getNomeShow(show, artistById, saByShow)
-              const cor = resultadoColor(show.resultado_geral)
-              const label = resultadoLabel(show.resultado_geral)
-              return (
-                <div key={show.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ fontSize: '13px', width: '16px', textAlign: 'center', flexShrink: 0, color: cor }}>⊙</span>
-                  <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nome}</span>
-                  <span className="font-mono" style={{ fontSize: '11px', color: 'var(--text-dim)', flexShrink: 0 }}>{formatDataMono(show.data)}</span>
-                  <span style={{ fontSize: '11px', color: cor, flexShrink: 0 }}>{label}</span>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </section>
     </div>
   )
 }

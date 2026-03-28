@@ -6,7 +6,7 @@ export default async function LocaisPage() {
 
   const { data: rows } = await (supabase as any)
     .from('venues')
-    .select('id, nome, cidade, capacidade_praticavel, tipo_default, zona_risco, risco_fiscalizacao')
+    .select('id, nome, cidade, bairro, capacidade_praticavel, zona_risco, risco_fiscalizacao')
     .order('nome', { ascending: true })
 
   const { data: showRows } = await (supabase as any)
@@ -32,9 +32,9 @@ export default async function LocaisPage() {
 
       <div style={{ display: 'flex', gap: '1rem', padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flex: 1 }}>Nome</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 120, flexShrink: 0 }}>Cidade</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>Bairro · Cidade</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 80, flexShrink: 0, textAlign: 'right' }}>Cap.</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 60, flexShrink: 0, textAlign: 'center' }}>Tipo</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 60, flexShrink: 0, textAlign: 'center' }}>Risco</span>
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 50, flexShrink: 0, textAlign: 'right' }}>Shows</span>
       </div>
 
@@ -60,14 +60,16 @@ export default async function LocaisPage() {
                 </span>
               )}
             </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 120, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {v.cidade ?? '—'}
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 130, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {v.bairro ? `${v.bairro} · ${v.cidade ?? ''}` : (v.cidade ?? '—')}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0, textAlign: 'right', fontFamily: 'monospace' }}>
               {v.capacidade_praticavel ? v.capacidade_praticavel.toLocaleString('pt-BR') : '—'}
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 60, flexShrink: 0, textAlign: 'center' }}>
-              {v.tipo_default ?? '—'}
+            <span style={{ fontSize: '0.75rem', width: 60, flexShrink: 0, textAlign: 'center',
+              color: v.risco_fiscalizacao === 'high' ? 'var(--red)' : v.risco_fiscalizacao === 'medium' ? 'var(--amber)' : v.risco_fiscalizacao === 'low' ? 'var(--green)' : 'var(--text-muted)',
+            }}>
+              {v.risco_fiscalizacao === 'high' ? 'Alto' : v.risco_fiscalizacao === 'medium' ? 'Médio' : v.risco_fiscalizacao === 'low' ? 'Baixo' : '—'}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 50, flexShrink: 0, textAlign: 'right', fontFamily: 'monospace' }}>
               {v.total_shows > 0 ? v.total_shows : '—'}
