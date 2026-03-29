@@ -111,7 +111,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
       {mostrarClima && (
         <div style={{ marginBottom: '1.5rem' }}>
-          <p className="section-label">☾ previsão</p>
+          <p className="section-label">previsão</p>
           <WeatherWidget
             data={show.data}
             lat={venue?.lat ?? null}

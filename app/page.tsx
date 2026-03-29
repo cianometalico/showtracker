@@ -150,19 +150,19 @@ export default async function HomePage({
           fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500,
           letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text)', margin: 0,
         }}>
-          ☰ painel
+          painel
         </h1>
         <span className="font-mono" style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-          ☾ {dataLabel}
+          {dataLabel}
         </span>
       </div>
 
       {/* Stats — 3 cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
         {[
-          { value: countHoje ?? 0,     label: '△ hoje' },
-          { value: countEsteMes ?? 0,  label: '☷ este mês' },
-          { value: countTotal ?? 0,    label: '⟁ acervo' },
+          { value: countHoje ?? 0,     label: 'hoje' },
+          { value: countEsteMes ?? 0,  label: 'este mês' },
+          { value: countTotal ?? 0,    label: 'acervo' },
         ].map(({ value, label }) => (
           <div key={label} className="stat-card">
             <p className="stat-value">{value}</p>
@@ -178,7 +178,7 @@ export default async function HomePage({
 
       {/* Pendências */}
       {hasPendencias && <section style={{ marginBottom: '2rem' }}>
-        <p className="section-label">◇ pendências</p>
+        <p className="section-label">pendências</p>
 
         {/* Shows sem resultado */}
         <div style={{ marginBottom: '1rem' }}>
@@ -189,7 +189,7 @@ export default async function HomePage({
             shows sem resultado ({semResultadoRows?.length ?? 0})
           </p>
           {!semResultadoRows || semResultadoRows.length === 0 ? (
-            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum ⊙</p>
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum</p>
           ) : (
             <div>
               {(semResultadoRows as any[]).map(show => (
@@ -221,7 +221,7 @@ export default async function HomePage({
             participação indefinida ({semParticipouRows?.length ?? 0})
           </p>
           {!semParticipouRows || semParticipouRows.length === 0 ? (
-            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum ⊙</p>
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum</p>
           ) : (
             <div>
               {(semParticipouRows as any[]).map(show => (
@@ -253,7 +253,7 @@ export default async function HomePage({
             designs sem estoque ({semEstoqueRows?.length ?? 0})
           </p>
           {!semEstoqueRows || semEstoqueRows.length === 0 ? (
-            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum ⊙</p>
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>nenhum</p>
           ) : (
             <div>
               {(semEstoqueRows as any[]).map(d => {
@@ -282,7 +282,7 @@ export default async function HomePage({
 
       {/* Ações rápidas */}
       <section style={{ marginBottom: '1rem' }}>
-        <p className="section-label">⊕ ações rápidas</p>
+        <p className="section-label">ações rápidas</p>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
             { href: '/shows/new',   label: '+ novo show'    },

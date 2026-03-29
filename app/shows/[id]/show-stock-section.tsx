@@ -89,7 +89,7 @@ export function ShowStockSection({ showId, movements, activeDesigns, levadosAqui
 
   return (
     <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-      <p className="section-label">☱ peças por design</p>
+      <p className="section-label">peças por design</p>
 
       {/* Resumo por design */}
       {designSummary.length > 0 && (

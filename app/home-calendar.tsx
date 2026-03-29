@@ -192,7 +192,7 @@ export function HomeCalendar({ showsByDate, hojeStr, mes }: Props) {
                             <span style={badge('var(--amber)')}>mal vendido</span>
                           )}
                           {semRes && (
-                            <span style={badge('var(--amber)')}>◇</span>
+                            <span style={badge('var(--amber)')}>pend</span>
                           )}
                         </div>
                       )}

@@ -106,6 +106,20 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
         {[artist.pais, artist.lastfm_listeners ? artist.lastfm_listeners.toLocaleString('pt-BR') + ' ouvintes' : null]
           .filter(Boolean).join(' · ') || '—'}
       </p>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+        <span style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: artist.mbid ? 'var(--amber)' : 'var(--text-muted)',
+          flexShrink: 0,
+        }} />
+        <span style={{
+          fontSize: '0.7rem',
+          color: artist.mbid ? 'var(--amber)' : 'var(--text-muted)',
+          fontFamily: 'var(--font-mono)',
+        }}>
+          {artist.mbid ? 'enriquecido' : 'pendente'}
+        </span>
+      </span>
       {artist.mbid && (
         <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
           mbid: {artist.mbid}

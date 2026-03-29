@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { linkNicho, unlinkNicho } from './actions'
+import { nichoColorAlpha } from '@/lib/nicho-color'
 
 type Nicho = {
   id: string
@@ -10,14 +11,17 @@ type Nicho = {
   underground_score: number
 }
 
+type LinkedNicho = { id: string; score: number }
+
 type Props = {
   artistId: string
   allNichos: Nicho[]
-  linkedNichoIds: string[]
+  linkedNichos: LinkedNicho[]
 }
 
-export function NichoManager({ artistId, allNichos, linkedNichoIds }: Props) {
-  const [linked, setLinked] = useState(new Set(linkedNichoIds))
+export function NichoManager({ artistId, allNichos, linkedNichos }: Props) {
+  const [linked, setLinked] = useState(new Set(linkedNichos.map(ln => ln.id)))
+  const [linkedScores] = useState(new Map(linkedNichos.map(ln => [ln.id, ln.score])))
   const [pending, startT] = useTransition()
 
   function toggle(nichoId: string) {
@@ -39,39 +43,42 @@ export function NichoManager({ artistId, allNichos, linkedNichoIds }: Props) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
         {allNichos.map(n => {
           const isLinked = linked.has(n.id)
-          return isLinked ? (
-  <div key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-    <a href={`/publicos/${n.id}`} style={{
-      padding: '0.25rem 0.6rem',
-      fontSize: '0.78rem', borderRadius: '4px 0 0 4px',
-      border: `1px solid ${n.cor}`, borderRight: 'none',
-      background: `${n.cor}22`, color: n.cor,
-      textDecoration: 'none',
-    }}>
-      {n.nome}
-    </a>
-    <button onClick={() => toggle(n.id)} disabled={pending} style={{
-      fontSize: '0.78rem',
-      padding: '0.25rem 0.5rem',
-      borderRadius: '0 4px 4px 0', cursor: 'pointer',
-      border: `1px solid ${n.cor}`,
-      background: `${n.cor}22`, color: n.cor,
-      opacity: pending ? 0.5 : 1,
-      
-    }}>✕</button>
-  </div>
-) : (
-  <button key={n.id} onClick={() => toggle(n.id)} disabled={pending} style={{
-    padding: '0.25rem 0.75rem', fontSize: '0.78rem',
-    borderRadius: 4, cursor: 'pointer',
-    border: `1px solid ${n.cor}88`, background: 'transparent',
-    color: `${n.cor}66`, opacity: pending ? 0.5 : 1,
-    transition: 'all 0.15s',
-    
-  }}>
-    + {n.nome}
-  </button>
-)
+          if (isLinked) {
+            const vincScore = linkedScores.get(n.id) ?? 5
+            const bg = nichoColorAlpha(n.nome, n.underground_score, vincScore / 10)
+            return (
+              <div key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <a href={`/publicos/${n.id}`} style={{
+                  padding: '0.25rem 0.6rem',
+                  fontSize: '0.78rem', borderRadius: '4px 0 0 4px',
+                  border: `1px solid ${n.cor}`, borderRight: 'none',
+                  background: bg, color: n.cor,
+                  textDecoration: 'none',
+                }}>
+                  {n.nome}
+                </a>
+                <button onClick={() => toggle(n.id)} disabled={pending} style={{
+                  fontSize: '0.78rem',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '0 4px 4px 0', cursor: 'pointer',
+                  border: `1px solid ${n.cor}`,
+                  background: bg, color: n.cor,
+                  opacity: pending ? 0.5 : 1,
+                }}>✕</button>
+              </div>
+            )
+          }
+          return (
+            <button key={n.id} onClick={() => toggle(n.id)} disabled={pending} style={{
+              padding: '0.25rem 0.75rem', fontSize: '0.78rem',
+              borderRadius: 4, cursor: 'pointer',
+              border: `1px solid ${n.cor}88`, background: 'transparent',
+              color: `${n.cor}66`, opacity: pending ? 0.5 : 1,
+              transition: 'all 0.15s',
+            }}>
+              + {n.nome}
+            </button>
+          )
         })}
       </div>
     </div>

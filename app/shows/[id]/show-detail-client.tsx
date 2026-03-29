@@ -219,7 +219,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
             {show.legado && !isEditing && (
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: 4 }}>
-                ⟁ legado
+                legado
               </span>
             )}
             {show.resultado_geral && !isEditing && (
@@ -407,7 +407,20 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
                     <Link href={`/artistas/${l.artist_id}`} style={{ flex: 1, fontSize: '0.9rem', color: 'var(--text)', textDecoration: 'none' }}>
                       {l.nome}
                     </Link>
-                    {!l.mbid && <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>· pendente</span>}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+                      <span style={{
+                        width: 6, height: 6, borderRadius: '50%',
+                        background: l.mbid ? 'var(--amber)' : 'var(--text-muted)',
+                        flexShrink: 0,
+                      }} />
+                      <span style={{
+                        fontSize: '0.7rem',
+                        color: l.mbid ? 'var(--amber)' : 'var(--text-muted)',
+                        fontFamily: 'var(--font-mono)',
+                      }}>
+                        {l.mbid ? 'enriquecido' : 'pendente'}
+                      </span>
+                    </span>
                     {l.pais && <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{l.pais}</span>}
                     {l.lastfm_listeners && (
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>

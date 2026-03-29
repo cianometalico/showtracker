@@ -95,7 +95,7 @@ export default async function PublicosPage() {
                   height: '100%', boxSizing: 'border-box',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-                    <span style={{ fontSize: '1.05rem', fontWeight: 400, color: cor, letterSpacing: '-0.01em', fontFamily: 'var(--font-serif)' }}>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 400, color: cor, letterSpacing: '0.04em', fontFamily: 'var(--font-serif)' }}>
                       {n.nome}
                     </span>
                     <span style={{ fontSize: '0.68rem', color: dimText }}>

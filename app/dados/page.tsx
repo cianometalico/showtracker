@@ -41,13 +41,13 @@ export default function DadosPage() {
           fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500,
           letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text)', margin: 0,
         }}>
-          ⊞ dados
+          dados
         </h1>
       </div>
 
       {/* Enriquecer em massa */}
       <section style={{ marginBottom: '2rem' }}>
-        <p className="section-label">⚗̧ enriquecer em massa</p>
+        <p className="section-label">enriquecer em massa</p>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.75rem' }}>
           Processa artistas sem MBID — busca MusicBrainz, Last.fm, Wikipedia, Setlist.fm
         </p>
@@ -77,7 +77,7 @@ export default function DadosPage() {
 
       {/* Importar shows */}
       <section style={{ marginBottom: '2rem' }}>
-        <p className="section-label">☷ importar shows</p>
+        <p className="section-label">importar shows</p>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
           em breve — importar histórico de shows via planilha CSV
         </p>
@@ -85,7 +85,7 @@ export default function DadosPage() {
 
       {/* Exportar */}
       <section style={{ marginBottom: '2rem' }}>
-        <p className="section-label">⊟ exportar</p>
+        <p className="section-label">exportar</p>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
           em breve — exportar shows, artistas e estoque em CSV
         </p>

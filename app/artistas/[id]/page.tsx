@@ -73,7 +73,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
     .select('nicho_id, score')
     .eq('artist_id', id)
 
-  const linkedNichoIds = (artistNichos ?? []).map((an: any) => an.nicho_id)
+  const linkedNichos = (artistNichos ?? []).map((an: any) => ({ id: an.nicho_id, score: an.score ?? 5 }))
 
   // Nicho principal = maior score
   const primaryNichoId = (artistNichos ?? []).length > 0
@@ -132,7 +132,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
       <NichoManager
         artistId={id}
         allNichos={nichosForManager}
-        linkedNichoIds={linkedNichoIds}
+        linkedNichos={linkedNichos}
       />
 
       {/* Overrides */}
@@ -167,7 +167,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         <div style={{ marginBottom: '1.5rem' }}>
           {tags_editorial.length > 0 && (
             <div style={{ marginBottom: '0.75rem' }}>
-              <p className="section-label">MusicBrainz</p>
+              <p className="section-label" style={{ color: 'var(--amber)' }}>MusicBrainz</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                 {tags_editorial.map((t: string, i: number) => (
                   <span key={i} style={{
@@ -180,7 +180,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           )}
           {tags_behavioral.length > 0 && (
             <div>
-              <p className="section-label">Last.fm</p>
+              <p className="section-label" style={{ color: 'var(--amber)' }}>Last.fm</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                 {tags_behavioral.map((t: any, i: number) => (
                   <span key={i} style={{

@@ -127,15 +127,17 @@
   text-transform: uppercase;
   color: var(--text);
 }
-.nav-glyph {
-  font-size: 13px;
-  width: 22px;
-  text-align: center;
-  color: var(--text-muted);
+.nav-indicator {
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  background: transparent;
+  margin-right: 8px;
+  vertical-align: middle;
   flex-shrink: 0;
 }
 .nav-link.active { color: var(--text); }
-.nav-link.active .nav-glyph { color: var(--cyan); }
+.nav-link.active .nav-indicator { background: var(--cyan); }
 .font-mono   { font-family: var(--font-mono); }
 .font-serif  { font-family: var(--font-serif); }
 .font-display { font-family: var(--font-serif); } /* compat alias */

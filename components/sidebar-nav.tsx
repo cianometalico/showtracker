@@ -1,34 +1,42 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export function SidebarNav() {
+  const pathname = usePathname()
+
+  function navClass(href: string) {
+    const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
+    return `nav-link${active ? ' active' : ''}`
+  }
+
   return (
     <nav className="sidebar-nav">
-      <Link href="/" className="nav-link">
-        <span className="nav-glyph">☰</span> home
+      <Link href="/" className={navClass('/')}>
+        <span className="nav-indicator" aria-hidden="true" /> home
       </Link>
       <div className="sidebar-separator" />
-      <Link href="/shows" className="nav-link">
-        <span className="nav-glyph">☷</span> shows
+      <Link href="/shows" className={navClass('/shows')}>
+        <span className="nav-indicator" aria-hidden="true" /> shows
       </Link>
       <div className="sidebar-separator" />
-      <Link href="/artistas" className="nav-link">
-        <span className="nav-glyph">☴</span> artistas
+      <Link href="/artistas" className={navClass('/artistas')}>
+        <span className="nav-indicator" aria-hidden="true" /> artistas
       </Link>
-      <Link href="/publicos" className="nav-link">
-        <span className="nav-glyph">☵</span> públicos
-      </Link>
-      <div className="sidebar-separator" />
-      <Link href="/locais" className="nav-link">
-        <span className="nav-glyph">☶</span> locais
-      </Link>
-      <Link href="/estoque" className="nav-link">
-        <span className="nav-glyph">☱</span> estoque
+      <Link href="/publicos" className={navClass('/publicos')}>
+        <span className="nav-indicator" aria-hidden="true" /> públicos
       </Link>
       <div className="sidebar-separator" />
-      <Link href="/dados" className="nav-link" style={{ opacity: 0.7 }}>
-        <span className="nav-glyph">⊞</span> dados
+      <Link href="/locais" className={navClass('/locais')}>
+        <span className="nav-indicator" aria-hidden="true" /> locais
+      </Link>
+      <Link href="/estoque" className={navClass('/estoque')}>
+        <span className="nav-indicator" aria-hidden="true" /> estoque
+      </Link>
+      <div className="sidebar-separator" />
+      <Link href="/dados" className={navClass('/dados')} style={{ opacity: 0.7 }}>
+        <span className="nav-indicator" aria-hidden="true" /> dados
       </Link>
     </nav>
   )

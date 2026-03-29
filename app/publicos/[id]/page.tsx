@@ -190,7 +190,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
         marginBottom: '1.5rem',
       }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: cor, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: cor, letterSpacing: '0.04em' }}>
             {nicho.nome}
           </h1>
           <span style={{ fontSize: '0.7rem', color: labelColor, display: 'flex', alignItems: 'center', gap: 2 }}>

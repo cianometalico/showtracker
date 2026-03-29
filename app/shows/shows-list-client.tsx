@@ -59,10 +59,10 @@ function todayMidnight() {
 type FilterKey = 'proximos' | 'agenda' | 'realizados' | 'legado'
 
 const FILTROS: { key: FilterKey; label: string }[] = [
-  { key: 'proximos',   label: '△ próximos' },
-  { key: 'agenda',     label: '☷ agenda' },
-  { key: 'realizados', label: '▽ realizados' },
-  { key: 'legado',     label: '⟁ legado' },
+  { key: 'proximos',   label: 'próximos' },
+  { key: 'agenda',     label: 'agenda' },
+  { key: 'realizados', label: 'realizados' },
+  { key: 'legado',     label: 'legado' },
 ]
 
 export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows: number }) {
@@ -169,14 +169,14 @@ function statusBadge(show: Show): { text: string; color: string } {
   const past = isPast(show.data)
   // Legado not yet confirmed
   if (show.legado && show.participou === null && past) {
-    return { text: '◇ confirmar', color: 'var(--amber)' }
+    return { text: 'confirmar', color: 'var(--amber)' }
   }
   if (show.legado) {
-    return { text: '⟁', color: 'var(--text-muted)' }
+    return { text: 'leg.', color: 'var(--text-muted)' }
   }
   // Future: no participou badge
   if (!past) {
-    return { text: '△', color: 'var(--text-dim)' }
+    return { text: '—', color: 'var(--text-dim)' }
   }
   if (show.resultado_geral) {
     return {
@@ -186,12 +186,12 @@ function statusBadge(show: Show): { text: string; color: string } {
   }
   // Past without confirmed participation
   if (show.participou === null) {
-    return { text: '◇ confirmar', color: 'var(--amber)' }
+    return { text: 'confirmar', color: 'var(--amber)' }
   }
   if (show.participou === false) {
-    return { text: '▽', color: 'var(--text-muted)' }
+    return { text: '—', color: 'var(--text-muted)' }
   }
-  return { text: '◇', color: 'var(--text-dim)' }
+  return { text: 'pend.', color: 'var(--text-dim)' }
 }
 
 function ShowRow({ show }: { show: Show }) {

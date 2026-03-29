@@ -153,7 +153,7 @@ function OharaSearch({ defaultExpanded = false }, ref) {
         color: 'var(--text-dim)', fontSize: '0.75rem',
         padding: '0.25rem 0', textAlign: 'left',
       }}>
-        <span style={{ marginRight: 6 }}>⊕</span> buscar artista
+        buscar artista
       </button>
     )
   }
@@ -248,6 +248,7 @@ function OharaSearch({ defaultExpanded = false }, ref) {
                   display: 'block', width: '100%', textAlign: 'left',
                   padding: '0.4rem 0.7rem', background: 'none', border: 'none',
                   borderBottom: '1px solid var(--border)', cursor: 'pointer',
+                  borderLeft: '2px solid var(--amber)',
                 }}>
                   <span style={{ fontSize: '0.825rem', color: 'var(--text)' }}>{r.nome}</span>
                   {(r.pais || r.tipo) && (
