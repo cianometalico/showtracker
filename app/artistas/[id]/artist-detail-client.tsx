@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { updateArtist, deleteArtist } from './actions'
+import { countryName } from '@/lib/countries'
+import { EnrichmentDot } from '@/components/enrichment-dot'
 
 type ArtistData = {
   id: string
@@ -64,7 +66,7 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
             <label style={labelStyle}>País (ISO){artist.mbid ? ' — somente leitura (vem do enrich)' : ''}</label>
             {artist.mbid ? (
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0, padding: '0.45rem 0.75rem', border: '1px solid var(--border)', borderRadius: 4, background: 'rgba(0,0,0,0.15)' }}>
-                {artist.pais ?? '—'}
+                {countryName(artist.pais)}
               </p>
             ) : (
               <input value={ePais} onChange={e => setEPais(e.target.value)} placeholder="BR, US, GB…" style={inputStyle} />
@@ -102,24 +104,13 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{artist.nome}</h1>
         <button onClick={startEdit} style={editBtnStyle}>editar</button>
       </div>
-      <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4 }}>
-        {[artist.pais, artist.lastfm_listeners ? artist.lastfm_listeners.toLocaleString('pt-BR') + ' ouvintes' : null]
-          .filter(Boolean).join(' · ') || '—'}
-      </p>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-        <span style={{
-          width: 6, height: 6, borderRadius: '50%',
-          background: artist.mbid ? 'var(--amber)' : 'var(--text-muted)',
-          flexShrink: 0,
-        }} />
-        <span style={{
-          fontSize: '0.7rem',
-          color: artist.mbid ? 'var(--amber)' : 'var(--text-muted)',
-          fontFamily: 'var(--font-mono)',
-        }}>
-          {artist.mbid ? 'enriquecido' : 'pendente'}
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <EnrichmentDot mbid={artist.mbid} />
+        <span>
+          {[artist.pais ? countryName(artist.pais) : null, artist.lastfm_listeners ? artist.lastfm_listeners.toLocaleString('pt-BR') + ' ouvintes' : null]
+            .filter(Boolean).join(' · ') || '—'}
         </span>
-      </span>
+      </p>
       {artist.mbid && (
         <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
           mbid: {artist.mbid}

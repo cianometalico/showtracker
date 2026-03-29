@@ -8,6 +8,8 @@ import {
 } from './actions'
 import type { UpdateShowInput } from './actions'
 import { isShowPast, getShowDisplayName } from '@/lib/show-utils'
+import { countryName } from '@/lib/countries'
+import { EnrichmentDot } from '@/components/enrichment-dot'
 import { ArtistPicker } from '@/components/artist-picker'
 import type { PickedArtist } from '@/components/artist-picker'
 
@@ -407,21 +409,8 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
                     <Link href={`/artistas/${l.artist_id}`} style={{ flex: 1, fontSize: '0.9rem', color: 'var(--text)', textDecoration: 'none' }}>
                       {l.nome}
                     </Link>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-                      <span style={{
-                        width: 6, height: 6, borderRadius: '50%',
-                        background: l.mbid ? 'var(--amber)' : 'var(--text-muted)',
-                        flexShrink: 0,
-                      }} />
-                      <span style={{
-                        fontSize: '0.7rem',
-                        color: l.mbid ? 'var(--amber)' : 'var(--text-muted)',
-                        fontFamily: 'var(--font-mono)',
-                      }}>
-                        {l.mbid ? 'enriquecido' : 'pendente'}
-                      </span>
-                    </span>
-                    {l.pais && <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{l.pais}</span>}
+                    <EnrichmentDot mbid={l.mbid} />
+                    {l.pais && <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{countryName(l.pais)}</span>}
                     {l.lastfm_listeners && (
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                         {l.lastfm_listeners.toLocaleString('pt-BR')}

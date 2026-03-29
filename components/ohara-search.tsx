@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { EnrichmentDot } from './enrichment-dot'
 
 type LocalArtist = {
   id: string
@@ -9,6 +10,7 @@ type LocalArtist = {
   pais: string | null
   tags_editorial: string[] | null
   lastfm_listeners: number | null
+  mbid?: string | null
 }
 type MBCandidate = {
   mbid: string; nome: string; pais: string | null
@@ -214,7 +216,10 @@ function OharaSearch({ defaultExpanded = false }, ref) {
                     padding: '0.4rem 0.7rem', background: 'none', border: 'none',
                     borderBottom: '1px solid var(--border)', cursor: 'pointer',
                   }}>
-                    <span style={{ fontSize: '0.825rem', color: 'var(--text)' }}>{a.nome}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <EnrichmentDot mbid={a.mbid} />
+                      <span style={{ fontSize: '0.825rem', color: 'var(--text)' }}>{a.nome}</span>
+                    </span>
                     {(a.pais || tag || ouvintes) && (
                       <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: 1 }}>
                         {[a.pais, tag, ouvintes ? `${ouvintes} ouvintes` : null].filter(Boolean).join(' · ')}

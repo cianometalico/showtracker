@@ -3,6 +3,8 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { removeAccents } from '@/lib/text-utils'
+import { countryName } from '@/lib/countries'
+import { EnrichmentDot } from '@/components/enrichment-dot'
 
 type Artist = {
   id: string
@@ -75,7 +77,6 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
             display: 'flex', alignItems: 'center', gap: '1rem',
             padding: '0.6rem 0.5rem',
             borderBottom: '1px solid var(--border)',
-            borderLeft: a.mbid ? '2px solid var(--amber)' : '2px solid transparent',
             background: a.mbid ? 'var(--surface-enriched)' : 'var(--surface-raw)',
             textDecoration: 'none',
           }}>
@@ -83,23 +84,10 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
               <span style={{ fontSize: '0.875rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {a.nome}
               </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-                <span style={{
-                  width: 6, height: 6, borderRadius: '50%',
-                  background: a.mbid ? 'var(--amber)' : 'var(--text-muted)',
-                  flexShrink: 0,
-                }} />
-                <span style={{
-                  fontSize: '0.7rem',
-                  color: a.mbid ? 'var(--amber)' : 'var(--text-muted)',
-                  fontFamily: 'var(--font-mono)',
-                }}>
-                  {a.mbid ? 'enriquecido' : 'pendente'}
-                </span>
-              </span>
+              <EnrichmentDot mbid={a.mbid} />
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0 }}>
-              {a.pais ?? '—'}
+              {countryName(a.pais)}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 120, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {a.top_tag ?? '—'}
