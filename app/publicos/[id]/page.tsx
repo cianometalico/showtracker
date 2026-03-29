@@ -108,7 +108,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
     if (!value) return <span style={{ fontSize: '0.75rem', color: labelColor }}>—</span>
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ fontSize: '0.85rem', color: valueColor, fontFamily: 'monospace', width: 20 }}>{value}</span>
+        <span style={{ fontSize: '0.85rem', color: valueColor, fontFamily: 'var(--font-mono)', width: 20 }}>{value}</span>
         <span style={{ display: 'flex', gap: 2 }}>
           {Array.from({ length: max }).map((_, i) => (
             <span key={i} style={{
@@ -190,7 +190,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
         marginBottom: '1.5rem',
       }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0, color: cor, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: cor, letterSpacing: '-0.02em' }}>
             {nicho.nome}
           </h1>
           <span style={{ fontSize: '0.7rem', color: labelColor, display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -325,5 +325,5 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
 const sectionLabel: React.CSSProperties = {
   fontSize: '0.62rem', color: 'rgba(255,255,255,0.4)',
   textTransform: 'uppercase', letterSpacing: '0.1em',
-  margin: '0 0 0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 6,
+  margin: '0 0 0.75rem',
 }

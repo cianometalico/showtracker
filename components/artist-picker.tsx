@@ -192,7 +192,7 @@ export function ArtistPicker({ selectedArtists, onArtistsChange }: ArtistPickerP
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '0.3rem 0', borderBottom: '1px solid var(--border)',
             }}>
-              <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: 'var(--text-muted)', width: 16, flexShrink: 0 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-muted)', width: 16, flexShrink: 0 }}>
                 {a.ordem}
               </span>
               <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)' }}>
@@ -311,7 +311,7 @@ export function ArtistPicker({ selectedArtists, onArtistsChange }: ArtistPickerP
 
           {/* Erro de enriquecimento */}
           {enrichError && (
-            <p style={{ fontSize: '0.8rem', color: 'var(--red)', marginTop: 6 }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--status-neg)', marginTop: 6 }}>
               erro: {enrichError}
             </p>
           )}

@@ -38,7 +38,7 @@ export default function DadosPage() {
 
       <div style={{ marginBottom: '1.5rem' }}>
         <h1 style={{
-          fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700,
+          fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500,
           letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text)', margin: 0,
         }}>
           ⊞ dados
@@ -66,12 +66,12 @@ export default function DadosPage() {
         </button>
 
         {enrichState === 'done' && enrichResult && (
-          <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-dim)', fontFamily: 'monospace' }}>
+          <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
             total: {enrichResult.total} | ok: {enrichResult.ok} | sem match: {enrichResult.skip} | erros: {enrichResult.fail}
           </p>
         )}
         {enrichState === 'error' && (
-          <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--red)' }}>{enrichError}</p>
+          <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--status-neg)' }}>{enrichError}</p>
         )}
       </section>
 

@@ -63,7 +63,7 @@ export default async function LocaisPage() {
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 130, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {v.bairro ? `${v.bairro} · ${v.cidade ?? ''}` : (v.cidade ?? '—')}
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0, textAlign: 'right', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
               {v.capacidade_praticavel ? v.capacidade_praticavel.toLocaleString('pt-BR') : '—'}
             </span>
             <span style={{ fontSize: '0.75rem', width: 60, flexShrink: 0, textAlign: 'center',
@@ -71,7 +71,7 @@ export default async function LocaisPage() {
             }}>
               {v.risco_fiscalizacao === 'high' ? 'Alto' : v.risco_fiscalizacao === 'medium' ? 'Médio' : v.risco_fiscalizacao === 'low' ? 'Baixo' : '—'}
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 50, flexShrink: 0, textAlign: 'right', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 50, flexShrink: 0, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
               {v.total_shows > 0 ? v.total_shows : '—'}
             </span>
           </Link>

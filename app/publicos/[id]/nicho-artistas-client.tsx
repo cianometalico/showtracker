@@ -135,7 +135,7 @@ export function NichoArtistasClient({
               </Link>
               {a.topTag && <span style={{ fontSize: '0.72rem', color: labelColor }}>{a.topTag}</span>}
               {a.lastfm_listeners != null && (
-                <span style={{ fontSize: '0.72rem', color: labelColor, fontFamily: 'monospace', width: 72, textAlign: 'right' }}>
+                <span style={{ fontSize: '0.72rem', color: labelColor, fontFamily: 'var(--font-mono)', width: 72, textAlign: 'right' }}>
                   {a.lastfm_listeners.toLocaleString('pt-BR')}
                 </span>
               )}
@@ -158,7 +158,7 @@ export function NichoArtistasClient({
                 />
               ) : (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <span style={{ fontSize: '0.75rem', color: labelColor, fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '0.75rem', color: labelColor, fontFamily: 'var(--font-mono)' }}>
                     {(a.score ?? 1).toFixed(1)}
                   </span>
                   <button
@@ -222,7 +222,7 @@ export function NichoArtistasClient({
                 <span style={{ flex: 1, fontSize: '0.85rem', color: valueColor }}>{r.nome}</span>
                 {r.pais && <span style={{ fontSize: '0.7rem', color: labelColor }}>{r.pais}</span>}
                 {r.lastfm_listeners != null && (
-                  <span style={{ fontSize: '0.7rem', color: labelColor, fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '0.7rem', color: labelColor, fontFamily: 'var(--font-mono)' }}>
                     {r.lastfm_listeners.toLocaleString('pt-BR')}
                   </span>
                 )}

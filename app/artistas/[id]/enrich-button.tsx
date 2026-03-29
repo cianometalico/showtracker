@@ -73,7 +73,7 @@ export function EnrichButton({ artistId, artistNome, artistMbid, ultimaAtualizac
         disabled={state === 'loading'}
         style={{
           display: 'inline-block', padding: '0.4rem 1rem',
-          fontSize: '0.8rem', background: 'var(--surface-2)',
+          fontSize: '0.8rem', background: 'var(--surface-raised)',
           color: 'var(--text-dim)', border: '1px solid var(--border)',
           borderRadius: 4, cursor: state === 'loading' ? 'default' : 'pointer',
           opacity: state === 'loading' ? 0.6 : 1,

@@ -73,7 +73,7 @@ export default async function GenerosPage() {
               {descritores.length > 0 && (
                 <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                   {descritores.map((d: string) => (
-                    <span key={d} style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 3, color: 'var(--text-dim)' }}>
+                    <span key={d} style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 3, color: 'var(--text-dim)' }}>
                       {d}
                     </span>
                   ))}
@@ -94,7 +94,7 @@ export default async function GenerosPage() {
                         <span style={{ flex: 1, fontSize: '0.85rem', color: 'var(--text)' }}>{a.nome}</span>
                         {topTag && <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{topTag}</span>}
                         {a.lastfm_listeners && (
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                             {a.lastfm_listeners.toLocaleString('pt-BR')}
                           </span>
                         )}

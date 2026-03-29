@@ -140,7 +140,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
                   <span style={{ flex: 1, fontSize: '0.9rem', color: 'rgba(255,255,255,0.85)' }}>{a.artist?.nome ?? '—'}</span>
                   {topTag && <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>{topTag}</span>}
                   {a.artist?.lastfm_listeners && (
-                    <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-mono)' }}>
                       {a.artist.lastfm_listeners.toLocaleString('pt-BR')}
                     </span>
                   )}

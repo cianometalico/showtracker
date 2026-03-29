@@ -4,6 +4,9 @@ Sistema operacional para vendas de camisetas estampadas em shows ao vivo.
 Vendedor ambulante com estamparia própria (tinta à base de água), São Paulo.
 Repositório: github.com/cianometalico/showtracker
 
+**Versão atual: v0.6.1** (2026-03-27)
+Próxima: v0.9.0 (UX/Layout Pass — ver ROADMAP v0.9.0 abaixo)
+
 ---
 
 ## STACK
@@ -24,10 +27,182 @@ Cursor corrompeu schema e criou duplicatas. Todo código via Claude.
 Não existe `artist_id` direto em `shows`. Sempre usar `show_artists`.
 
 ### Nunca hardcodar cores
-Usar variáveis CSS: `var(--nav-bg)`, `var(--surface)`, `var(--cyan)`, `var(--text)`, `var(--text-dim)`, `var(--text-muted)`, `var(--border)`, `var(--red)`, `var(--green)`, `var(--amber)`.
+Sempre variáveis CSS. Nunca valores hex diretos no código.
+Usar tokens semânticos (ver seção SISTEMA VISUAL v0.9.0).
 
 ### Caixa baixa nos nichos/públicos
-Toda a seção de Públicos usa caixa baixa.
+Toda a seção de Públicos usa caixa baixa (Instrument Serif lowercase).
+
+### Ler antes de tocar
+Nunca modificar arquivos sem ler o conteúdo real primeiro.
+
+### PowerShell: nunca &&
+Usar `;` ou linhas separadas para encadear comandos.
+
+---
+
+## SISTEMA VISUAL v0.9.0
+
+Conceito tripartido: **cristal luminoso sobre território escuro.**
+
+```
+.structurecore   cyan #6ec8d8   organização, labels, nav, estrutura
+.datacore        amber #e8b830  Ohara, enriquecimento, custódia do dado
+.bodycore        IBM Plex Mono  a grade/tela antes do conteúdo existir
+```
+
+### Tipografia
+
+Duas fontes. Nenhuma outra. Google Fonts, ambas free/open-source.
+
+```
+IBM Plex Mono      .bodycore — terminal, dados, labels, nav, venues
+                   Pesos: regular (400) + medium (500) apenas
+
+Instrument Serif   .datacore/.structurecore — conteúdo, nomes, nichos
+                   Pesos: regular (400) + italic
+```
+
+**Descontinuadas:** Cinzel, JetBrains Mono, system-ui como escolha intencional.
+
+#### Gramática tipográfica
+
+```
+IBM PLEX MONO CAPS    labels de campo, categorias, nav, venues
+                      cor: cyan quando .structurecore
+                      ex: ARTISTA · LISTENERS · RISCO · CARIOCA CLUB
+
+IBM Plex Mono lower   números, dados técnicos, timestamps, hex, ids
+                      cor: conforme contexto (cyan / amber / status)
+                      ex: 482.391 · 2024-03-15
+
+Instrument Serif      conteúdo, descrições, nomes próprios
+                      lowercase: nichos, tags, estados textuais
+                      Title Case: nomes próprios (artistas, eventos)
+                      cor: text-primary padrão, amber se dado Ohara
+                      ex: post-hc millenium · Refused · Bangers Open Air
+```
+
+#### Regras de case
+
+```
+SEMPRE CAPS MONO:      labels de campo, nav, categorias, venues
+sempre lower serif:    nichos, descrições, tags, estados textuais
+Title Case serif:      nomes próprios (artistas, eventos)
+lower mono:            números, dados técnicos, timestamps
+```
+
+### Paleta e tokens CSS
+
+#### Cores cerne
+
+```css
+--cyan:    #6ec8d8    /* .structurecore — estrutura, nav, destaque primário */
+--amber:   #e8b830    /* .datacore — Ohara, dado enriquecido, escasso */
+```
+
+#### Paleta de status (gradiente contínuo)
+
+Não são categorias fixas — são posições num espectro.
+
+```css
+--status-pos:    #6e90d8    /* steel blue — confirmação, resultado bom */
+--status-neut+:  #7a8a9e    /* cinza-azulado — tendência positiva */
+--status-neut:   #8a8886    /* cinza quente — sem carga, observando */
+--status-neut-:  #9e807a    /* cinza-avermelhado — atenção */
+--status-neg:    #db291d    /* tomato — urgente, risco alto */
+```
+
+Campos que usam paleta de status: `resultado_geral`, `risco_fiscalizacao`,
+`underground_score`, qualquer campo que gradue de bom para ruim.
+
+**Descontinuados:** lime `#a0e650`, red antigo `#e85050`.
+
+#### Texto
+
+```css
+--text-primary:  ~#E8E4E0    /* soft white — headings, dados primários */
+--text-dim:      ~#9A9890    /* metadados, timestamps, secundário */
+--text-muted:    ~#6E6C64    /* disponível mas não urgente */
+```
+
+#### Fundos
+
+```css
+--nav-bg:        #080b10    /* quase preto */
+--content-bg:    #0c1018    /* ligeiramente mais claro */
+```
+
+#### Tokens semânticos (usar estes, não as cores brutas)
+
+```css
+--accent-structure:  var(--cyan)
+--accent-data:       var(--amber)
+
+--surface-nav:       baseado em --nav-bg
+--surface-base:      fundo principal de conteúdo
+--surface-raised:    card / bloco elevado
+--surface-enriched:  dado convergido (mais luminoso) — artista com mbid
+--surface-raw:       dado cru / pendente — artista sem mbid
+```
+
+### Superfícies
+
+Dois eixos: enriquecimento (`surface-raw` → `surface-enriched`) e temporalidade.
+`surface-enriched`: artista com mbid + listeners + nicho — borda amber 1px.
+`surface-raw`: artista sem mbid — luminância reduzida, indicador pendente visível.
+Hierarquia por luminância, não por bordas. Remover bordas desnecessárias.
+
+### nichoColor()
+
+Localização: `lib/nicho-color.ts` — `nichoColor(nome, score)` e `nichoColorAlpha()`
+Hue por golden ratio (determinístico pelo nome), lightness 55–80% por `underground_score`.
+
+Propagação descendente:
+```
+nicho (cor plena) → artista (alpha × score/10) → show (tint sutil) → derivados (dot/borda 1px)
+```
+
+Usar apenas `nicho.tags` para matching — nunca `descritores` (falsos positivos).
+
+### Ohara visual
+
+Tudo que vem do pipeline Ohara: amber na fonte ou borda `1px var(--amber)`.
+Página `/ohara`: amber como ambiente visual dominante.
+Indicador inline: enriquecido vs pendente — sempre com label, nunca glifo isolado.
+
+### Indicadores visuais
+
+**Descontinuados:**
+- Glifos I Ching no nav — responsabilidade transferida para .bodycore
+- Glifos funcionais (⊙ ◇ ∴ ◉ ⊘ ⟁ ✦ ⊕ ☾ ⏣ ⦿) — redundância semiótica
+
+**Princípio:** cor + forma + label sempre juntos. Nunca glifo sem label.
+
+#### Padrão metadata pipe
+
+```
+[Instrument Serif, nome/título]
+[IBM PLEX MONO, campo1] | [campo2] | [campo3]
+
+ex: Refused
+    SUÉCIA | enriquecido | mbid a5f3c8e1 | 482.391 listeners
+
+ex: Carioca Club — 2024-04-12
+    LIBERDADE | 1.200 cap | risco high | bem vendido | participou
+```
+
+---
+
+## SEGURANÇA — SUPPLY CHAIN & SECRETS
+
+- Cada dependency responde: "seria 2x mais difícil escrever isso em TS puro?"
+- Foco em packages que fazem network calls ou processam credenciais
+- Supabase anon key é pública (`NEXT_PUBLIC_`), RLS é a segurança real. Service keys nunca em client
+- API keys (Last.fm, OpenWeather, etc): apenas `.env.local`, nunca em commit
+- Nunca logar valores completos de env vars em console ou responses de API
+- `npm audit` com fail-on-high no pipeline. Limitar deploy ao admin no Vercel
+- v2.0+: Supabase Auth built-in, nunca armazenar senhas em texto plano
 
 ---
 
@@ -39,12 +214,14 @@ artists: id, nome, pais, mbid, genre_id (FK→genres), tags_editorial jsonb,
   ultima_atualizacao
 
 venues: id, nome, cidade, bairro (nullable), lat, lng, capacidade_praticavel,
-  tipo_default, zona_risco bool, risco_fiscalizacao (low|medium|high)
+  tipo_default, zona_risco bool, risco_fiscalizacao (low|medium|high),
+  endereco text, subprefeitura_id (FK→subprefeituras)
 
 shows: id, venue_id, data, nome_evento (nullable), status_ingresso
-  (sold out|bem vendido|mal vendido|null=sem informação), publico_estimado, participou bool,
-  resultado_geral, concorrencia, clima_estimado, observacoes, singularidades jsonb,
-  source_url, legado bool, pecas_levadas int, pecas_vendidas int,
+  (sold out|bem vendido|mal vendido|null=sem informação), publico_estimado,
+  participou bool, resultado_geral, concorrencia, clima_estimado, observacoes,
+  singularidades jsonb, source_url, legado bool,
+  pecas_levadas int, pecas_vendidas int,
   fiscalizacao_override (string|null), publico_estimado_manual (bool|null),
   tipo_venue_override (string|null)
 
@@ -64,9 +241,12 @@ designs: id, nome, artist_id (FK→artists), descricao, created_at, ativo bool
 stock_movements: id, design_id (FK→designs), tipo (produzido|levado|vendido|perdido),
   quantidade int, show_id (FK→shows, nullable), created_at, observacoes
 
--- VIEW: design_stock
+-- VIEW
 design_stock: design_id, nome, artist_id, ativo,
   total_produzido, total_vendido, total_perdido, saldo_atual
+
+-- TABELA
+subprefeituras: id, nome, zona, operacao_delegada, perfil, risco_base, notas, fonte_legal
 ```
 
 ### Status ingresso (valores reais no banco)
@@ -84,61 +264,64 @@ Calculado por: `capacidade_praticavel × fator`
 
 ```
 app/
-  page.tsx                          ← Home: painel operacional (stats 3 cards + OharaSearch + calendário mensal + pendências + ações)
-  home-calendar.tsx                 ← HomeCalendar client component (grid 7×N, ←/→ via router.push ?mes=YYYY-MM)
-  layout.tsx                        ← Nav hierárquico com separadores
-  globals.css                       ← Tema escuro
+  page.tsx                          ← Home: stats 3 cards + OharaSearch + calendário mensal + pendências + ações
+  home-calendar.tsx                 ← HomeCalendar client (grid 7×N, ←/→ via ?mes=YYYY-MM)
+  layout.tsx                        ← Nav + OharaSearch no header
+  globals.css                       ← Tema escuro + tokens CSS
   agenda/
     page.tsx + agenda-client.tsx    ← Agenda (calendário)
   generos/
-    page.tsx                        ← Lista de gêneros (separada de /publicos/generos/[id])
+    page.tsx                        ← Lista de gêneros
   shows/
     page.tsx + shows-list-client.tsx ← Lista com filtros + busca
     new/page.tsx + new-show-client.tsx + actions.ts ← Múltiplas datas: cada DateEntry gera um show
-    [id]/page.tsx                   ← Detalhe com clima, lineup, venue, estoque
+    [id]/page.tsx                   ← Detalhe: clima, lineup, venue, estoque
     [id]/show-detail-client.tsx     ← Edição inline (toggle read/edit + seção resultado)
-    [id]/show-stock-section.tsx     ← Seção peças por design (client, renders quando participou=true ou há movements)
+    [id]/show-stock-section.tsx     ← Seção peças por design (client)
     [id]/show-history-block.tsx     ← Histórico Setlist.fm
     [id]/weather-widget.tsx         ← Clima via OpenWeather (≤5 dias)
-    [id]/actions.ts                 ← updateShowInline, updateResultado, updateParticipou, deleteShow, searchVenues, addShowMovement
+    [id]/actions.ts                 ← updateShowInline, updateResultado, updateParticipou,
+                                       deleteShow, searchVenues, addShowMovement
   artistas/
-    page.tsx + artistas-list-client.tsx ← Lista com busca + botão "+ novo artista" (abre OharaSearch via ?abrir=artista)
-    [id]/page.tsx                   ← Perfil + nichos + tags + designs + shows
-    [id]/artist-detail-client.tsx   ← Edição inline (nome, país read-only se tem mbid) + exclusão com verificação de deps
+    page.tsx + artistas-list-client.tsx ← Lista + botão "+ novo artista" (?abrir=artista)
+    [id]/page.tsx                   ← Perfil: nichos + tags + designs + shows
+    [id]/artist-detail-client.tsx   ← Edição inline + exclusão com verificação de deps
     [id]/nicho-manager.tsx          ← Vinculação artista↔nicho
     [id]/actions.ts                 ← linkNicho, unlinkNicho, updateArtist, deleteArtist
   estoque/
     page.tsx + estoque-list-client.tsx  ← Lista de designs com saldo (view design_stock)
-    new/page.tsx + new-design-client.tsx + actions.ts ← Criar design
-    [id]/page.tsx                   ← Detalhe do design (server: saldo + movements + shows)
+    new/page.tsx + new-design-client.tsx + actions.ts
+    [id]/page.tsx                   ← Detalhe: saldo + movements + shows
     [id]/design-detail-client.tsx   ← Edição inline + form movimentação + histórico
     [id]/actions.ts                 ← updateDesign, addMovement, deleteMovement, deleteDesign
   locais/
-    page.tsx                        ← Lista com capacidade
+    page.tsx                        ← Lista com capacidade + risco
     [id]/page.tsx                   ← Detalhe + histórico
     [id]/venue-detail-client.tsx    ← Edição inline (toggle read/edit)
     [id]/actions.ts                 ← updateVenueInline, deleteVenue
   publicos/
-    page.tsx                        ← Nichos + gêneros + sem nicho
+    page.tsx                        ← Nichos + gêneros como faceta + sem nicho
     [id]/page.tsx                   ← Detalhe do nicho (4 níveis)
     generos/[id]/page.tsx           ← Detalhe do gênero
-  ohara/page.tsx                    ← Enriquecimento de artistas (rota existe mas link removido da nav)
+  ohara/page.tsx                    ← Enriquecimento (link removido da nav, rota existe)
+
 components/
-  artist-picker.tsx               ← ArtistPicker (3 fases: local → MusicBrainz → enrich+save)
-  ohara-search.tsx                ← OharaSearch (busca local → MB → enrich+navigate; auto-abre via ?abrir=artista; no header do layout)
-  api/
-    weather/route.ts                ← OpenWeather 5 dias
-    enrich/route.ts                 ← Enriquecimento individual
-    enrich-all/route.ts             ← Enriquecimento em massa (bootstrap)
-    artists/route.ts                ← GET ?search= (busca local, limit 8) + POST com dedup por mbid→nome
-    artist-shows/route.ts           ← Shows por artista
-    link-nichos/route.ts            ← Auto-link artista↔nicho por tags
-    scrape/route.ts                 ← Scraping auxiliar
-    musicbrainz/route.ts
-    lastfm/route.ts
-    wikipedia/route.ts
-    discogs/route.ts
-    setlistfm/route.ts
+  artist-picker.tsx                 ← ArtistPicker (3 fases: local → MB → enrich+save)
+  ohara-search.tsx                  ← OharaSearch (busca → navegação; auto-abre via ?abrir=artista)
+
+api/
+  weather/route.ts
+  enrich/route.ts                   ← Enriquecimento individual
+  enrich-all/route.ts               ← Enriquecimento em massa (bootstrap)
+  artists/route.ts                  ← GET ?search= (busca local, limit 8) + POST dedup mbid→nome
+  artist-shows/route.ts
+  link-nichos/route.ts              ← Auto-link artista↔nicho por tags
+  scrape/route.ts
+  musicbrainz/route.ts
+  lastfm/route.ts
+  wikipedia/route.ts
+  discogs/route.ts
+  setlistfm/route.ts
 ```
 
 ---
@@ -148,13 +331,13 @@ components/
 ```
 lib/
   nicho-color.ts    ← nichoColor(nome, score) e nichoColorAlpha()
-                       hue golden ratio, lightness 55-80% por underground_score
   show-utils.ts     ← isShowPast, participacaoLabel, getShowDisplayName
   text-utils.ts     ← removeAccents (normalização NFD para busca accent-insensitive)
+  utils.ts          ← getNomeEvento, formatDataShow, corResultado,
+                       labelStatusIngresso, labelResultado
   db/
     shows.ts        ← getShows, getShow, createShow, updateShow, getShowsInRange
     artists.ts      ← getArtists, getArtist, upsertArtist, updateArtist
-  utils.ts          ← getNomeEvento, formatDataShow, corResultado, labelStatusIngresso, labelResultado
 
 types/
   database.ts       ← tipos gerados pelo Supabase CLI
@@ -177,18 +360,17 @@ Pipeline: MusicBrainz (mbid) → Last.fm (listeners, tags) → Wikipedia → Set
 
 ## NICHOS
 
-Clusters manuais de público com:
+Clusters manuais de público. Caixa baixa sempre.
+Lista canônica: consultar banco (tabela `nichos`) — não documentar aqui para não desatualizar.
+
+Estrutura:
 - `corporalidade`: faixa etária, estética, geração
 - `mentalidade`: valores, comportamento de compra, concorrência típica
-- `underground_score` 1-10: escuro=underground, claro=mainstream
+- `underground_score` 1–10: 1=underground, 10=mainstream
 - Cor gerada automaticamente por `nichoColor()` — determinístico pelo nome
 
-Nichos existentes:
-- **post-hc millenium** (score=2) — Refused, ATDI, Fall of Troy
-- **hip-hop gen z** (score=6) — Kendrick, Tyler, BK
-
-Link artista↔nicho: manual via página do artista (NichoManager)
-Auto-link via `/api/link-nichos` (bootstrap, usa apenas nicho.tags não descritores)
+Link artista↔nicho: manual via NichoManager. Auto-link via `/api/link-nichos` é só bootstrap.
+Matching usa apenas `nicho.tags` — nunca `descritores`.
 
 ---
 
@@ -198,23 +380,23 @@ Auto-link via `/api/link-nichos` (bootstrap, usa apenas nicho.tags não descrito
 Campos: lat, lng, capacidade_praticavel, tipo_default, bairro, endereco,
 subprefeitura_id (FK→subprefeituras), risco_fiscalizacao (low|medium|high).
 
-Subprefeituras mapeadas (tabela subprefeituras):
+Subprefeituras mapeadas:
 Lapa (O) · Pinheiros (O) · Sé (C) · Vila Mariana (S) ·
 Butantã (O) · Santo Amaro (S) · Santana/Tucuruvi (N) · Mooca (L)
 
 Lógica de risco (empírica, não administrativa):
-- GCM + Rapa = perigo real
-- PM = ordem geral, não fiscal de ambulante
+- GCM + Rapa = perigo real. PM = ordem geral, não fiscal de ambulante
 - Exposição física na via pública > jurisdição administrativa
 - Grande porte (>30k) atrai operação especial independente da subpref
 
-Venues por risco:
-high   → Morumbi, Interlagos, Ibirapuera, Vibra SP
-medium → Allianz, Anhembi, Unimed, Memorial AL, Madame Sata,
-          Teatro Liberdade, Suhai, Komplexo Tempo
-low    → Audio, Burning Bar, Carioca Club, Rockambole, Cine Joia,
-          Hangar 110, Usine, Fabrique, Studio Stage, Terra SP,
-          Tokio Marine Hall, Vip Station
+```
+high    → Morumbi, Interlagos, Ibirapuera, Vibra SP
+medium  → Allianz, Anhembi, Unimed, Memorial AL, Madame Sata,
+           Teatro Liberdade, Suhai, Komplexo Tempo
+low     → Audio, Burning Bar, Carioca Club, Rockambole, Cine Joia,
+           Hangar 110, Usine, Fabrique, Studio Stage, Terra SP,
+           Tokio Marine Hall, Vip Station
+```
 
 ---
 
@@ -231,37 +413,101 @@ OPENWEATHER_API_KEY=...
 
 ---
 
-## DECISÕES DE DESIGN
+## DECISÕES DE IMPLEMENTAÇÃO
 
-- Inferência removida na v0.1.0 — código deletado na auditoria. ML planejado para fase 3 (ver ROADMAP.md)
-- Gênero alimentado pelo ohara (tags MB + Last.fm), não campo manual
-- Nichos são curadoria manual — auto-link é apenas sugestão inicial
-- Legado = shows importados da planilha (campo legado=true, não editável pelo usuário). Todos os outros campos de um show legado SÃO editáveis normalmente.
-- `risco_fiscalizacao` é o único campo de risco do venue (zona_risco ignorado na UI)
-- **v0.4.0**: Edição inline substituiu rotas `/editar` — toggle read/edit no próprio detalhe; `startEdit()` ressincroniza state dos props antes de abrir o modo edição para evitar stale values
-- **v0.4.0**: `ArtistPicker` (3 fases): busca local (300ms debounce) → MusicBrainz (500ms debounce) → enrich+save via `/api/enrich` + `/api/artists`. Integrado em `shows/new` e `show-detail-client`. Falta integrar na página do artista (ohara inline pendente).
-- **v0.4.0**: Upsert de artistas do show é atômico — `updateShowInline` faz delete+insert de todos os `show_artists` quando o parâmetro `artistas[]` é passado. Não há mais operações por peça (add/remove/reorder individuais).
-- **v0.4.0**: `faz_estampa` agora editável via ArtistPicker (checkbox na lista de selecionados)
-- **v0.4.x**: `participou` é campo editável — não calculado automaticamente. Toggle always-visible na página de detalhe (`updateParticipou`). Criação: default inteligente (passado=true, futuro=false), mas editável antes de salvar.
-- **v0.4.x**: `nome_evento` é opcional; exibição usa `getShowDisplayName(nome_evento, artistas)` → fallback `artistas.join(' + ')`. Campo no form tem aparência secundária com placeholder explicativo.
-- **v0.4.x**: `status_ingresso` aceita null (="sem informação"). Quando null, `publico_estimado` é zerado no update.
-- **v0.4.x**: `clima_estimado` NÃO é editável pela UI (campo removido do form). Apenas exibido pelo weather-widget quando há previsão disponível.
-- **v0.4.x**: Buscas accent-insensitive — server-side via RPCs `search_artists` / `search_venues` (extensão `unaccent`); client-side via `removeAccents()` em `lib/text-utils.ts`.
-- **v0.4.x**: venues têm campo `bairro` (text, nullable). Exibido como "Bairro · Cidade" no detalhe do venue e no detalhe do show.
-- **v0.5.0**: Múltiplas datas no form de novo show — `dates: DateEntry[]`, cada entry tem `data` + `artistas` próprios. `createShow` cria um show por entry, redireciona pro primeiro. Campos globais: nome_evento, venue, status_ingresso, concorrencia, source_url, observacoes.
-- **v0.5.0**: `stock_movements` log append-only — `quantidade` sempre positivo, `tipo` determina entrada/saída. Saldo via view `design_stock`. Validação de saldo negativo antes de inserir `vendido`/`perdido`.
-- **v0.5.0**: Relação movements ↔ shows.pecas_levadas/vendidas — os dois caminhos coexistem. Se há movements, exibir breakdown por design E campos manuais. Não sobrescrever automaticamente.
-- **v0.5.0**: Seção estoque no show só aparece se `participou=true` OU já há movements vinculados. `ShowStockSection` é client component renderizado diretamente do `page.tsx` do show.
-- **v0.5.0**: RPC `search_designs` usa `unaccent` — mesmo padrão de `search_artists`/`search_venues`.
-- **v0.6.0**: Home é painel operacional — stats + OharaSearch expandido + calendário 10+3 dias (horizontal scroll, passados só se têm shows sem resultado) + pendências (3 grupos: sem resultado, participação indefinida, designs sem estoque) + ações rápidas.
-- **v0.6.0**: `OharaSearch` (components/ohara-search.tsx) — busca → navegação (diferente do ArtistPicker que é busca → seleção). Click outside fecha; Escape fecha. Enriquece via `/api/enrich` + `/api/artists` e navega para `/artistas/[id]`.
-- **v0.6.0 patch**: OharaSearch movido para o header do `main-content` (layout.tsx), visível em todas as páginas. Removido da sidebar. Auto-abre via `?abrir=artista` na URL (usa useSearchParams + router.replace para limpar o param). Botão "+ novo artista" na home e na lista de artistas navega para `?abrir=artista`.
-- **v0.6.0 patch**: OharaSearch dropdown de resultados locais exibe: nome, país, primeira tag editorial, ouvintes last.fm formatado. Candidatos MB: nome, país, tipo, disambiguation.
-- **v0.6.0**: Labels pt-BR em todo o app — "Venue" → "local", "Buscar..." → "buscar...", "Listeners" → "ouvintes", "+ Novo show" → "+ novo show", "Buscar venue..." → "buscar local...", "Sold Out" (legenda agenda) → "esgotado".
-- **v0.6.0 patch**: Home stats: 3 cards (hoje, este mês, acervo) — removido "pendentes". Calendário: grid mensal 7×N (seg-dom, pt-BR), navegação ←/→ via `?mes=YYYY-MM` searchParam. `app/home-calendar.tsx` é o client component do grid. `page.tsx` aceita `searchParams.mes`, busca shows do mês inteiro (primeiroDia–ultimoDia), constrói `showsByDate` pré-computado e passa para `HomeCalendar`.
+- Inferência removida na v0.1.0 — código deletado. ML planejado para v2.0+
+- Gênero alimentado pelo Ohara (tags MB + Last.fm), não campo manual
+- Nichos são curadoria manual — auto-link é sugestão inicial
+- Legado = shows importados (`legado=true`, não editável). Demais campos editáveis normalmente
+- `risco_fiscalizacao` é o único campo de risco ativo na UI (`zona_risco` ignorado)
+- Não implementar multi-user antes de fechar fase 2 — não hardcodar lógica single-user
+- Vercel vs localhost: investigar pré-v1.0
+- Modelo de trabalho: Opus (decisões) → Sonnet (instruções) → Claude Code (execução) → Bruno (testes)
+
+### v0.4.0
+- Edição inline substituiu rotas `/editar` — toggle read/edit no próprio detalhe; `startEdit()` ressincroniza state antes de abrir para evitar stale values
+- `ArtistPicker` (3 fases): busca local (300ms debounce) → MusicBrainz (500ms debounce) → enrich+save via `/api/enrich` + `/api/artists`
+- Upsert de artistas do show é atômico — `updateShowInline` faz delete+insert de todos os `show_artists` quando `artistas[]` é passado
+- `faz_estampa` editável via ArtistPicker (checkbox na lista de selecionados)
+
+### v0.4.x
+- `participou` é campo editável — não calculado automaticamente. Toggle always-visible. Default inteligente na criação (passado=true, futuro=false)
+- `nome_evento` opcional — exibição via `getShowDisplayName(nome_evento, artistas)` → fallback `artistas.join(' + ')`
+- `status_ingresso` aceita null (="sem informação") → `publico_estimado` zerado
+- `clima_estimado` não editável pela UI — apenas exibido pelo weather-widget
+- Buscas accent-insensitive: server via RPCs `search_artists`/`search_venues` (unaccent); client via `removeAccents()`
+- venues têm `bairro` (text, nullable) — exibido como "Bairro · Cidade"
+
+### v0.5.0
+- Múltiplas datas no form de novo show — `dates: DateEntry[]`, cada entry tem `data` + `artistas` próprios
+- `stock_movements` log append-only — `quantidade` sempre positivo, `tipo` determina entrada/saída. Saldo via view `design_stock`. Validação de saldo negativo antes de `vendido`/`perdido`
+- Seção estoque no show: só aparece se `participou=true` OU há movements vinculados
+- RPC `search_designs` usa `unaccent`
+
+### v0.6.0
+- Home é painel operacional — stats + OharaSearch + calendário mensal + pendências + ações rápidas
+- `OharaSearch`: busca → navegação (≠ ArtistPicker que é busca → seleção). No header do layout, visível em todas as páginas. Auto-abre via `?abrir=artista`
+- Labels pt-BR em todo o app
+- Calendário: grid mensal 7×N (seg-dom, pt-BR), navegação via `?mes=YYYY-MM`
 
 ---
 
-## VERSÃO
+## ROADMAP v0.9.0
 
-**v0.6.1** (2026-03-27) — CRUD artistas, OharaSearch no header, busca enriquecida, pais read-only com mbid
+Implementação em 4 fases. Não pular — cada uma depende da anterior.
+
+```
+FASE A — fundação visual (não toca layout)
+  1. Paleta + tokens CSS
+  2. Tipografia (IBM Plex Mono + Instrument Serif)
+  3. Superfícies
+  → Bruno testa no browser. Ajustes antes de continuar.
+
+FASE B — indicadores (depende de A)
+  4. Dissolver glifos I Ching e funcionais, criar indicadores .bodycore
+  5. nichoColor() revisão e propagação descendente
+  6. Ohara visual (amber ambiente)
+  → Bruno testa cada página.
+
+FASE C — layout (depende de A+B)
+  7. Show detalhe: venue ∥ lineup, header pipe
+  8. Artista detalhe: nichos ∥ tags, header pipe
+  9. Listas reestruturadas (shows, artistas, locais, públicos)
+  10. Nav: formato + labels MONO CAPS
+  → v0.9.0 pronta para commit.
+
+FASE D — extras (se couber)
+  11. Metadata pipe em todas as páginas
+  12. Loading mínimo (.bodycore)
+```
+
+**Adiado para v1.0:** logo dodecaedro, Braille expandido, Ohara inline, Home completa.
+**Adiado para v2.0+:** multi-user (Auth + RLS), ML regressão, RPG UI, mobile suporte completo.
+
+### Pretext (text layout engine)
+Implementar quando: histórico 500+ shows, ou públicos 50+ entradas, ou reflow >100ms/frame.
+Hoje: ~200 shows, Tailwind resolve. Não implementar antes — premature optimization.
+
+---
+
+## FASE 2 — PENDENTE
+
+### 1. Ohara inline na página do artista
+Hoje: botão redireciona para `/ohara?prefill=nome`.
+Objetivo: painel embutido. Requer transformar em client ou componente separado.
+
+### 2. Setlist.fm na página do show
+Rota `/api/setlistfm` existe. Falta exibir.
+
+### 3. Múltiplas datas por evento
+Solução futura: tabela `show_dates`. Não implementar antes de 5+ casos reais.
+
+### 4. Histórico anterior ao app
+Gerar CSV, importar com `legado=true`.
+
+### 5. ML fase 3
+Regressão com scikit-learn quando ~30 shows tiverem `resultado_geral` preenchido.
+Features: listeners, status_ingresso, capacidade, concorrencia, underground_score.
+
+### 6. Songkick API
+Aguardando aprovação.

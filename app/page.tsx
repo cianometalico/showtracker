@@ -147,7 +147,7 @@ export default async function HomePage({
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <h1 style={{
-          fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700,
+          fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500,
           letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text)', margin: 0,
         }}>
           ☰ painel
@@ -197,7 +197,7 @@ export default async function HomePage({
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '7px 0', borderBottom: '1px solid var(--border)',
                 }}>
-                  <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)', flexShrink: 0, minWidth: 36 }}>
+                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', flexShrink: 0, minWidth: 36 }}>
                     {formatDataMono(show.data)}
                   </span>
                   <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -229,7 +229,7 @@ export default async function HomePage({
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '7px 0', borderBottom: '1px solid var(--border)',
                 }}>
-                  <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)', flexShrink: 0, minWidth: 36 }}>
+                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', flexShrink: 0, minWidth: 36 }}>
                     {formatDataMono(show.data)}
                   </span>
                   <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -266,7 +266,7 @@ export default async function HomePage({
                     <span style={{ flex: 1, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {d.nome}{artistNome ? ` · ${artistNome}` : ''}
                     </span>
-                    <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--amber)', flexShrink: 0 }}>
+                    <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--amber)', flexShrink: 0 }}>
                       {d.saldo_atual ?? 0}
                     </span>
                     <Link href={`/estoque/${d.design_id}`} style={{ fontSize: '11px', color: 'var(--cyan)', textDecoration: 'none', flexShrink: 0 }}>

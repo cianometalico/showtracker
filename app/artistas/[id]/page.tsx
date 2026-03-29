@@ -171,8 +171,8 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                 {tags_editorial.map((t: string, i: number) => (
                   <span key={i} style={{
-                    background: 'var(--tag-green-bg)', padding: '0.15rem 0.5rem',
-                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid var(--tag-green-border)', color: 'var(--text)',
+                    background: 'var(--tag-blue-bg)', padding: '0.15rem 0.5rem',
+                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid var(--tag-blue-border)', color: 'var(--text)',
                   }}>{t}</span>
                 ))}
               </div>
@@ -216,9 +216,9 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
               <a key={d.design_id} href={`/estoque/${d.design_id}`}
                 style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.45rem 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', opacity: d.ativo ? 1 : 0.5 }}>
                 <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)' }}>{d.nome}</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--cyan)', fontFamily: 'monospace' }}>{d.total_vendido} vendidas</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>{d.total_vendido} vendidas</span>
                 <span style={{
-                  fontSize: '0.75rem', fontFamily: 'monospace',
+                  fontSize: '0.75rem', fontFamily: 'var(--font-mono)',
                   color: d.saldo_atual > 0 ? 'var(--green)' : 'var(--text-muted)',
                 }}>
                   {d.saldo_atual} em estoque
@@ -246,7 +246,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
                     padding: '0.5rem 0', borderBottom: '1px solid var(--border)',
                     textDecoration: 'none', opacity: past && !s.participou ? 0.3 : past ? 0.6 : 1,
                   }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 90, flexShrink: 0, fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 90, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
                     {new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                   <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

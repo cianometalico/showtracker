@@ -73,7 +73,7 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
           {artist.mbid && (
             <div>
               <label style={labelStyle}>MBID (somente leitura)</label>
-              <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>{artist.mbid}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>{artist.mbid}</p>
             </div>
           )}
         </div>
@@ -107,7 +107,7 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
           .filter(Boolean).join(' · ') || '—'}
       </p>
       {artist.mbid && (
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'monospace' }}>
+        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
           mbid: {artist.mbid}
         </p>
       )}
@@ -128,13 +128,13 @@ const inputStyle: React.CSSProperties = {
   outline: 'none', boxSizing: 'border-box',
 }
 const saveBtnStyle: React.CSSProperties = {
-  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-2)',
+  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-raised)',
   color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
 }
 const cancelBtnStyle: React.CSSProperties = {
   fontSize: '0.85rem', color: 'var(--text-dim)', background: 'none', border: 'none', cursor: 'pointer', padding: 0,
 }
 const editBtnStyle: React.CSSProperties = {
-  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-2)',
+  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-raised)',
   border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: 4, cursor: 'pointer', flexShrink: 0,
 }

@@ -43,7 +43,7 @@ export function EstoqueListClient({ designs }: { designs: Design[] }) {
         <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Estoque</h1>
         <Link href="/estoque/new" style={{
           padding: '0.4rem 1rem', fontSize: '0.8rem',
-          background: 'var(--surface-2)', color: 'var(--text)',
+          background: 'var(--surface-raised)', color: 'var(--text)',
           border: '1px solid var(--border)', borderRadius: 4, textDecoration: 'none',
         }}>
           + Novo design
@@ -104,14 +104,14 @@ export function EstoqueListClient({ designs }: { designs: Design[] }) {
             <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', width: 120, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {d.artista}
             </span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', width: 70, flexShrink: 0, textAlign: 'right', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', width: 70, flexShrink: 0, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
               {d.total_produzido}
             </span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--cyan)', width: 70, flexShrink: 0, textAlign: 'right', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--cyan)', width: 70, flexShrink: 0, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
               {d.total_vendido}
             </span>
             <span style={{
-              fontSize: '0.8rem', fontFamily: 'monospace',
+              fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
               width: 70, flexShrink: 0, textAlign: 'right',
               color: d.saldo_atual > 0 ? 'var(--green)' : d.saldo_atual < 0 ? 'var(--red)' : 'var(--text-muted)',
             }}>

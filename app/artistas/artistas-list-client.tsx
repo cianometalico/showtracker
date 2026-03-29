@@ -11,6 +11,7 @@ type Artist = {
   top_tag: string | null
   lastfm_listeners: number | null
   total_shows: number
+  mbid?: string | null
 }
 
 export function ArtistasListClient({ artists }: { artists: Artist[] }) {
@@ -72,11 +73,15 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
         {filtered.map(a => (
           <Link key={a.id} href={`/artistas/${a.id}`} style={{
             display: 'flex', alignItems: 'center', gap: '1rem',
-            padding: '0.6rem 0.5rem', borderBottom: '1px solid var(--border)',
+            padding: '0.6rem 0.5rem',
+            borderBottom: '1px solid var(--border)',
+            borderLeft: a.mbid ? '2px solid var(--amber)' : '2px solid transparent',
+            background: a.mbid ? 'var(--surface-enriched)' : 'var(--surface-raw)',
             textDecoration: 'none',
           }}>
             <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {a.nome}
+              {!a.mbid && <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginLeft: 6 }}>· pendente</span>}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0 }}>
               {a.pais ?? '—'}
@@ -84,7 +89,7 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 120, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {a.top_tag ?? '—'}
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0, fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
               {a.lastfm_listeners ? a.lastfm_listeners.toLocaleString('pt-BR') : '—'}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 50, flexShrink: 0, textAlign: 'right' }}>

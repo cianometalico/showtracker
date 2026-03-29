@@ -110,7 +110,7 @@ export function HomeCalendar({ showsByDate, hojeStr, mes }: Props) {
         {WEEKDAYS.map(d => (
           <div key={d} style={{
             textAlign: 'center', fontSize: '10px', color: 'var(--text-muted)',
-            padding: '2px 0', fontFamily: 'monospace', letterSpacing: '0.04em',
+            padding: '2px 0', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em',
           }}>
             {d}
           </div>
@@ -131,7 +131,7 @@ export function HomeCalendar({ showsByDate, hojeStr, mes }: Props) {
               }}>
                 <span style={{
                   fontSize: '11px', color: 'var(--text-muted)', opacity: 0.35,
-                  fontFamily: 'monospace',
+                  fontFamily: 'var(--font-mono)',
                 }}>
                   {cell.day}
                 </span>
@@ -151,7 +151,7 @@ export function HomeCalendar({ showsByDate, hojeStr, mes }: Props) {
             }}>
               {/* Day number */}
               <span style={{
-                fontSize: '11px', fontFamily: 'monospace', display: 'block',
+                fontSize: '11px', fontFamily: 'var(--font-mono)', display: 'block',
                 color: cell.isToday
                   ? 'var(--cyan)'
                   : cell.shows.length > 0 ? 'var(--text-dim)' : 'var(--text-muted)',

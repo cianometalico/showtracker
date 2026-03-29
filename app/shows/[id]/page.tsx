@@ -22,7 +22,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   const { data: saRows } = await supabase
     .from('show_artists')
-    .select('artist_id, ordem, faz_estampa, artists(id, nome, pais, tags_editorial, lastfm_listeners)')
+    .select('artist_id, ordem, faz_estampa, artists(id, nome, pais, mbid, tags_editorial, lastfm_listeners)')
     .eq('show_id', id)
     .order('ordem', { ascending: true }) as any
 
@@ -33,6 +33,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
     nome: (Array.isArray(sa.artists) ? sa.artists[0] : sa.artists)?.nome ?? '—',
     pais: (Array.isArray(sa.artists) ? sa.artists[0] : sa.artists)?.pais ?? null,
     lastfm_listeners: (Array.isArray(sa.artists) ? sa.artists[0] : sa.artists)?.lastfm_listeners ?? null,
+    mbid: (Array.isArray(sa.artists) ? sa.artists[0] : sa.artists)?.mbid ?? null,
   }))
 
   const venue = Array.isArray(show.venues) ? show.venues[0] : show.venues

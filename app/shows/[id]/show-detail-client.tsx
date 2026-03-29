@@ -20,7 +20,7 @@ type Venue = {
 
 type LineupItem = {
   artist_id: string; nome: string; ordem: number; faz_estampa: boolean
-  pais?: string | null; lastfm_listeners?: number | null
+  pais?: string | null; lastfm_listeners?: number | null; mbid?: string | null
 }
 
 type ShowData = {
@@ -396,14 +396,21 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
             ) : (
               <div>
                 {initialLineup.map(l => (
-                  <div key={l.artist_id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
-                    <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: 'var(--text-muted)', width: 16 }}>{l.ordem}</span>
+                  <div key={l.artist_id} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                    padding: '0.5rem 0.5rem',
+                    borderBottom: '1px solid var(--border)',
+                    borderLeft: l.mbid ? '2px solid var(--amber)' : '2px solid transparent',
+                    background: l.mbid ? 'var(--surface-enriched)' : 'var(--surface-raw)',
+                  }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-muted)', width: 16 }}>{l.ordem}</span>
                     <Link href={`/artistas/${l.artist_id}`} style={{ flex: 1, fontSize: '0.9rem', color: 'var(--text)', textDecoration: 'none' }}>
                       {l.nome}
                     </Link>
+                    {!l.mbid && <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>· pendente</span>}
                     {l.pais && <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{l.pais}</span>}
                     {l.lastfm_listeners && (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'monospace' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                         {l.lastfm_listeners.toLocaleString('pt-BR')}
                       </span>
                     )}
@@ -565,13 +572,13 @@ const clearBtnStyle: React.CSSProperties = {
   fontSize: '0.75rem', color: 'var(--text-dim)', background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px',
 }
 const saveBtnStyle: React.CSSProperties = {
-  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-2)',
+  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-raised)',
   color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
 }
 const cancelBtnStyle: React.CSSProperties = {
   fontSize: '0.85rem', color: 'var(--text-dim)', background: 'none', border: 'none', cursor: 'pointer', padding: 0,
 }
 const editBtnStyle: React.CSSProperties = {
-  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-2)',
+  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-raised)',
   border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: 4, cursor: 'pointer',
 }

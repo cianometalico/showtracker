@@ -306,7 +306,7 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
                   textDecoration: 'none',
                   opacity: past && !s.participou ? 0.3 : past ? 0.6 : 1,
                 }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 90, flexShrink: 0, fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 90, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
                     {new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                   <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -365,7 +365,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 const saveBtnStyle: React.CSSProperties = {
-  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-2)',
+  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-raised)',
   color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
 }
 
@@ -374,6 +374,6 @@ const cancelBtnStyle: React.CSSProperties = {
 }
 
 const editBtnStyle: React.CSSProperties = {
-  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-2)',
+  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-raised)',
   border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: 4, cursor: 'pointer', flexShrink: 0,
 }

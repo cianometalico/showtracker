@@ -376,6 +376,6 @@ const selectStyle: React.CSSProperties = {
 
 const saveBtnStyle: React.CSSProperties = {
   padding: '0.5rem 1.5rem', fontSize: '0.875rem',
-  background: 'var(--surface-2)', color: 'var(--text)',
+  background: 'var(--surface-raised)', color: 'var(--text)',
   border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
 }

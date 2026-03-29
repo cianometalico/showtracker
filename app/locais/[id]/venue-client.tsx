@@ -116,7 +116,7 @@ export function EditVenueClient({ venue }: Props) {
       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '1.5rem' }}>
         <button onClick={submit} disabled={saving} style={{
           padding: '0.5rem 1.5rem', fontSize: '0.875rem',
-          background: 'var(--surface-2)', color: 'var(--text)',
+          background: 'var(--surface-raised)', color: 'var(--text)',
           border: '1px solid var(--border)', borderRadius: 4,
           cursor: 'pointer', opacity: saving ? 0.5 : 1,
         }}>

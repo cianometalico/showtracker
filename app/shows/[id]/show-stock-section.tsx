@@ -108,9 +108,9 @@ export function ShowStockSection({ showId, movements, activeDesigns, levadosAqui
                 <Link href={`/estoque/${d.id}`} style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', textDecoration: 'none' }}>
                   {d.nome}
                 </Link>
-                <span style={{ fontSize: '0.8rem', color: 'var(--amber)', fontFamily: 'monospace', width: 60, textAlign: 'right' }}>{d.levado}</span>
-                <span style={{ fontSize: '0.8rem', color: 'var(--cyan)', fontFamily: 'monospace', width: 60, textAlign: 'right' }}>{d.vendido}</span>
-                <span style={{ fontSize: '0.8rem', fontFamily: 'monospace', width: 50, textAlign: 'right', color: taxaColor }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--amber)', fontFamily: 'var(--font-mono)', width: 60, textAlign: 'right' }}>{d.levado}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--cyan)', fontFamily: 'var(--font-mono)', width: 60, textAlign: 'right' }}>{d.vendido}</span>
+                <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', width: 50, textAlign: 'right', color: taxaColor }}>
                   {taxa !== null ? `${taxa}%` : '—'}
                 </span>
               </div>
@@ -132,7 +132,7 @@ export function ShowStockSection({ showId, movements, activeDesigns, levadosAqui
               }}>
                 {m.tipo}
               </span>
-              <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text)', width: 32, textAlign: 'right', flexShrink: 0 }}>{m.quantidade}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text)', width: 32, textAlign: 'right', flexShrink: 0 }}>{m.quantidade}</span>
               <Link href={`/estoque/${m.design_id}`} style={{ flex: 1, fontSize: '0.8rem', color: 'var(--text-dim)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {m.design_nome}
               </Link>

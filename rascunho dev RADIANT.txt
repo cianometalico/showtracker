@@ -1,29 +1,21 @@
-Framework 1: Bourdieu — Os Três Capitais (1979)
+respondendo a "Isso serve a luminância? (a hierarquia é por brilho/contraste, não por moldura?)
+Isso serve ao cristal? (a densidade é estrutural ou é empilhamento?)
+Isso serve ao território? (o dado está ancorado em algo real ou está flutuando?)"
 
-Capital cultural. estampa explícita ou críptica: isso é interessante para inferir o design da estampa no app. algo como medir o grau de intelectualidade do público.
+o cristal é a estrutura icônica — ok, trabalhemos com o componente forma metamatica dodecaedro rhombo-hexagonal. é um recorte conceitual da estrutura, não cristal, a forma e suas questoes de perspectiva e numeração persistente, percebi q vendo essa forma geometrica em 3d ela sempre mostra de 3 até 6 lados dela, ou seja metade do total. e ainda 4 e 5, tudo isso pode ser embasado na numerologia raiz (nem vide informação de internet) vou simplificar q sao numeros poderosos para pensar os processos hermeticos, perspectiva. percebe q estou trazendo algo totalmente integro em si mas recortado para o conceito macro harmonizador equalizador como o radiant.
 
-Capital econômico: isso aqui q vc disse "Millennial empregado numa terça = bolso cheio. Gen Z no Lolla no domingo = bolso esvaziado." não é verdade. quanto a ao cap econ podemos estudar fluxo financeiro mensal das pessoas, por serem majoritariamente clt ganham em certos dias do mes. e sim, punk veio é duro, gen z gasta mesmo se n tiver, millenium normalmente tem dinheiro, gen x crítica chata imunda, babyboomer então... mas isso n são regras, n posso ter a visão do todo e em detalhes, ainda mais contando só com minha experiencia individual. o metodo aqui n é tão antropologico, o que acha?
+a luminância é o índice — isso aqui vai ser substituido completamente, pois ja temos um componente (dodecaedro rhombo-hexagonal) em ref ao radiant em si. agora existe a narrativa de ohara. falando em luminância, ela é ref de one piece, traz outro componente recortado que são os ponyglifos (e existem os road ponyglifos, vide informação e cheque). isso significa q abissalmente existe um rigor e pesquisa na questão de um segredo e suas rotas e dicas do caminho, na pratica isso é tudo q conseguimos extrair dos api etc, tudo isso é conceitualmente conectado. basicamente esse fragmento é para narrativizar e até checar processos, caminhos, informações, dados, seja do que der até a versão 1.0. mas sim aponta para o que importa, em contexto. aqui talvez entre a luz propria do prime radiant
 
-Capital social: vc disse "Quando capital social é dominante, a camiseta precisa ser reconhecível pelo grupo. Quando é baixo, a estampa pode ser pessoal, nichada." isso ressoa qualificando com capital cultural, pois uma estampa explícita tem duas ramificações pelo menos: arte iconica (caso do interpol, limp bizkit) ou puramente o capital cultural, e neste ultimo caso normalmente não existe identificação visual de estilo de se vestir, exemplo: shakira (foi péssimo o show) se faltar alguma conexão q n explicitei na argumentação, avise.
+o território é o símbolo — gostei, acho interessante a persistencia em qualidade da informação. tmb incluo q o visual atual do radiant n é ruim, principalmente a pagina publicos. então pensar sempre no estado atual como historico. mas falar de geofilosofia aqui não cabe em si. mas cabe por exemplo toda complexidade do clima tmb, n citado. por fim eu trocaria por 
 
+e sobre "### 1.1 Nome e conceito
+- "Radiant" como Prime Radiant (Seldon) — ✓ confirmado
+- Implicações: informação luminosa, densidade legível, ferramenta de previsão
+- Pergunta: o app hoje comunica "radiância" ou comunica "bunker"?"
 
-Framework 2: Thornton — Capital Subcultural (1995)
+já reviso sintentizando e complementando dialogo sobre a premissa de maneira suprema:
 
-sobre esse incremento no framework 1: isso é vdd: "Em nichos com alto capital subcultural, merch ambulante com referências internas (um verso, um símbolo do selo, um insider joke) vende mais que o logo genérico." vide turnstile, the fall of troy, refused, etc. esse mapeamento q vc fez deste framework achei interessante, mas seria o caso de pensarmos por conceitos(=frameworks) e não por pensadores? aí unir framework 1 e 2. sendo a contribuição do 2 pro 1. no sentido dessa distinção teórica: "underground_score é uma propriedade do nicho, capital subcultural é do público que orbita aquele nicho."
-
-
-Framework 3: Hebdige — Bricolage e o Ciclo de Comodificação (1979)
-
-ciclo de comodificação: vc citou "subculturas inicialmente se formam por resistência comum, mas eventualmente empreendedores encontram formas de mercantilizar o estilo e a música" isso é uma verdade abissal, inclusive novos artistas pop são muito bons para vender, já os saturados... e existe o caso q falei em algum chat passado sobre lady gaga ser um nicho antigo no pop, e mesmo assim vender bem, por motivos da relação com o eixo underground vs mídia entre outras coisas q ressoam q vc disse aqui no caos do subgenero dela ser dark pop, o dark entra em contracultura estetica etc.
-
-bricolage é um elemento riquíssimo e está muito atrelado ao design da estampa tmb, seria loco poder mostrar num campo para insights q indicaria q bricolage é uma coisa aceita no nicho ou subcultura juntando ao conceito do framework 2
-
-e isso aqui "um campo numérico de onde o nicho está no ciclo de comodificação. 1 = cena nascente/DIY, a estampa ambulante tem valor de originalidade. 5 = cena totalmente comodificada, merch oficial domina, ambulante compete por preço." é ouro.
-
-
-Framework 4: Cova & Kozinets — Marketing Tribal e Valor de Vínculo (1997-2007)
-
-isso do valor de vínculo é ouro. junto a " O que define a vida não é o consumo individual de produtos, mas que essa atividade facilita relações sociais significativas" e isso "Assim como toda relação social duradoura requer algum tipo de ritual, uma tribo depende de rituais para pronunciar sua existência"
-
-dois campos operacionais — valor_vinculo (quanto a camiseta funciona como badge tribal vs objeto estético puro)
-e intensidade_ritual (quão intensa é a experiência coletiva no show).
+RADIANT — componentes:
+prime radiant (hard scifi (psico e matematica (seria resumir perigosamente?))),
+biblioteca de Ohara (world-building (história e tecnologia (valide criticamente tmb))),
+	

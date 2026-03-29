@@ -32,10 +32,10 @@ const ICONE_CLIMA: Record<string, string> = {
 
 function corResultado(r: string): string {
   switch (r) {
-    case 'sucesso_total': return 'var(--green)'
-    case 'sucesso':       return 'var(--green)'
+    case 'sucesso_total': return 'var(--status-pos)'
+    case 'sucesso':       return 'var(--status-pos)'
     case 'medio':         return 'var(--amber)'
-    case 'fracasso':      return 'var(--red)'
+    case 'fracasso':      return 'var(--status-neg)'
     default:              return 'var(--text-dim)'
   }
 }
@@ -114,7 +114,7 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
         <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Shows</h1>
         <Link href="/shows/new" style={{
           padding: '0.4rem 1rem', fontSize: '0.8rem',
-          background: 'var(--surface-2)', color: 'var(--text)',
+          background: 'var(--surface-raised)', color: 'var(--text)',
           border: '1px solid var(--border)', borderRadius: 4, textDecoration: 'none',
         }}>
           + novo show
@@ -205,7 +205,7 @@ function ShowRow({ show }: { show: Show }) {
       padding: '0.55rem 0.5rem', borderBottom: '1px solid var(--border)',
       textDecoration: 'none', opacity,
     }}>
-      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 160, flexShrink: 0, fontFamily: 'monospace' }}>
+      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 160, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
         {formatData(show.data)}
       </span>
 

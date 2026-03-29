@@ -241,7 +241,7 @@ export function DesignDetailClient({ design, saldo, movements, showOptions }: Pr
                 }}>
                   {m.tipo}
                 </span>
-                <span style={{ fontFamily: 'monospace', fontSize: '0.875rem', color: 'var(--text)', width: 40, textAlign: 'right', flexShrink: 0 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--text)', width: 40, textAlign: 'right', flexShrink: 0 }}>
                   {m.quantidade}
                 </span>
                 <span style={{ flex: 1, fontSize: '0.8rem', color: 'var(--text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -254,7 +254,7 @@ export function DesignDetailClient({ design, saldo, movements, showOptions }: Pr
                     {m.observacoes}
                   </span>
                 )}
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace', flexShrink: 0 }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
                   {new Date(m.created_at).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}
                 </span>
                 <button onClick={() => handleDeleteMovement(m)}
@@ -287,13 +287,13 @@ const inputStyle: React.CSSProperties = {
   outline: 'none', boxSizing: 'border-box',
 }
 const saveBtnStyle: React.CSSProperties = {
-  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-2)',
+  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-raised)',
   color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
 }
 const cancelBtnStyle: React.CSSProperties = {
   fontSize: '0.85rem', color: 'var(--text-dim)', background: 'none', border: 'none', cursor: 'pointer', padding: 0,
 }
 const editBtnStyle: React.CSSProperties = {
-  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-2)',
+  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-raised)',
   border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: 4, cursor: 'pointer',
 }

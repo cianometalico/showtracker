@@ -6,7 +6,7 @@ export default async function ArtistasPage() {
 
   const { data: rows } = await (supabase as any)
     .from('artists')
-    .select('id, nome, pais, tags_editorial, tags_behavioral, lastfm_listeners')
+    .select('id, nome, pais, mbid, tags_editorial, tags_behavioral, lastfm_listeners')
     .order('nome', { ascending: true })
 
   const { data: saRows } = await (supabase as any)
@@ -27,6 +27,7 @@ export default async function ArtistasPage() {
     top_tag:          (a.tags_editorial as string[] | null)?.[0]
                    ?? (a.tags_behavioral as {name: string}[] | null)?.[0]?.name
                    ?? null,
+    mbid:             a.mbid ?? null,
   }))
 
   return <ArtistasListClient artists={artists} />

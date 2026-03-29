@@ -244,13 +244,13 @@ const inputStyle: React.CSSProperties = {
   outline: 'none', boxSizing: 'border-box',
 }
 const saveBtnStyle: React.CSSProperties = {
-  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-2)',
+  padding: '0.45rem 1.25rem', fontSize: '0.875rem', background: 'var(--surface-raised)',
   color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
 }
 const cancelBtnStyle: React.CSSProperties = {
   fontSize: '0.85rem', color: 'var(--text-dim)', background: 'none', border: 'none', cursor: 'pointer', padding: 0,
 }
 const editBtnStyle: React.CSSProperties = {
-  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-2)',
+  fontSize: '0.75rem', color: 'var(--text-dim)', background: 'var(--surface-raised)',
   border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: 4, cursor: 'pointer',
 }
