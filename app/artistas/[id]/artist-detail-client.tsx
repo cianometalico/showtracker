@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, Fragment } from 'react'
 import { updateArtist, deleteArtist } from './actions'
 import { countryName } from '@/lib/countries'
 import { EnrichmentDot } from '@/components/enrichment-dot'
@@ -98,24 +98,53 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
     )
   }
 
+  // ── Pipe segments ──────────────────────────────────────────
+  const pipeSegments: React.ReactNode[] = []
+
+  if (artist.pais) {
+    pipeSegments.push(countryName(artist.pais))
+  }
+
+  pipeSegments.push(
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+      <EnrichmentDot mbid={artist.mbid} />
+      <span style={{ color: artist.mbid ? 'var(--amber)' : 'var(--text-muted)' }}>
+        {artist.mbid ? 'enriquecido' : 'pendente'}
+      </span>
+    </span>
+  )
+
+  if (artist.lastfm_listeners && artist.lastfm_listeners > 0) {
+    pipeSegments.push(`${artist.lastfm_listeners.toLocaleString('pt-BR')} ouvintes`)
+  }
+
+  if (artist.mbid) {
+    pipeSegments.push(`mbid ${artist.mbid.slice(0, 8)}…`)
+  }
+
   return (
     <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{artist.nome}</h1>
+        <h1 style={{
+          fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400,
+          color: 'var(--text)', margin: 0, lineHeight: 1.3,
+        }}>
+          {artist.nome}
+        </h1>
         <button onClick={startEdit} style={editBtnStyle}>editar</button>
       </div>
-      <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <EnrichmentDot mbid={artist.mbid} />
-        <span>
-          {[artist.pais ? countryName(artist.pais) : null, artist.lastfm_listeners ? artist.lastfm_listeners.toLocaleString('pt-BR') + ' ouvintes' : null]
-            .filter(Boolean).join(' · ') || '—'}
-        </span>
-      </p>
-      {artist.mbid && (
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
-          mbid: {artist.mbid}
-        </p>
-      )}
+      <div style={{
+        display: 'flex', alignItems: 'center', flexWrap: 'wrap',
+        fontFamily: 'var(--font-mono)', fontSize: '0.78rem',
+        color: 'var(--text-dim)', marginTop: 6,
+      }}>
+        {pipeSegments.map((seg, i) => (
+          <Fragment key={i}>
+            {i > 0 && <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>}
+            <span style={{ whiteSpace: 'nowrap' }}>{seg}</span>
+          </Fragment>
+        ))}
+      </div>
       {deleteError && <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 4 }}>{deleteError}</p>}
     </div>
   )

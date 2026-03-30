@@ -34,9 +34,18 @@ function corResultado(r: string): string {
   switch (r) {
     case 'sucesso_total': return 'var(--status-pos)'
     case 'sucesso':       return 'var(--status-pos)'
-    case 'medio':         return 'var(--amber)'
+    case 'medio':         return 'var(--status-neut)'
     case 'fracasso':      return 'var(--status-neg)'
     default:              return 'var(--text-dim)'
+  }
+}
+
+function corStatusIngresso(status: string | null): string {
+  switch (status) {
+    case 'sold out':    return 'var(--status-pos)'
+    case 'bem vendido': return 'var(--status-neut-p)'
+    case 'mal vendido': return 'var(--status-neg)'
+    default:            return 'var(--text-muted)'
   }
 }
 
@@ -109,9 +118,9 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
   }, [shows, filtro, busca])
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 860 }}>
+    <div style={{ padding: '1.5rem', maxWidth: 720 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Shows</h1>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>Shows</h1>
         <Link href="/shows/new" style={{
           padding: '0.4rem 1rem', fontSize: '0.8rem',
           background: 'var(--surface-raised)', color: 'var(--text)',
@@ -145,14 +154,6 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
       <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 4 }}>
         {filtered.length} show{filtered.length !== 1 ? 's' : ''}
       </p>
-
-      {/* Header */}
-      <div style={{ display: 'flex', gap: '1rem', padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border)', marginBottom: 2 }}>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 160, flexShrink: 0 }}>Data</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flex: 1 }}>Evento</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>local</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 90, flexShrink: 0, textAlign: 'right' }}>status</span>
-      </div>
 
       {filtered.length === 0 ? (
         <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', padding: '2rem 0.5rem' }}>Nenhum show encontrado.</p>
@@ -198,33 +199,44 @@ function ShowRow({ show }: { show: Show }) {
   const past    = isPast(show.data)
   const opacity = !past ? 1 : show.participou === false ? 0.45 : 0.55
   const badge   = statusBadge(show)
+  const nome    = getShowDisplayName(show.nome_evento, show.artistas)
+  const venue   = show.venue?.nome ?? null
 
   return (
     <Link href={`/shows/${show.id}`} style={{
-      display: 'flex', alignItems: 'center', gap: '1rem',
-      padding: '0.55rem 0.5rem', borderBottom: '1px solid var(--border)',
+      display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+      padding: '0.6rem 0', borderBottom: '1px solid var(--border)',
       textDecoration: 'none', opacity,
     }}>
-      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 160, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
-        {formatData(show.data)}
-      </span>
-
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {getShowDisplayName(show.nome_evento, show.artistas)}
+        <p style={{
+          fontFamily: 'var(--font-serif)', fontSize: '0.95rem', color: 'var(--text)',
+          margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {nome}
+          {show.legado && (
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginLeft: 6 }}>
+              leg.
+            </span>
+          )}
         </p>
-        {show.nome_evento && show.artistas.length > 0 && (
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {show.artistas.join(' / ')}
-          </p>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', flexWrap: 'wrap' }}>
+          <span>{formatData(show.data)}</span>
+          {venue && (
+            <>
+              <span style={{ margin: '0 5px', opacity: 0.4 }}>|</span>
+              <span>{venue}</span>
+            </>
+          )}
+          {show.status_ingresso && (
+            <>
+              <span style={{ margin: '0 5px', opacity: 0.4 }}>|</span>
+              <span style={{ color: corStatusIngresso(show.status_ingresso) }}>{show.status_ingresso}</span>
+            </>
+          )}
+        </div>
       </div>
-
-      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 140, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {show.venue?.nome ?? '—'}
-      </span>
-
-      <span style={{ fontSize: '0.75rem', width: 90, flexShrink: 0, textAlign: 'right', color: badge.color }}>
+      <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: badge.color, flexShrink: 0, paddingTop: 2 }}>
         {badge.text}
       </span>
     </Link>

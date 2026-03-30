@@ -17,7 +17,7 @@ import type { PickedArtist } from '@/components/artist-picker'
 
 type Venue = {
   id: string; nome: string; cidade: string; bairro?: string | null
-  capacidade_praticavel?: number | null; zona_risco?: boolean | null
+  capacidade_praticavel?: number | null; risco_fiscalizacao?: string | null
 }
 
 type LineupItem = {
@@ -35,7 +35,7 @@ type ShowData = {
   source_url: string | null; pecas_levadas: number | null; pecas_vendidas: number | null
 }
 
-type Props = { show: ShowData; venue: Venue | null; lineup: LineupItem[] }
+type Props = { show: ShowData; venue: Venue | null; lineup: LineupItem[]; stockSection?: React.ReactNode; weatherSummary?: string | null; weatherTemp?: number | null }
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -46,12 +46,32 @@ const LABEL_RESULTADO: Record<string, string> = {
   sucesso_total: 'Sucesso Total', sucesso: 'Sucesso', medio: 'Médio', fracasso: 'Fracasso',
 }
 const COR_RESULTADO: Record<string, string> = {
-  sucesso_total: 'var(--green)', sucesso: 'var(--green)', medio: 'var(--amber)', fracasso: 'var(--red)',
+  sucesso_total: 'var(--status-pos)', sucesso: 'var(--status-pos)',
+  medio: 'var(--status-neut)', fracasso: 'var(--status-neg)',
+}
+const COR_STATUS: Record<string, string> = {
+  'sold out':    'var(--status-pos)',
+  'bem vendido': 'var(--status-pos)',
+  'mal vendido': 'var(--status-neg)',
 }
 
-function formatData(iso: string) {
+function corStatusIngresso(s: string): string { return COR_STATUS[s] ?? 'var(--text-dim)' }
+function labelStatusIngresso(s: string): string { return LABEL_STATUS[s] ?? s }
+function corResultado(r: string): string { return COR_RESULTADO[r] ?? 'var(--text-dim)' }
+function labelResultado(r: string): string { return LABEL_RESULTADO[r] ?? r }
+
+function riscoColor(risco: string): string {
+  switch (risco) {
+    case 'low':    return 'var(--status-pos)'
+    case 'medium': return 'var(--status-neut)'
+    case 'high':   return 'var(--status-neg)'
+    default:       return 'var(--text-muted)'
+  }
+}
+
+function formatDataPipe(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    day: 'numeric', month: 'short', year: 'numeric',
   })
 }
 
@@ -61,7 +81,7 @@ function lineupToPickedArtists(lineup: LineupItem[]): PickedArtist[] {
 
 // ── Main Component ────────────────────────────────────────────
 
-export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLineup }: Props) {
+export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLineup, stockSection, weatherSummary, weatherTemp }: Props) {
   const router = useRouter()
   const past = isShowPast(show.data)
   const nomeShow = getShowDisplayName(show.nome_evento, initialLineup.map(l => l.nome))
@@ -121,7 +141,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
 
   const taxa = rPecasLevadas > 0 ? (rPecasVendidas / rPecasLevadas * 100) : null
   const taxaColor = taxa === null ? 'var(--text-dim)'
-    : taxa >= 70 ? 'var(--green)' : taxa >= 30 ? 'var(--amber)' : 'var(--red)'
+    : taxa >= 70 ? 'var(--status-pos)' : taxa >= 30 ? 'var(--status-neut)' : 'var(--status-neg)'
 
   // ── Handlers ─────────────────────────────────────────────
 
@@ -144,7 +164,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
   function cancelEdit() { resetEditState(); setIsEditing(false) }
 
   function submitEdit() {
-    if (!eData)                  { setEditError('Data obrigatória'); return }
+    if (!eData)                     { setEditError('Data obrigatória'); return }
     if (pickerArtists.length === 0) { setEditError('Pelo menos um artista é necessário'); return }
     setEditError(null)
     const input: UpdateShowInput = {
@@ -204,299 +224,315 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
     })
   }
 
-  // ── Render ────────────────────────────────────────────────
+  // ── Derived ────────────────────────────────────────────────
 
   const singularidades = show.singularidades ?? []
+
+  const pipePartes = [
+    formatDataPipe(show.data),
+    initialVenue?.nome ?? null,
+    show.status_ingresso ? (LABEL_STATUS[show.status_ingresso] ?? show.status_ingresso) : null,
+    show.resultado_geral ? (LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral) : null,
+    weatherSummary ? `${weatherSummary}${weatherTemp ? ` ${weatherTemp}°C` : ''}` : null,
+  ].filter(Boolean)
+
+  // ── Render ────────────────────────────────────────────────
 
   return (
     <div>
       <Link href="/shows" className="breadcrumb">← Shows</Link>
 
-      {/* Header */}
-      <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: 0, lineHeight: 1.3 }}>
-            {nomeShow}
-          </h1>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
-            {show.legado && !isEditing && (
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: 4 }}>
-                legado
-              </span>
-            )}
-            {show.resultado_geral && !isEditing && (
-              <span style={{
-                fontSize: '0.75rem', fontWeight: 600,
-                color: COR_RESULTADO[show.resultado_geral] ?? 'var(--text-dim)',
-                border: `1px solid ${COR_RESULTADO[show.resultado_geral] ?? 'var(--border)'}`,
-                padding: '0.2rem 0.6rem', borderRadius: 4,
-              }}>
-                {LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral}
-              </span>
-            )}
-            {!isEditing && (
-              <button onClick={startEdit} style={editBtnStyle}>editar</button>
-            )}
-          </div>
-        </div>
-
-        {!isEditing && (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 6 }}>
-            {formatData(show.data)}
-          </p>
-        )}
-
-        {singularidades.length > 0 && !isEditing && (
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: 8 }}>
-            {singularidades.map((tag: string) => (
-              <span key={tag} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: '#1a1a2a', border: '1px solid var(--blue)', borderRadius: 3, color: 'var(--blue)' }}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* ── EDIT MODE ─────────────────────────────────────── */}
       {isEditing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '1.25rem', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <>
+          <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: 0 }}>
+              editando — {nomeShow}
+            </p>
+          </div>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '1.25rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-            <EField label="Nome do evento">
-              <input value={eNome} onChange={e => setENome(e.target.value)}
-                placeholder="opcional — se vazio, usa nomes dos artistas"
-                style={{ ...inputStyle, fontSize: '0.8rem', color: eNome ? 'var(--text)' : 'var(--text-dim)' }} />
-            </EField>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <EField label="Data *">
-                <input type="date" value={eData} onChange={e => setEData(e.target.value)} style={inputStyle} />
+              <EField label="Nome do evento">
+                <input value={eNome} onChange={e => setENome(e.target.value)}
+                  placeholder="opcional — se vazio, usa nomes dos artistas"
+                  style={{ ...inputStyle, fontSize: '0.8rem', color: eNome ? 'var(--text)' : 'var(--text-dim)' }} />
               </EField>
-              <EField label="Status ingresso">
-                <select value={eStatus} onChange={e => setEStatus(e.target.value)} style={inputStyle}>
-                  <option value="">sem informação</option>
-                  <option value="sold out">Sold Out</option>
-                  <option value="bem vendido">Bem Vendido</option>
-                  <option value="mal vendido">Mal Vendido</option>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <EField label="Data *">
+                  <input type="date" value={eData} onChange={e => setEData(e.target.value)} style={inputStyle} />
+                </EField>
+                <EField label="Status ingresso">
+                  <select value={eStatus} onChange={e => setEStatus(e.target.value)} style={inputStyle}>
+                    <option value="">sem informação</option>
+                    <option value="sold out">Sold Out</option>
+                    <option value="bem vendido">Bem Vendido</option>
+                    <option value="mal vendido">Mal Vendido</option>
+                  </select>
+                </EField>
+              </div>
+
+              <EField label="local">
+                {eVenueId ? (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <span style={{ ...inputStyle, display: 'block' }}>{eVenueLabel}</span>
+                    <button onClick={() => { setEVenueId(null); setEVenueLabel(''); setEVenueQuery('') }} style={clearBtnStyle}>✕</button>
+                  </div>
+                ) : (
+                  <div>
+                    <input value={eVenueQuery} onChange={e => onVenueSearch(e.target.value)} placeholder="buscar local..." style={inputStyle} />
+                    {eVenueResults.length > 0 && (
+                      <div style={dropdownStyle}>
+                        {eVenueResults.map(v => (
+                          <button key={v.id} onClick={() => { setEVenueId(v.id); setEVenueLabel(v.nome); setEVenueResults([]) }} style={dropdownItemStyle}>
+                            {v.nome} <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>· {v.cidade}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </EField>
+
+              <EField label="Lineup (ordem = headliner primeiro)">
+                <ArtistPicker
+                  selectedArtists={pickerArtists}
+                  onArtistsChange={setPickerArtists}
+                />
+              </EField>
+
+              <EField label="Concorrência">
+                <select value={eConcorrencia} onChange={e => setEConcorrencia(e.target.value)} style={inputStyle}>
+                  <option value="">—</option>
+                  <option value="nenhuma">Nenhuma</option>
+                  <option value="baixa">Baixa</option>
+                  <option value="média">Média</option>
+                  <option value="alta">Alta</option>
                 </select>
               </EField>
+
+              <EField label="Observações">
+                <textarea value={eObservacoes} onChange={e => setEObservacoes(e.target.value)}
+                  rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
+              </EField>
+
+              <EField label="Source URL">
+                <input value={eSourceUrl} onChange={e => setESourceUrl(e.target.value)} style={inputStyle} placeholder="https://..." />
+              </EField>
+
             </div>
 
-            <EField label="local">
-              {eVenueId ? (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ ...inputStyle, display: 'block' }}>{eVenueLabel}</span>
-                  <button onClick={() => { setEVenueId(null); setEVenueLabel(''); setEVenueQuery('') }} style={clearBtnStyle}>✕</button>
-                </div>
+            {editError && <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--red)' }}>{editError}</p>}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <button onClick={submitEdit} disabled={saving} style={{ ...saveBtnStyle, opacity: saving ? 0.5 : 1 }}>
+                  {saving ? 'Salvando...' : 'Salvar'}
+                </button>
+                <button onClick={cancelEdit} style={cancelBtnStyle}>Cancelar</button>
+              </div>
+              <button onClick={handleDelete} disabled={deleting}
+                style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem', background: 'none', color: 'var(--red)', border: '1px solid var(--red)', borderRadius: 4, cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}>
+                {deleting ? 'Excluindo...' : 'Excluir show'}
+              </button>
+            </div>
+
+            {/* + adicionar data (show irmão) */}
+            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+              {!showSiblingInput ? (
+                <button onClick={() => { setShowSiblingInput(true); setSiblingDate(''); setSiblingError(null) }}
+                  style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  + adicionar data
+                </button>
               ) : (
-                <div>
-                  <input value={eVenueQuery} onChange={e => onVenueSearch(e.target.value)} placeholder="buscar local..." style={inputStyle} />
-                  {eVenueResults.length > 0 && (
-                    <div style={dropdownStyle}>
-                      {eVenueResults.map(v => (
-                        <button key={v.id} onClick={() => { setEVenueId(v.id); setEVenueLabel(v.nome); setEVenueResults([]) }} style={dropdownItemStyle}>
-                          {v.nome} <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>· {v.cidade}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <input type="date" value={siblingDate} onChange={e => setSiblingDate(e.target.value)}
+                    style={{ ...inputStyle, width: 'auto' }} />
+                  <button onClick={handleCreateSibling} disabled={creatingSibling}
+                    style={{ ...saveBtnStyle, fontSize: '0.8rem', opacity: creatingSibling ? 0.5 : 1 }}>
+                    {creatingSibling ? 'Criando...' : 'Criar show'}
+                  </button>
+                  <button onClick={() => setShowSiblingInput(false)} style={cancelBtnStyle}>cancelar</button>
+                  {siblingError && <span style={{ fontSize: '0.75rem', color: 'var(--red)' }}>{siblingError}</span>}
                 </div>
               )}
-            </EField>
-
-            <EField label="Lineup (ordem = headliner primeiro)">
-              <ArtistPicker
-                selectedArtists={pickerArtists}
-                onArtistsChange={setPickerArtists}
-              />
-            </EField>
-
-            <EField label="Concorrência">
-              <select value={eConcorrencia} onChange={e => setEConcorrencia(e.target.value)} style={inputStyle}>
-                <option value="">—</option>
-                <option value="nenhuma">Nenhuma</option>
-                <option value="baixa">Baixa</option>
-                <option value="média">Média</option>
-                <option value="alta">Alta</option>
-              </select>
-            </EField>
-
-            <EField label="Observações">
-              <textarea value={eObservacoes} onChange={e => setEObservacoes(e.target.value)}
-                rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
-            </EField>
-
-            <EField label="Source URL">
-              <input value={eSourceUrl} onChange={e => setESourceUrl(e.target.value)} style={inputStyle} placeholder="https://..." />
-            </EField>
-
-          </div>
-
-          {editError && <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--red)' }}>{editError}</p>}
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem' }}>
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-              <button onClick={submitEdit} disabled={saving} style={{ ...saveBtnStyle, opacity: saving ? 0.5 : 1 }}>
-                {saving ? 'Salvando...' : 'Salvar'}
-              </button>
-              <button onClick={cancelEdit} style={cancelBtnStyle}>Cancelar</button>
             </div>
-            <button onClick={handleDelete} disabled={deleting}
-              style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem', background: 'none', color: 'var(--red)', border: '1px solid var(--red)', borderRadius: 4, cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}>
-              {deleting ? 'Excluindo...' : 'Excluir show'}
-            </button>
           </div>
-
-          {/* + adicionar data (show irmão) */}
-          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-            {!showSiblingInput ? (
-              <button onClick={() => { setShowSiblingInput(true); setSiblingDate(''); setSiblingError(null) }}
-                style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                + adicionar data
-              </button>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <input type="date" value={siblingDate} onChange={e => setSiblingDate(e.target.value)}
-                  style={{ ...inputStyle, width: 'auto' }} />
-                <button onClick={handleCreateSibling} disabled={creatingSibling}
-                  style={{ ...saveBtnStyle, fontSize: '0.8rem', opacity: creatingSibling ? 0.5 : 1 }}>
-                  {creatingSibling ? 'Criando...' : 'Criar show'}
-                </button>
-                <button onClick={() => setShowSiblingInput(false)} style={cancelBtnStyle}>cancelar</button>
-                {siblingError && <span style={{ fontSize: '0.75rem', color: 'var(--red)' }}>{siblingError}</span>}
-              </div>
-            )}
-          </div>
-        </div>
+        </>
       )}
 
       {/* ── READ MODE ─────────────────────────────────────── */}
       {!isEditing && (
         <>
-          <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-            {[
-              {
-                label: 'Status',
-                value: show.status_ingresso ? (LABEL_STATUS[show.status_ingresso] ?? show.status_ingresso) : 'sem informação',
-                color: show.status_ingresso ? undefined : 'var(--text-muted)',
-              },
-              { label: 'Público est.', value: show.publico_estimado ? show.publico_estimado.toLocaleString('pt-BR') : '—' },
-              { label: 'Concorrência', value: show.concorrencia ?? '—' },
-              { label: past ? 'Realizado' : 'Previsto', value: past ? (show.participou ? 'Sim' : 'Não') : '—' },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="stat-card">
-                <p className="stat-label">{label}</p>
-                <div className="stat-value" style={color ? { color } : undefined}>{value}</div>
+          {/* Seção 1: nome+pipe ∥ local */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start', marginTop: '1rem', marginBottom: 24 }}>
+
+            {/* Left: nome + editar + pipe + singularidades */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0, lineHeight: 1.3 }}>
+                  {nomeShow}
+                </h1>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                  {show.legado && (
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', border: '1px solid var(--border)', padding: '0.2rem 0.5rem', borderRadius: 3, fontFamily: 'var(--font-mono)' }}>
+                      legado
+                    </span>
+                  )}
+                  <button onClick={startEdit} style={editBtnStyle}>editar</button>
+                </div>
               </div>
-            ))}
+              {pipePartes.length > 0 && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: 6, marginBottom: 0, lineHeight: 1.6 }}>
+                  {pipePartes.join(' | ')}
+                </p>
+              )}
+              {singularidades.length > 0 && (
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: 8 }}>
+                  {singularidades.map((tag: string) => (
+                    <span key={tag} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: 'rgba(110,144,216,0.08)', border: '1px solid rgba(110,144,216,0.2)', borderRadius: 3, color: 'var(--status-pos)' }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right: venue */}
+            <div>
+              {initialVenue ? (
+                <Link href={`/locais/${initialVenue.id}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '0.75rem 1rem', background: 'var(--surface)' }}>
+                    <p style={{ fontFamily: 'var(--font-serif)', fontSize: '0.95rem', color: 'var(--text)', margin: 0 }}>
+                      {initialVenue.nome}
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', margin: '4px 0 0' }}>
+                      {[initialVenue.bairro, initialVenue.cidade].filter(Boolean).join(' · ')}
+                    </p>
+                    {initialVenue.capacidade_praticavel && (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', margin: '2px 0 0' }}>
+                        cap. {initialVenue.capacidade_praticavel.toLocaleString('pt-BR')}
+                      </p>
+                    )}
+                    {initialVenue.risco_fiscalizacao && (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: riscoColor(initialVenue.risco_fiscalizacao), margin: '2px 0 0' }}>
+                        risco {initialVenue.risco_fiscalizacao}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ) : (
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>local não cadastrado</p>
+              )}
+            </div>
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
+          {/* Seção 2: Lineup — largura total */}
+          <div style={{ marginBottom: 24 }}>
             <p className="section-label">Lineup</p>
             {initialLineup.length === 0 ? (
               <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Sem artistas cadastrados.</p>
             ) : (
               <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '4px 0', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+                  <span style={{ width: 16, flexShrink: 0 }} />
+                  <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>ARTISTA</span>
+                  <span style={{ width: 8, flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', width: 90, flexShrink: 0 }}>PAÍS</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', width: 80, flexShrink: 0, textAlign: 'right' }}>OUVINTES</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', width: 56, flexShrink: 0 }}>ESTAMPA</span>
+                </div>
                 {initialLineup.map(l => (
                   <div key={l.artist_id} style={{
                     display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    padding: '0.5rem 0.5rem',
-                    borderBottom: '1px solid var(--border)',
-                    borderLeft: l.mbid ? '2px solid var(--amber)' : '2px solid transparent',
-                    background: l.mbid ? 'var(--surface-enriched)' : 'var(--surface-raw)',
+                    padding: '0.45rem 0', borderBottom: '1px solid var(--border)',
                   }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-muted)', width: 16 }}>{l.ordem}</span>
-                    <Link href={`/artistas/${l.artist_id}`} style={{ flex: 1, fontSize: '0.9rem', color: 'var(--text)', textDecoration: 'none' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-muted)', width: 16, flexShrink: 0 }}>{l.ordem}</span>
+                    <Link href={`/artistas/${l.artist_id}`} style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {l.nome}
                     </Link>
                     <EnrichmentDot mbid={l.mbid} />
-                    {l.pais && <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{countryName(l.pais)}</span>}
-                    {l.lastfm_listeners && (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
-                        {l.lastfm_listeners.toLocaleString('pt-BR')}
-                      </span>
-                    )}
-                    {l.faz_estampa && (
-                      <span style={{ fontSize: '0.7rem', color: 'var(--cyan)', padding: '0.1rem 0.4rem', border: '1px solid var(--cyan)', borderRadius: 3 }}>
-                        estampa
-                      </span>
-                    )}
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', width: 90, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {l.pais ? countryName(l.pais) : ''}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', width: 80, flexShrink: 0, textAlign: 'right' }}>
+                      {l.lastfm_listeners && l.lastfm_listeners > 0 ? l.lastfm_listeners.toLocaleString('pt-BR') : ''}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--accent-structure)', fontFamily: 'var(--font-mono)', width: 56, flexShrink: 0 }}>
+                      {l.faz_estampa ? 'estampa' : ''}
+                    </span>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {initialVenue && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <p className="section-label">local</p>
-              <Link href={`/locais/${initialVenue.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '0.75rem 1rem', background: 'var(--surface)' }}>
-                  <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)', margin: 0 }}>{initialVenue.nome}</p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: '2px 0 0' }}>
-                    {initialVenue.bairro ? `${initialVenue.bairro} · ` : ''}{initialVenue.cidade}
-                    {initialVenue.capacidade_praticavel && ` · cap. ${initialVenue.capacidade_praticavel.toLocaleString('pt-BR')}`}
-                    {initialVenue.zona_risco && <span style={{ color: 'var(--red)', marginLeft: 6 }}>zona de risco</span>}
-                  </p>
-                </div>
-              </Link>
+          {/* Seção 3: Participação + link do evento */}
+          <div style={{ marginBottom: 24 }}>
+            <p className="section-label">{past ? 'Participação' : 'Presença prevista'}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <button onClick={() => toggleParticipou(true)} disabled={savingP} style={{ padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 99, cursor: 'pointer', border: '1px solid var(--border)', background: pParticipou ? 'var(--text)' : 'var(--surface)', color: pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)', opacity: savingP ? 0.5 : 1 }}>
+                {past ? 'participei' : 'vou participar'}
+              </button>
+              <button onClick={() => toggleParticipou(false)} disabled={savingP} style={{ padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 99, cursor: 'pointer', border: '1px solid var(--border)', background: !pParticipou ? 'var(--text)' : 'var(--surface)', color: !pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)', opacity: savingP ? 0.5 : 1 }}>
+                {past ? 'não participei' : 'não vou participar'}
+              </button>
+              {show.source_url && (
+                <a href={show.source_url} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-structure)', textDecoration: 'none' }}>
+                  ver evento →
+                </a>
+              )}
             </div>
-          )}
+          </div>
 
+          {/* Seção 4: Stats — linha horizontal */}
+          <div style={{ display: 'flex', gap: 32, alignItems: 'baseline', padding: '12px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: 24, flexWrap: 'wrap' }}>
+            {show.status_ingresso && (
+              <div>
+                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>STATUS</div>
+                <div style={{ fontFamily: 'var(--font-mono)', color: corStatusIngresso(show.status_ingresso) }}>
+                  {labelStatusIngresso(show.status_ingresso)}
+                </div>
+              </div>
+            )}
+            {show.publico_estimado && (
+              <div>
+                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>PÚBLICO EST.</div>
+                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
+                  {show.publico_estimado.toLocaleString('pt-BR')}
+                </div>
+              </div>
+            )}
+            {show.concorrencia && (
+              <div>
+                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>CONCORRÊNCIA</div>
+                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                  {show.concorrencia}
+                </div>
+              </div>
+            )}
+            {show.resultado_geral && (
+              <div>
+                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>RESULTADO</div>
+                <div style={{ fontFamily: 'var(--font-mono)', color: corResultado(show.resultado_geral) }}>
+                  {labelResultado(show.resultado_geral)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Seção 5: Peças por design */}
+          {stockSection && <div style={{ marginBottom: 24 }}>{stockSection}</div>}
+
+          {/* Observações */}
           {show.observacoes && (
             <div style={{ marginBottom: '1.5rem' }}>
               <p className="section-label">Observações</p>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', lineHeight: 1.5 }}>{show.observacoes}</p>
             </div>
           )}
-
-          {show.source_url && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <p className="section-label">link do evento</p>
-              <a href={show.source_url} target="_blank" rel="noopener noreferrer" style={{
-                fontSize: '0.85rem', color: 'var(--cyan)', textDecoration: 'underline',
-                wordBreak: 'break-all',
-              }}>
-                {show.source_url}
-              </a>
-            </div>
-          )}
         </>
-      )}
-
-      {/* ── PARTICIPAÇÃO (sempre editável) ─────────────────── */}
-      {!isEditing && (
-        <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-          <p className="section-label">{past ? 'Participação' : 'Presença prevista'}</p>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button
-              onClick={() => toggleParticipou(true)}
-              disabled={savingP}
-              style={{
-                padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 99, cursor: 'pointer',
-                border: '1px solid var(--border)',
-                background: pParticipou ? 'var(--text)' : 'var(--surface)',
-                color: pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)',
-                opacity: savingP ? 0.5 : 1,
-              }}
-            >
-              {past ? 'participei' : 'vou participar'}
-            </button>
-            <button
-              onClick={() => toggleParticipou(false)}
-              disabled={savingP}
-              style={{
-                padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 99, cursor: 'pointer',
-                border: '1px solid var(--border)',
-                background: !pParticipou ? 'var(--text)' : 'var(--surface)',
-                color: !pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)',
-                opacity: savingP ? 0.5 : 1,
-              }}
-            >
-              {past ? 'não participei' : 'não vou participar'}
-            </button>
-          </div>
-        </div>
       )}
 
       {/* ── RESULTADO (sempre editável para shows passados) ── */}
@@ -533,7 +569,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
               <button onClick={saveResultado} disabled={savingR} style={{ ...saveBtnStyle, opacity: savingR ? 0.5 : 1 }}>
                 {savingR ? 'Salvando...' : 'Salvar resultado'}
               </button>
-              {rSaved && <span style={{ fontSize: '0.8rem', color: 'var(--green)' }}>✓ salvo</span>}
+              {rSaved && <span style={{ fontSize: '0.8rem', color: 'var(--status-pos)' }}>✓ salvo</span>}
               {rError && <span style={{ fontSize: '0.8rem', color: 'var(--red)' }}>{rError}</span>}
             </div>
           </div>

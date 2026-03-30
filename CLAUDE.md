@@ -43,8 +43,6 @@ Usar `;` ou linhas separadas para encadear comandos.
 
 ## SISTEMA VISUAL v0.9.0
 
-Conceito tripartido: **cristal luminoso sobre território escuro.**
-
 ```
 .structurecore   cyan #6ec8d8   organização, labels, nav, estrutura
 .datacore        amber #e8b830  Ohara, enriquecimento, custódia do dado

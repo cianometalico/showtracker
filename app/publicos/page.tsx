@@ -41,15 +41,15 @@ export default async function PublicosPage() {
     .select('id, nome')
     .order('nome', { ascending: true })
 
-  const dimText  = 'rgba(255,255,255,0.4)'
-  const bodyText = 'rgba(255,255,255,0.85)'
+  const dimText  = 'var(--text-dim)'
+  const bodyText = 'var(--text-primary)'
 
   return (
     <div style={{ padding: '1.5rem', maxWidth: 960 }}>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '2rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: bodyText, margin: 0, letterSpacing: '-0.01em' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: bodyText, margin: 0 }}>
             públicos
           </h1>
           <p style={{ fontSize: '0.78rem', color: dimText, margin: '4px 0 0' }}>
@@ -62,7 +62,7 @@ export default async function PublicosPage() {
           </span>
           <Link href="/publicos/novo" style={{
             fontSize: '0.75rem', color: dimText,
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
+            background: 'var(--surface-raised)', border: '1px solid var(--border)',
             padding: '0.2rem 0.65rem', borderRadius: 4, textDecoration: 'none',
           }}>
             + novo nicho
@@ -98,8 +98,8 @@ export default async function PublicosPage() {
                     <span style={{ fontSize: '1.25rem', fontWeight: 400, color: cor, letterSpacing: '0.04em', fontFamily: 'var(--font-serif)' }}>
                       {n.nome}
                     </span>
-                    <span style={{ fontSize: '0.68rem', color: dimText }}>
-                      {score}/10 · {arts.length} artistas
+                    <span style={{ fontSize: '0.68rem', color: dimText, fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ color: cor }}>{score}</span>/10 · {arts.length} artistas
                     </span>
                   </div>
 
@@ -161,8 +161,8 @@ export default async function PublicosPage() {
               <Link key={g.id} href={`/publicos/generos/${g.id}`} style={{ textDecoration: 'none' }}>
                 <span style={{
                   fontSize: '0.78rem', padding: '0.2rem 0.65rem',
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 3, color: 'rgba(255,255,255,0.65)',
+                  background: 'var(--surface-raised)', border: '1px solid var(--border)',
+                  borderRadius: 3, color: 'var(--text-dim)',
                 }}>{g.nome}</span>
               </Link>
             ))}
@@ -181,8 +181,8 @@ export default async function PublicosPage() {
               <Link key={a.id} href={`/artistas/${a.id}`} style={{ textDecoration: 'none' }}>
                 <span style={{
                   fontSize: '0.75rem', padding: '0.15rem 0.55rem',
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 3, color: 'rgba(255,255,255,0.35)',
+                  background: 'var(--surface-base)', border: '1px solid var(--border)',
+                  borderRadius: 3, color: 'var(--text-muted)',
                 }}>{a.nome}</span>
               </Link>
             ))}

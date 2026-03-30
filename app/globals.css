@@ -186,3 +186,31 @@
   .font-mono  { font-family: var(--font-mono); }
   .font-serif { font-family: var(--font-serif); }
 }
+
+/* artist detail — grid nichos ∥ tags */
+.artist-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 768px) {
+  .artist-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* show detail — grid venue ∥ lineup */
+.show-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 768px) {
+  .show-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

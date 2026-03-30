@@ -32,7 +32,7 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
   return (
     <div style={{ padding: '1.5rem', maxWidth: 760 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Artistas</h1>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>Artistas</h1>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/artistas?abrir=artista" style={{
             fontSize: '0.8rem', color: 'var(--text-dim)',
@@ -86,7 +86,7 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
               </span>
               <EnrichmentDot mbid={a.mbid} />
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0 }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {countryName(a.pais)}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 120, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

@@ -1,6 +1,15 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 
+function riscoColor(risco: string): string {
+  switch (risco) {
+    case 'low':    return 'var(--status-pos)'
+    case 'medium': return 'var(--status-neut)'
+    case 'high':   return 'var(--status-neg)'
+    default:       return 'var(--text-muted)'
+  }
+}
+
 export default async function LocaisPage() {
   const supabase = await createClient()
 
@@ -26,53 +35,47 @@ export default async function LocaisPage() {
   return (
     <div style={{ padding: '1.5rem', maxWidth: 760 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Locais</h1>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>Locais</h1>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{venues.length} cadastrados</span>
-      </div>
-
-      <div style={{ display: 'flex', gap: '1rem', padding: '0 0.5rem 0.5rem', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flex: 1 }}>Nome</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>Bairro · Cidade</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 80, flexShrink: 0, textAlign: 'right' }}>Cap.</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 60, flexShrink: 0, textAlign: 'center' }}>Risco</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: 50, flexShrink: 0, textAlign: 'right' }}>Shows</span>
       </div>
 
       <div>
         {venues.length === 0 && (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', padding: '2rem 0.5rem' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', padding: '2rem 0' }}>
             Nenhum local cadastrado.
           </p>
         )}
         {venues.map((v: any) => (
           <Link key={v.id} href={`/locais/${v.id}`} style={{
-            display: 'flex', alignItems: 'center', gap: '1rem',
-            padding: '0.6rem 0.5rem', borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+            padding: '0.6rem 0', borderBottom: '1px solid var(--border)',
             textDecoration: 'none',
           }}>
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.875rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{
+                fontFamily: 'var(--font-serif)', fontSize: '0.95rem', color: 'var(--text)',
+                margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
                 {v.nome}
-              </span>
-              {v.zona_risco && (
-                <span style={{ fontSize: '0.65rem', color: 'var(--red)', border: '1px solid var(--red)', padding: '0 0.3rem', borderRadius: 3, flexShrink: 0 }}>
-                  risco
-                </span>
-              )}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', flexWrap: 'wrap' }}>
+                <span>{v.bairro ? `${v.bairro} · ${v.cidade ?? ''}` : (v.cidade ?? '—')}</span>
+                {v.capacidade_praticavel && (
+                  <>
+                    <span style={{ margin: '0 5px', opacity: 0.4 }}>|</span>
+                    <span>cap. {v.capacidade_praticavel.toLocaleString('pt-BR')}</span>
+                  </>
+                )}
+                {v.risco_fiscalizacao && (
+                  <>
+                    <span style={{ margin: '0 5px', opacity: 0.4 }}>|</span>
+                    <span style={{ color: riscoColor(v.risco_fiscalizacao) }}>{v.risco_fiscalizacao}</span>
+                  </>
+                )}
+              </div>
             </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 130, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {v.bairro ? `${v.bairro} · ${v.cidade ?? ''}` : (v.cidade ?? '—')}
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 80, flexShrink: 0, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-              {v.capacidade_praticavel ? v.capacidade_praticavel.toLocaleString('pt-BR') : '—'}
-            </span>
-            <span style={{ fontSize: '0.75rem', width: 60, flexShrink: 0, textAlign: 'center',
-              color: v.risco_fiscalizacao === 'high' ? 'var(--red)' : v.risco_fiscalizacao === 'medium' ? 'var(--amber)' : v.risco_fiscalizacao === 'low' ? 'var(--green)' : 'var(--text-muted)',
-            }}>
-              {v.risco_fiscalizacao === 'high' ? 'Alto' : v.risco_fiscalizacao === 'medium' ? 'Médio' : v.risco_fiscalizacao === 'low' ? 'Baixo' : '—'}
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 50, flexShrink: 0, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-              {v.total_shows > 0 ? v.total_shows : '—'}
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', flexShrink: 0, paddingTop: 2 }}>
+              {v.total_shows > 0 ? `${v.total_shows} shows` : '—'}
             </span>
           </Link>
         ))}

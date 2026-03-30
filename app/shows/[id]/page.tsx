@@ -1,4 +1,3 @@
-import { WeatherWidget } from './weather-widget'
 import { ShowDetailClient } from './show-detail-client'
 import { ShowStockSection } from './show-stock-section'
 import { createClient } from '@/utils/supabase/server'
@@ -14,7 +13,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   const { data: show, error } = await supabase
     .from('shows')
-    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, concorrencia, observacoes, publico_estimado, singularidades, legado, venue_id, source_url, pecas_levadas, pecas_vendidas, venues(id, nome, cidade, bairro, capacidade_praticavel, zona_risco, lat, lng)')
+    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, clima_temp, concorrencia, observacoes, publico_estimado, singularidades, legado, venue_id, source_url, pecas_levadas, pecas_vendidas, venues(id, nome, cidade, bairro, capacidade_praticavel, risco_fiscalizacao, lat, lng)')
     .eq('id', id)
     .single() as any
 
@@ -38,10 +37,43 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   const venue = Array.isArray(show.venues) ? show.venues[0] : show.venues
 
-  const today = new Date(); today.setHours(0, 0, 0, 0)
-  const limit5 = new Date(today); limit5.setDate(limit5.getDate() + 5)
-  const showDate = new Date(show.data + 'T12:00:00')
-  const mostrarClima = showDate >= today && showDate <= limit5
+  // Weather: fetch server-side para shows dentro de 5 dias, persiste se ainda não tiver
+  const CLIMA_ICONE: Record<string, string> = { sol: '☀', nublado: '☁', chuva: '🌧', frio: '🥶' }
+  let weatherSummary: string | null = null
+  let weatherTemp: number | null = show.clima_temp ?? null
+
+  const hoje = new Date()
+  const dataShow = new Date(show.data + 'T12:00:00')
+  const diasAteShow = Math.ceil((dataShow.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
+
+  if (diasAteShow >= 0 && diasAteShow <= 5 && venue?.lat && venue?.lng) {
+    if (show.clima_estimado && show.clima_temp != null) {
+      weatherSummary = CLIMA_ICONE[show.clima_estimado] ?? null
+      weatherTemp    = show.clima_temp
+    } else {
+      try {
+        const baseUrl = process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : 'http://localhost:3000'
+        const res = await fetch(
+          `${baseUrl}/api/weather?lat=${venue.lat}&lng=${venue.lng}&data=${show.data}`,
+          { cache: 'no-store' },
+        )
+        const wd = await res.json()
+        if (wd.clima) {
+          weatherSummary = CLIMA_ICONE[wd.clima] ?? null
+          weatherTemp    = wd.temp ?? null
+          await (supabase as any)
+            .from('shows')
+            .update({ clima_estimado: wd.clima, clima_temp: wd.temp })
+            .eq('id', id)
+        }
+      } catch {}
+    }
+  } else if (show.clima_estimado) {
+    weatherSummary = CLIMA_ICONE[show.clima_estimado] ?? null
+    weatherTemp    = show.clima_temp ?? null
+  }
 
   // ── Estoque: movimentos deste show ──
   const { data: movRows } = await (supabase as any)
@@ -107,28 +139,19 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
         }}
         venue={venue ?? null}
         lineup={lineup}
+        weatherSummary={weatherSummary}
+        weatherTemp={weatherTemp}
+        stockSection={
+          (show.participou || movements.length > 0) ? (
+            <ShowStockSection
+              showId={id}
+              movements={movements}
+              activeDesigns={activeDesigns}
+              levadosAqui={levadosAqui}
+            />
+          ) : null
+        }
       />
-
-      {mostrarClima && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <p className="section-label">previsão</p>
-          <WeatherWidget
-            data={show.data}
-            lat={venue?.lat ?? null}
-            lng={venue?.lng ?? null}
-            climaSalvo={show.clima_estimado ?? null}
-          />
-        </div>
-      )}
-
-      {(show.participou || movements.length > 0) && (
-        <ShowStockSection
-          showId={id}
-          movements={movements}
-          activeDesigns={activeDesigns}
-          levadosAqui={levadosAqui}
-        />
-      )}
     </div>
   )
 }

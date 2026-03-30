@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { NichoManager } from './nicho-manager'
-import { nichoColor } from '@/lib/nicho-color'
+import { nichoColor, nichoColorAlpha } from '@/lib/nicho-color'
 import { EnrichButton } from './enrich-button'
 import { ArtistDetailClient } from './artist-detail-client'
 import { OverrideSectionClient } from './override-section-client'
@@ -47,10 +47,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
       faz_estampa: saByShow[s.id]?.faz_estampa ?? false,
     }))
 
-    const todayStr = new Date().toISOString().slice(0, 10)
-    const future = mapped.filter((s: any) => s.data >= todayStr).sort((a: any, b: any) => a.data.localeCompare(b.data))
-    const past   = mapped.filter((s: any) => s.data < todayStr).sort((a: any, b: any) => b.data.localeCompare(a.data))
-    shows = [...future, ...past]
+    shows = mapped.sort((a: any, b: any) => b.data.localeCompare(a.data))
   }
 
   const participados = shows.filter(s => s.participou)
@@ -58,8 +55,13 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   const sucessos = comResultado.filter(s => ['sucesso', 'sucesso_total'].includes(s.resultado_geral))
   const taxaSucesso = comResultado.length > 0 ? Math.round((sucessos.length / comResultado.length) * 100) : null
 
-  const tags_editorial = (artist.tags_editorial as string[] | null) ?? []
+  const tags_editorial  = (artist.tags_editorial  as string[] | null) ?? []
   const tags_behavioral = (artist.tags_behavioral as { name: string; count?: number }[] | null) ?? []
+
+  const COR_RESULTADO: Record<string, string> = {
+    sucesso_total: 'var(--status-pos)', sucesso: 'var(--status-pos)',
+    medio: 'var(--status-neut)', fracasso: 'var(--status-neg)',
+  }
 
   // todos os nichos disponíveis
   const { data: allNichos } = await (supabase as any)
@@ -90,6 +92,19 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
     underground_score: n.underground_score ?? 5,
     cor: nichoColor(n.nome, n.underground_score ?? 5),
   }))
+
+  const linkedNichosDisplay = linkedNichos
+    .map(ln => {
+      const nicho = (allNichos ?? []).find((n: any) => n.id === ln.id)
+      if (!nicho) return null
+      return {
+        id:                nicho.id,
+        nome:              nicho.nome,
+        underground_score: nicho.underground_score ?? 5,
+        score:             ln.score,
+      }
+    })
+    .filter(Boolean) as { id: string; nome: string; underground_score: number; score: number }[]
 
   // Designs do artista
   const { data: designRows } = await (supabase as any)
@@ -128,7 +143,76 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         ))}
       </div>
 
-      {/* Nichos */}
+      {/* Grid: nichos ∥ tags */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr',
+        gap: 24, alignItems: 'start', marginBottom: '1.5rem',
+      }}>
+        {/* Nichos — coluna esquerda */}
+        <div>
+          <p className="section-label">Nichos</p>
+          {linkedNichosDisplay.length === 0 ? (
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-serif)' }}>
+              nenhum nicho vinculado
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {linkedNichosDisplay.map(n => (
+                <a key={n.id} href={`/publicos/${n.id}`} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '0.2rem 0.6rem', borderRadius: 4,
+                  background: nichoColorAlpha(n.nome, n.underground_score, n.score / 10),
+                  border: `1px solid ${nichoColor(n.nome, n.underground_score)}55`,
+                  color: nichoColor(n.nome, n.underground_score),
+                  textDecoration: 'none', fontSize: '0.78rem', fontFamily: 'var(--font-serif)',
+                }}>
+                  {n.nome}
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    {n.score}
+                  </span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Tags — coluna direita */}
+        <div>
+          {tags_editorial.length > 0 && (
+            <div style={{ marginBottom: '0.75rem' }}>
+              <p className="section-label" style={{ color: 'var(--amber)' }}>MusicBrainz</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                {tags_editorial.map((t: string, i: number) => (
+                  <span key={i} style={{
+                    background: 'var(--surface-raised)', padding: '0.15rem 0.5rem',
+                    borderRadius: 3, fontSize: '0.72rem', color: 'var(--text-dim)',
+                    fontFamily: 'var(--font-mono)',
+                  }}>{t}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {tags_behavioral.length > 0 && (
+            <div>
+              <p className="section-label" style={{ color: 'var(--amber)' }}>Last.fm</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                {tags_behavioral.map((t: any, i: number) => (
+                  <span key={i} style={{
+                    background: 'var(--surface-raised)', padding: '0.15rem 0.5rem',
+                    borderRadius: 3, fontSize: '0.72rem', color: 'var(--text-dim)',
+                    fontFamily: 'var(--font-mono)',
+                  }}>{t.name}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {tags_editorial.length === 0 && tags_behavioral.length === 0 && (
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>—</p>
+          )}
+        </div>
+      </div>
+
+      {/* NichoManager — vinculation control */}
       <NichoManager
         artistId={id}
         allNichos={nichosForManager}
@@ -161,40 +245,6 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           abertura_experimental: primaryNicho.abertura_experimental ?? null,
         } : null}
       />
-
-      {/* Tags */}
-      {(tags_editorial.length > 0 || tags_behavioral.length > 0) && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          {tags_editorial.length > 0 && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <p className="section-label" style={{ color: 'var(--amber)' }}>MusicBrainz</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                {tags_editorial.map((t: string, i: number) => (
-                  <span key={i} style={{
-                    background: 'var(--tag-blue-bg)', padding: '0.15rem 0.5rem',
-                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid var(--tag-blue-border)', color: 'var(--text)',
-                  }}>{t}</span>
-                ))}
-              </div>
-            </div>
-          )}
-          {tags_behavioral.length > 0 && (
-            <div>
-              <p className="section-label" style={{ color: 'var(--amber)' }}>Last.fm</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                {tags_behavioral.map((t: any, i: number) => (
-                  <span key={i} style={{
-                    background: 'var(--tag-blue-bg)', padding: '0.15rem 0.5rem',
-                    borderRadius: 3, fontSize: '0.75rem', border: '1px solid var(--tag-blue-border)', color: 'var(--text)',
-                  }}>
-                    {t.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Enriquecer */}
       <EnrichButton
@@ -237,14 +287,15 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         ) : (
           <div>
             {shows.map((s: any) => {
-              const past = new Date(s.data + 'T23:59:59') < new Date()
-              const venue = s.venue?.nome ?? '—'
+              const isPast = new Date(s.data + 'T23:59:59') < new Date()
+              const venue  = s.venue?.nome ?? '—'
+              const corRes = s.resultado_geral ? COR_RESULTADO[s.resultado_geral] ?? 'var(--text-dim)' : 'var(--text-dim)'
               return (
                 <Link key={s.id} href={`/shows/${s.id}`}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '1rem',
                     padding: '0.5rem 0', borderBottom: '1px solid var(--border)',
-                    textDecoration: 'none', opacity: past && !s.participou ? 0.3 : past ? 0.6 : 1,
+                    textDecoration: 'none', opacity: isPast && !s.participou ? 0.3 : isPast ? 0.7 : 1,
                   }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', width: 90, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
                     {new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -255,7 +306,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
                   {s.faz_estampa && (
                     <span style={{ fontSize: '0.7rem', color: 'var(--cyan)', flexShrink: 0 }}>estampa</span>
                   )}
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.75rem', color: corRes, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
                     {s.resultado_geral ?? s.status_ingresso ?? '—'}
                   </span>
                 </Link>
