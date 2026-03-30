@@ -22,11 +22,25 @@ type Movement = {
 
 type ShowOption = { id: string; label: string }
 
+type ShowItem = {
+  id: string; data: string; nome_evento: string | null
+  venue_nome: string | null; resultado_geral: string | null
+}
+
+const COR_RESULTADO: Record<string, string> = {
+  sucesso_total: 'var(--status-pos)', sucesso: 'var(--status-pos)',
+  medio: 'var(--status-neut)', fracasso: 'var(--status-neg)',
+}
+const LABEL_RESULTADO: Record<string, string> = {
+  sucesso_total: 'sucesso total', sucesso: 'sucesso', medio: 'médio', fracasso: 'fracasso',
+}
+
 type Props = {
   design:      Design
   saldo:       Saldo
   movements:   Movement[]
   showOptions: ShowOption[]
+  artistShows: ShowItem[]
 }
 
 const TIPO_COLOR: Record<string, string> = {
@@ -36,7 +50,7 @@ const TIPO_COLOR: Record<string, string> = {
   perdido:   'var(--red)',
 }
 
-export function DesignDetailClient({ design, saldo, movements, showOptions }: Props) {
+export function DesignDetailClient({ design, saldo, movements, showOptions, artistShows }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [eNome,     setENome]     = useState(design.nome)
   const [eDesc,     setEDesc]     = useState(design.descricao ?? '')
@@ -223,6 +237,39 @@ export function DesignDetailClient({ design, saldo, movements, showOptions }: Pr
           </div>
         </div>
       </div>
+
+      {/* Shows do artista */}
+      {artistShows.length > 0 && (
+        <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+          <p className="section-label">Shows — {design.artista} ({artistShows.length})</p>
+          <div>
+            {artistShows.map(s => {
+              const titulo = s.nome_evento ?? s.venue_nome ?? s.data
+              const resultado = s.resultado_geral
+              return (
+                <Link key={s.id} href={`/shows/${s.id}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', padding: '0.45rem 0', borderBottom: '1px solid var(--border)' }}>
+                    <span style={{ fontFamily: 'var(--font-serif)', fontSize: '0.875rem', color: 'var(--text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {titulo}
+                    </span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', flexShrink: 0 }}>
+                      {s.venue_nome && s.nome_evento ? s.venue_nome : s.data}
+                    </span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', flexShrink: 0 }}>
+                      {s.data}
+                    </span>
+                    {resultado && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: COR_RESULTADO[resultado] ?? 'var(--text-dim)', flexShrink: 0 }}>
+                        {LABEL_RESULTADO[resultado] ?? resultado}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Histórico */}
       <div>

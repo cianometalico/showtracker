@@ -54,20 +54,42 @@ export default async function DesignDetailPage({ params }: { params: Promise<{ i
     }
   })
 
-  // Shows recentes para o select de movimentação
-  const { data: recentShows } = await (supabase as any)
-    .from('shows')
-    .select('id, data, nome_evento, venues(nome)')
-    .order('data', { ascending: false })
-    .limit(60)
+  // Shows do artista vinculado ao design (dois passos para evitar limitações do join)
+  let showOptions: { id: string; label: string }[] = []
+  let artistShows: { id: string; data: string; nome_evento: string | null; venue_nome: string | null; resultado_geral: string | null }[] = []
 
-  const showOptions = ((recentShows ?? []) as any[]).map((s: any) => {
-    const venue = Array.isArray(s.venues) ? s.venues[0] : s.venues
-    return {
-      id:    s.id,
-      label: s.nome_evento ? `${s.nome_evento} (${s.data})` : `${venue?.nome ?? '?'} (${s.data})`,
+  if (designRow.artist_id) {
+    const { data: showArtists } = await (supabase as any)
+      .from('show_artists')
+      .select('show_id')
+      .eq('artist_id', designRow.artist_id)
+
+    const showIds = ((showArtists ?? []) as any[]).map((sa: any) => sa.show_id)
+
+    if (showIds.length > 0) {
+      const { data: showRows } = await (supabase as any)
+        .from('shows')
+        .select('id, data, nome_evento, resultado_geral, venues(nome)')
+        .in('id', showIds)
+        .order('data', { ascending: false })
+
+      artistShows = ((showRows ?? []) as any[]).map((s: any) => {
+        const venue = Array.isArray(s.venues) ? s.venues[0] : s.venues
+        return {
+          id:             s.id,
+          data:           s.data,
+          nome_evento:    s.nome_evento ?? null,
+          venue_nome:     venue?.nome ?? null,
+          resultado_geral: s.resultado_geral ?? null,
+        }
+      })
+
+      showOptions = artistShows.map(s => ({
+        id:    s.id,
+        label: s.nome_evento ? `${s.nome_evento} (${s.data})` : `${s.venue_nome ?? '?'} (${s.data})`,
+      }))
     }
-  })
+  }
 
   return (
     <DesignDetailClient
@@ -88,6 +110,7 @@ export default async function DesignDetailPage({ params }: { params: Promise<{ i
       }}
       movements={movementsMapped}
       showOptions={showOptions}
+      artistShows={artistShows}
     />
   )
 }
