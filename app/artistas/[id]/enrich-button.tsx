@@ -43,6 +43,9 @@ export function EnrichButton({ artistId, artistNome, artistMbid, ultimaAtualizac
           name:            enrichData.identity?.name,
           country:         enrichData.identity?.country,
           type:            enrichData.identity?.type,
+          founded_year:    enrichData.identity?.formedYear
+            ? parseInt(enrichData.identity.formedYear)
+            : null,
           tags_editorial:  enrichData.tags_editorial,
           tags_behavioral: enrichData.tags_behavioral,
           listeners:       enrichData.audience?.listeners,

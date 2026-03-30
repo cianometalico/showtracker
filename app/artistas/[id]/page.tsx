@@ -14,7 +14,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   const { data: artist, error } = await (supabase as any)
     .from('artists')
     .select(`
-      id, nome, pais, mbid, tags_editorial, tags_behavioral, lastfm_listeners, wikipedia_url, genre_id, ultima_atualizacao,
+      id, nome, pais, mbid, founded_year, tags_editorial, tags_behavioral, lastfm_listeners, wikipedia_url, genre_id, ultima_atualizacao,
       energia, receptividade_autoral, commodificacao, letramento, abertura_experimental,
       geracao_override, estetica_override, cor_dominante_override, tipo_nostalgia_override
     `)
@@ -126,6 +126,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         nome: artist.nome,
         pais: artist.pais ?? null,
         mbid: artist.mbid ?? null,
+        founded_year: artist.founded_year ?? null,
         lastfm_listeners: artist.lastfm_listeners ?? null,
       }} />
 

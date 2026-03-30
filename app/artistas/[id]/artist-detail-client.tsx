@@ -10,6 +10,7 @@ type ArtistData = {
   nome: string
   pais: string | null
   mbid: string | null
+  founded_year: number | null
   lastfm_listeners: number | null
 }
 
@@ -103,6 +104,10 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
 
   if (artist.pais) {
     pipeSegments.push(countryName(artist.pais))
+  }
+
+  if (artist.founded_year) {
+    pipeSegments.push(`desde ${artist.founded_year}`)
   }
 
   pipeSegments.push(

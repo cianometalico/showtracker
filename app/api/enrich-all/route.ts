@@ -149,12 +149,18 @@ export async function GET() {
         count: parseInt(t.count ?? '0'),
       })) ?? []
 
+      // founded_year: life-span.begin pode ser "1995" ou "1995-03-12"
+      const foundedYear = mbDetail?.['life-span']?.begin
+        ? parseInt(mbDetail['life-span'].begin.slice(0, 4))
+        : null
+
       // update no banco
       await (supabase as any)
         .from('artists')
         .update({
           mbid,
           pais:               mbDetail?.country ?? best.country ?? null,
+          founded_year:       foundedYear,
           tags_editorial,
           tags_behavioral,
           lastfm_listeners:   parseInt(lfmArtist?.stats?.listeners ?? '0') || null,

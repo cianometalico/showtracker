@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
 
   const {
-    mbid, name, country,
+    mbid, name, country, founded_year,
     tags_editorial, tags_behavioral, listeners, wikipedia_url,
   } = body
 
@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     nome:               name,
     mbid:               mbid ?? null,
     pais:               country ?? null,
+    founded_year:       founded_year ?? null,
     tags_editorial:     tags_editorial ?? [],
     tags_behavioral:    tags_behavioral ?? [],
     lastfm_listeners:   listeners ?? null,
