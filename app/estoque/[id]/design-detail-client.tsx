@@ -122,13 +122,18 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
       <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>{design.nome}</h1>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4 }}>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>{design.nome}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: 6 }}>
               <Link href={`/artistas/${design.artist_id}`} style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>
                 {design.artista}
               </Link>
-              {!design.ativo && <span style={{ marginLeft: 8, fontSize: '0.75rem', color: 'var(--text-muted)', border: '1px solid var(--border)', padding: '0.1rem 0.4rem', borderRadius: 3 }}>inativo</span>}
-            </p>
+              <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>
+              <span>saldo {saldo.saldo_atual}</span>
+              <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>
+              <span style={{ color: design.ativo ? 'var(--status-pos)' : 'var(--text-muted)' }}>
+                {design.ativo ? 'ativo' : 'inativo'}
+              </span>
+            </div>
           </div>
           {!isEditing && (
             <button onClick={startEdit} style={editBtnStyle}>editar</button>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { TerminalSpinner } from '@/components/terminal-spinner'
 
 interface Props {
   artistId: string
@@ -65,9 +66,7 @@ export function EnrichButton({ artistId, artistNome, artistMbid, ultimaAtualizac
     }
   }
 
-  const label = state === 'loading'
-    ? 'enriquecendo...'
-    : artistMbid ? 'atualizar dados' : 'enriquecer'
+  const labelIdle = artistMbid ? 'atualizar dados' : 'enriquecer'
 
   return (
     <div style={{ marginBottom: '1.5rem' }}>
@@ -75,14 +74,20 @@ export function EnrichButton({ artistId, artistNome, artistMbid, ultimaAtualizac
         onClick={handleEnrich}
         disabled={state === 'loading'}
         style={{
-          display: 'inline-block', padding: '0.4rem 1rem',
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          padding: '0.4rem 1rem',
           fontSize: '0.8rem', background: 'var(--surface-raised)',
           color: 'var(--text-dim)', border: '1px solid var(--border)',
           borderRadius: 4, cursor: state === 'loading' ? 'default' : 'pointer',
           opacity: state === 'loading' ? 0.6 : 1,
         }}
       >
-        {label}
+        {state === 'loading' ? (
+          <>
+            <TerminalSpinner size={12} />
+            <span>enriquecendo…</span>
+          </>
+        ) : labelIdle}
       </button>
       {ultimaAtualizacao && state !== 'done' && (
         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '0.75rem' }}>

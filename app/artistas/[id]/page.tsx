@@ -121,14 +121,23 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         ← Artistas
       </Link>
 
-      <ArtistDetailClient artist={{
-        id: artist.id,
-        nome: artist.nome,
-        pais: artist.pais ?? null,
-        mbid: artist.mbid ?? null,
-        founded_year: artist.founded_year ?? null,
-        lastfm_listeners: artist.lastfm_listeners ?? null,
-      }} />
+      <ArtistDetailClient
+        artist={{
+          id: artist.id,
+          nome: artist.nome,
+          pais: artist.pais ?? null,
+          mbid: artist.mbid ?? null,
+          founded_year: artist.founded_year ?? null,
+          lastfm_listeners: artist.lastfm_listeners ?? null,
+        }}
+        nichoManagerSlot={
+          <NichoManager
+            artistId={id}
+            allNichos={nichosForManager}
+            linkedNichos={linkedNichos}
+          />
+        }
+      />
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -213,12 +222,6 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      {/* NichoManager — vinculation control */}
-      <NichoManager
-        artistId={id}
-        allNichos={nichosForManager}
-        linkedNichos={linkedNichos}
-      />
 
       {/* Overrides */}
       <OverrideSectionClient

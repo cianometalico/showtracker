@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { EnrichmentDot } from './enrichment-dot'
+import { TerminalSpinner } from './terminal-spinner'
 
 type LocalArtist = {
   id: string
@@ -164,9 +165,12 @@ function OharaSearch({ defaultExpanded = false }, ref) {
   return (
     <div ref={containerRef} style={{ position: 'relative', minWidth: 320 }}>
       {phase === 'enriching' ? (
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', margin: 0 }}>
-          <span style={{ color: 'var(--amber)' }}>⟳</span> enriquecendo {enrichingNome}…
-        </p>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <TerminalSpinner size={14} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            enriquecendo {enrichingNome}…
+          </span>
+        </span>
       ) : (
         <>
           {phase === 'mb' && (
@@ -194,7 +198,9 @@ function OharaSearch({ defaultExpanded = false }, ref) {
               }}
             />
             {loading && (
-              <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.6rem', color: 'var(--text-muted)' }}>···</span>
+              <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
+                <TerminalSpinner size={12} />
+              </span>
             )}
           </div>
 

@@ -14,7 +14,7 @@ type ArtistData = {
   lastfm_listeners: number | null
 }
 
-export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
+export function ArtistDetailClient({ artist, nichoManagerSlot }: { artist: ArtistData; nichoManagerSlot?: React.ReactNode }) {
   const [isEditing,    setIsEditing]    = useState(false)
   const [editError,    setEditError]    = useState<string | null>(null)
   const [deleteError,  setDeleteError]  = useState<string | null>(null)
@@ -95,6 +95,11 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
           </button>
         </div>
         {deleteError && <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: '0.5rem' }}>{deleteError}</p>}
+        {nichoManagerSlot && (
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
+            {nichoManagerSlot}
+          </div>
+        )}
       </div>
     )
   }
@@ -123,19 +128,25 @@ export function ArtistDetailClient({ artist }: { artist: ArtistData }) {
     pipeSegments.push(`${artist.lastfm_listeners.toLocaleString('pt-BR')} ouvintes`)
   }
 
-  if (artist.mbid) {
-    pipeSegments.push(`mbid ${artist.mbid.slice(0, 8)}…`)
-  }
-
   return (
     <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-        <h1 style={{
-          fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400,
-          color: 'var(--text)', margin: 0, lineHeight: 1.3,
-        }}>
-          {artist.nome}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
+          <h1 style={{
+            fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400,
+            color: 'var(--text)', margin: 0, lineHeight: 1.3,
+          }}>
+            {artist.nome}
+          </h1>
+          {artist.mbid && (
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.7rem',
+              color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0,
+            }}>
+              {artist.mbid}
+            </span>
+          )}
+        </div>
         <button onClick={startEdit} style={editBtnStyle}>editar</button>
       </div>
       <div style={{

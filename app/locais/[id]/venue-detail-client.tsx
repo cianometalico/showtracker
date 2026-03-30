@@ -159,13 +159,27 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
       {/* Header */}
       <div style={{ marginTop: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>
             {venue.nome}
           </h1>
           {!isEditing && (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: 4 }}>
-              {venue.bairro ? `${venue.bairro} · ` : ''}{venue.cidade ?? '—'}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: 6 }}>
+              <span>{venue.bairro ? `${venue.bairro} · ${venue.cidade ?? ''}` : (venue.cidade ?? '—')}</span>
+              {venue.capacidade_praticavel && (
+                <>
+                  <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>
+                  <span>cap. {venue.capacidade_praticavel.toLocaleString('pt-BR')}</span>
+                </>
+              )}
+              {venue.risco_fiscalizacao && (
+                <>
+                  <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>
+                  <span style={{ color: RISCO_COR[venue.risco_fiscalizacao] ?? 'var(--text-dim)' }}>
+                    {venue.risco_fiscalizacao}
+                  </span>
+                </>
+              )}
+            </div>
           )}
         </div>
         {!isEditing && (

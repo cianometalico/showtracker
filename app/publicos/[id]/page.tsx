@@ -47,7 +47,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
     .select(`
       artist_id, score,
       artists(
-        id, nome, lastfm_listeners, tags_editorial, pais,
+        id, nome, mbid, lastfm_listeners, tags_editorial, pais,
         energia, receptividade_autoral, commodificacao, letramento
       )
     `)
@@ -96,6 +96,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
     artist_id: a.artist_id,
     score: a.score ?? 1,
     nome: a.artist?.nome ?? '—',
+    mbid: a.artist?.mbid ?? null,
     lastfm_listeners: a.artist?.lastfm_listeners ?? null,
     topTag: (a.artist?.tags_editorial as string[] | null)?.[0] ?? null,
   }))
@@ -189,15 +190,18 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
         borderRadius: 6, background: corBg, padding: '1.5rem',
         marginBottom: '1.5rem',
       }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: cor, letterSpacing: '0.04em' }}>
+        <div style={{ marginBottom: '0.5rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, margin: '0 0 6px', color: cor, letterSpacing: '0.04em' }}>
             {nicho.nome}
           </h1>
-          <span style={{ fontSize: '0.7rem', color: labelColor, display: 'flex', alignItems: 'center', gap: 2 }}>
-            underground {score}/10
-            <TooltipIcon text={TOOLTIPS.underground_score} />
-            · {artistas.length} artistas
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              underground <span style={{ color: cor }}>{score}</span>/10
+              <TooltipIcon text={TOOLTIPS.underground_score} />
+            </span>
+            <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>
+            <span>{artistas.length} artistas</span>
+          </div>
         </div>
 
         {nicho.descricao && (
