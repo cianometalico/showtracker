@@ -4,8 +4,8 @@ Sistema operacional para vendas de camisetas estampadas em shows ao vivo.
 Vendedor ambulante com estamparia própria (tinta à base de água), São Paulo.
 Repositório: github.com/cianometalico/showtracker
 
-**Versão atual: v0.6.1** (2026-03-27)
-Próxima: v0.9.0 (UX/Layout Pass — ver ROADMAP v0.9.0 abaixo)
+**Versão atual: v0.6.3** (2026-03-30)
+Próxima: v0.9.0 (UX/Layout Pass — Fases A+C parcialmente concluídas — ver ROADMAP abaixo)
 
 ---
 
@@ -184,7 +184,7 @@ Indicador inline: enriquecido vs pendente — sempre com label, nunca glifo isol
 [IBM PLEX MONO, campo1] | [campo2] | [campo3]
 
 ex: Refused
-    SUÉCIA | enriquecido | mbid a5f3c8e1 | 482.391 listeners
+    SUÉCIA | desde 1991 | enriquecido | mbid a5f3c8e1 | 482.391 listeners
 
 ex: Carioca Club — 2024-04-12
     LIBERDADE | 1.200 cap | risco high | bem vendido | participou
@@ -207,9 +207,9 @@ ex: Carioca Club — 2024-04-12
 ## SCHEMA SUPABASE
 
 ```sql
-artists: id, nome, pais, mbid, genre_id (FK→genres), tags_editorial jsonb,
-  tags_behavioral jsonb, lastfm_listeners, wikipedia_url, similar_artists jsonb,
-  ultima_atualizacao
+artists: id, nome, pais, mbid, founded_year int, genre_id (FK→genres),
+  tags_editorial jsonb, tags_behavioral jsonb, lastfm_listeners,
+  wikipedia_url, similar_artists jsonb, ultima_atualizacao
 
 venues: id, nome, cidade, bairro (nullable), lat, lng, capacidade_praticavel,
   tipo_default, zona_risco bool, risco_fiscalizacao (low|medium|high),
@@ -217,8 +217,8 @@ venues: id, nome, cidade, bairro (nullable), lat, lng, capacidade_praticavel,
 
 shows: id, venue_id, data, nome_evento (nullable), status_ingresso
   (sold out|bem vendido|mal vendido|null=sem informação), publico_estimado,
-  participou bool, resultado_geral, concorrencia, clima_estimado, observacoes,
-  singularidades jsonb, source_url, legado bool,
+  participou bool, resultado_geral, concorrencia, clima_estimado, clima_temp int,
+  observacoes, singularidades jsonb, source_url, legado bool,
   pecas_levadas int, pecas_vendidas int,
   fiscalizacao_override (string|null), publico_estimado_manual (bool|null),
   tipo_venue_override (string|null)
@@ -277,7 +277,7 @@ app/
     [id]/show-detail-client.tsx     ← Edição inline (toggle read/edit + seção resultado)
     [id]/show-stock-section.tsx     ← Seção peças por design (client)
     [id]/show-history-block.tsx     ← Histórico Setlist.fm
-    [id]/weather-widget.tsx         ← Clima via OpenWeather (≤5 dias)
+    [id]/weather-widget.tsx         ← [DEPRECATED] substituído por fetch server-side em page.tsx
     [id]/actions.ts                 ← updateShowInline, updateResultado, updateParticipou,
                                        deleteShow, searchVenues, addShowMovement
   artistas/
@@ -432,7 +432,7 @@ OPENWEATHER_API_KEY=...
 - `participou` é campo editável — não calculado automaticamente. Toggle always-visible. Default inteligente na criação (passado=true, futuro=false)
 - `nome_evento` opcional — exibição via `getShowDisplayName(nome_evento, artistas)` → fallback `artistas.join(' + ')`
 - `status_ingresso` aceita null (="sem informação") → `publico_estimado` zerado
-- `clima_estimado` não editável pela UI — apenas exibido pelo weather-widget
+- `clima_estimado` + `clima_temp`: persistidos via fetch server-side em `shows/[id]/page.tsx` para shows dentro de 5 dias. WeatherWidget client removido do fluxo principal
 - Buscas accent-insensitive: server via RPCs `search_artists`/`search_venues` (unaccent); client via `removeAccents()`
 - venues têm `bairro` (text, nullable) — exibido como "Bairro · Cidade"
 
@@ -448,6 +448,24 @@ OPENWEATHER_API_KEY=...
 - Labels pt-BR em todo o app
 - Calendário: grid mensal 7×N (seg-dom, pt-BR), navegação via `?mes=YYYY-MM`
 
+### v0.9.0 Fase A (concluída — commit 96b0768)
+- Paleta + tokens CSS aplicados globalmente
+- Tipografia: IBM Plex Mono (.bodycore) + Instrument Serif (.datacore) em todo o app
+- Superfícies: `surface-raw` / `surface-enriched` por enriquecimento
+
+### v0.9.0 Fase C (parcial)
+- **Item 7 — Show detalhe**: layout grid nome∥venue, lineup full-width com header de colunas (ARTISTA/PAÍS/OUVINTES/ESTAMPA), participação flat, stats linha horizontal, stockSection como ReactNode prop
+- **Item 9 — Listas**: shows, artistas, locais, públicos com pipe format; h1 serif 400; status tokens; sem tabela fixa
+
+### v0.6.2
+- Estoque/design: `showOptions` (dropdown de movimentação) e lista "Shows" filtrados pelo `artist_id` do design — não mais todos os shows. Dois passos: `show_artists` → `shows.in(ids)`
+
+### v0.6.3
+- `artists.founded_year int` adicionado ao schema
+- Pipeline Ohara: `life-span.begin` do MB (formato `"1995"` ou `"1995-03-12"`, sempre `.slice(0,4)`) capturado em `enrich-all`, `EnrichButton` → `/api/artists`
+- Artista pipe: `desde XXXX` após país, só se não-null
+- Artistas já enriquecidos: precisam de re-enrich para popular `founded_year`
+
 ---
 
 ## ROADMAP v0.9.0
@@ -455,11 +473,10 @@ OPENWEATHER_API_KEY=...
 Implementação em 4 fases. Não pular — cada uma depende da anterior.
 
 ```
-FASE A — fundação visual (não toca layout)
-  1. Paleta + tokens CSS
-  2. Tipografia (IBM Plex Mono + Instrument Serif)
-  3. Superfícies
-  → Bruno testa no browser. Ajustes antes de continuar.
+FASE A — fundação visual ✓ CONCLUÍDA (commit 96b0768)
+  1. Paleta + tokens CSS ✓
+  2. Tipografia (IBM Plex Mono + Instrument Serif) ✓
+  3. Superfícies ✓
 
 FASE B — indicadores (depende de A)
   4. Dissolver glifos I Ching e funcionais, criar indicadores .bodycore
@@ -468,9 +485,9 @@ FASE B — indicadores (depende de A)
   → Bruno testa cada página.
 
 FASE C — layout (depende de A+B)
-  7. Show detalhe: venue ∥ lineup, header pipe
-  8. Artista detalhe: nichos ∥ tags, header pipe
-  9. Listas reestruturadas (shows, artistas, locais, públicos)
+  7. Show detalhe: venue ∥ lineup, header pipe ✓ CONCLUÍDO
+  8. Artista detalhe: nichos ∥ tags, header pipe (pipe feito, layout grid pendente)
+  9. Listas reestruturadas (shows, artistas, locais, públicos) ✓ CONCLUÍDO
   10. Nav: formato + labels MONO CAPS
   → v0.9.0 pronta para commit.
 

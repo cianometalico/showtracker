@@ -38,7 +38,7 @@ export function EstoqueListClient({ designs }: { designs: Design[] }) {
   }, [designs, filtro, busca])
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 720 }}>
+    <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Estoque</h1>
         <Link href="/estoque/new" style={{

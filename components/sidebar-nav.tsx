@@ -1,3 +1,4 @@
+// deprecated v0.9.0 — substituído por components/nav.tsx
 'use client'
 
 import Link from 'next/link'

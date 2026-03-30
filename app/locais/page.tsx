@@ -33,7 +33,7 @@ export default async function LocaisPage() {
   }))
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 760 }}>
+    <div style={{ width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>Locais</h1>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{venues.length} cadastrados</span>

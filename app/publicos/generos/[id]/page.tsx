@@ -63,7 +63,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
   const valueColor = 'rgba(255,255,255,0.9)'
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 720 }}>
+    <div>
 
       <Link href="/publicos" style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
         ← públicos

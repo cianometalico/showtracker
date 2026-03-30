@@ -162,7 +162,7 @@ function OharaSearch({ defaultExpanded = false }, ref) {
 
   // ── Expanded state ───────────────────────────────────────────
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative', minWidth: 320 }}>
       {phase === 'enriching' ? (
         <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', margin: 0 }}>
           <span style={{ color: 'var(--amber)' }}>⟳</span> enriquecendo {enrichingNome}…
@@ -201,8 +201,9 @@ function OharaSearch({ defaultExpanded = false }, ref) {
           {/* Resultados locais */}
           {phase === 'local' && localResults.length > 0 && (
             <div style={{
-              position: 'absolute', left: 0, right: 0, zIndex: 200,
-              background: 'var(--nav-bg)', border: '1px solid var(--border)',
+              position: 'absolute', top: '100%', right: 0, zIndex: 200,
+              minWidth: 320,
+              background: 'var(--surface-raised)', border: '1px solid var(--border)',
               borderRadius: 4, marginTop: 2, maxHeight: 260, overflowY: 'auto',
             }}>
               {localResults.slice(0, 8).map(a => {
@@ -244,8 +245,9 @@ function OharaSearch({ defaultExpanded = false }, ref) {
           {/* Resultados MB */}
           {phase === 'mb' && mbResults.length > 0 && !loading && (
             <div style={{
-              position: 'absolute', left: 0, right: 0, zIndex: 200,
-              background: 'var(--nav-bg)', border: '1px solid var(--border)',
+              position: 'absolute', top: '100%', right: 0, zIndex: 200,
+              minWidth: 320,
+              background: 'var(--surface-raised)', border: '1px solid var(--border)',
               borderRadius: 4, marginTop: 2, maxHeight: 260, overflowY: 'auto',
             }}>
               {mbResults.slice(0, 8).map(r => (

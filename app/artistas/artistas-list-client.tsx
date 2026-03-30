@@ -30,7 +30,7 @@ export function ArtistasListClient({ artists }: { artists: Artist[] }) {
   }, [artists, busca])
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 760 }}>
+    <div style={{ width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>Artistas</h1>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>

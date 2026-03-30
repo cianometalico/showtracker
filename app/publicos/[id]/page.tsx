@@ -164,7 +164,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 720 }}>
+    <div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
         <Link href="/publicos" style={{ fontSize: '0.75rem', color: labelColor, textDecoration: 'none' }}>

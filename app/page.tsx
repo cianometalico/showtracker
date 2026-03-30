@@ -142,7 +142,7 @@ export default async function HomePage({
   })
 
   return (
-    <div className="page-container">
+    <div>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.5rem' }}>

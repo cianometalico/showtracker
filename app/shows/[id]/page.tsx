@@ -117,7 +117,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
   }))
 
   return (
-    <div className="page-container">
+    <div>
       <ShowDetailClient
         show={{
           id: show.id,

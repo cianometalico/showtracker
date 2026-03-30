@@ -4,8 +4,6 @@ import { OharaSearch } from '@/components/ohara-search'
 export default function OharaPage() {
   return (
     <div style={{
-      padding: '1.5rem',
-      maxWidth: 720,
       borderTop: '1px solid var(--amber)',
       background: 'linear-gradient(180deg, rgba(232,184,48,0.06) 0%, transparent 300px)',
       minHeight: '100vh',

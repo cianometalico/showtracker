@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import './globals.css'
 import { WeatherBar } from '@/components/weather-bar'
 import type { WeatherData } from '@/components/weather-bar'
-import { SidebarNav } from '@/components/sidebar-nav'
+import { Nav } from '@/components/nav'
 import { OharaSearch } from '@/components/ohara-search'
 
 export const metadata: Metadata = {
@@ -41,24 +41,50 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
-        <div className="app-shell">
-          <aside className="sidebar">
-            <div className="sidebar-logo">
-              <div className="sidebar-logo-text">R̦adiant</div>
-            </div>
-            <SidebarNav />
-            <div className="sidebar-version">v0.6.0</div>
-          </aside>
-          <main className="main-content">
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '0.5rem 1.5rem 0', gap: '1rem' }}>
-              <Suspense fallback={null}>
-                <OharaSearch />
-              </Suspense>
-              {weather && <WeatherBar weather={weather} />}
-            </div>
-            {children}
-          </main>
-        </div>
+        {/* header: logo + OharaSearch + clima */}
+        <header style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          height: 48,
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--nav-bg)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+        }}>
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontWeight: 500,
+            fontSize: '0.75rem',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'var(--text-primary)',
+          }}>
+            Radiant
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Suspense fallback={null}>
+              <OharaSearch />
+            </Suspense>
+            {weather && <WeatherBar weather={weather} />}
+          </div>
+        </header>
+
+        {/* nav: horizontal (desktop) ou bottom bar (mobile) */}
+        <Nav />
+
+        {/* conteúdo */}
+        <main style={{
+          width: '100%',
+          maxWidth: 960,
+          margin: '0 auto',
+          padding: '24px 16px',
+          boxSizing: 'border-box',
+        }}>
+          {children}
+        </main>
       </body>
     </html>
   )

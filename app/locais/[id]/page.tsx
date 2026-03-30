@@ -60,8 +60,6 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   }))
 
   return (
-    <div className="page-container">
-      <VenueDetailClient venue={venue} subprefeitura={sub ?? null} shows={showsEnriquecidos} />
-    </div>
+    <VenueDetailClient venue={venue} subprefeitura={sub ?? null} shows={showsEnriquecidos} />
   )
 }

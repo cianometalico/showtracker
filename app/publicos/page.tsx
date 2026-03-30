@@ -45,20 +45,17 @@ export default async function PublicosPage() {
   const bodyText = 'var(--text-primary)'
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 960 }}>
+    <div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: bodyText, margin: 0 }}>
             públicos
           </h1>
-          <p style={{ fontSize: '0.78rem', color: dimText, margin: '4px 0 0' }}>
-            leitura de tribos — nichos · gêneros
-          </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ fontSize: '0.75rem', color: dimText }}>
-            {(nichos ?? []).length} nichos · {(generos ?? []).length} gêneros
+            {(nichos ?? []).length} nichos{(generos ?? []).length > 0 ? ` · ${(generos ?? []).length} gêneros` : ''}
           </span>
           <Link href="/publicos/novo" style={{
             fontSize: '0.75rem', color: dimText,
@@ -72,9 +69,6 @@ export default async function PublicosPage() {
 
       {/* nichos */}
       <div style={{ marginBottom: '2.5rem' }}>
-        <p style={{ fontSize: '0.62rem', color: dimText, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>
-          nichos — escuro → underground · claro → mainstream
-        </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '1rem' }}>
           {(nichos ?? []).map((n: any) => {
             const score = n.underground_score ?? 5

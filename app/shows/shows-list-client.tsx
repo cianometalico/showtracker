@@ -118,7 +118,7 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
   }, [shows, filtro, busca])
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 720 }}>
+    <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>Shows</h1>
         <Link href="/shows/new" style={{

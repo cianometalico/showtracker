@@ -34,7 +34,7 @@ export default function DadosPage() {
   }
 
   return (
-    <div className="page-container">
+    <div>
 
       <div style={{ marginBottom: '1.5rem' }}>
         <h1 style={{

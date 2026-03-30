@@ -115,7 +115,7 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
   const showOptional = mTipo === 'perdido'
 
   return (
-    <div className="page-container">
+    <div>
       <Link href="/estoque" className="breadcrumb">← Estoque</Link>
 
       {/* Header */}

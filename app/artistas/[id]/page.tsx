@@ -115,7 +115,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   const artistDesigns = (designRows ?? []) as any[]
 
   return (
-    <div className="page-container">
+    <div>
 
       <Link href="/artistas" className="breadcrumb">
         ← Artistas

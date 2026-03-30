@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @layer base {
-  * { box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: border-box; }
 
   body {
     font-family: var(--font-mono);
@@ -198,6 +198,92 @@
 @media (max-width: 768px) {
   .artist-detail-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* nav responsive */
+.nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+}
+
+.nav-mobile {
+  display: none;
+}
+
+.nav-mais-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.15s;
+}
+
+.nav-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 0;
+  min-width: 140px;
+  z-index: 200;
+}
+
+.nav-popover-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.15s;
+}
+
+.nav-popover-link:hover {
+  color: var(--cyan);
+}
+
+@media (max-width: 768px) {
+  .nav-desktop {
+    display: none;
+  }
+
+  .nav-mobile {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    align-items: center;
+    justify-content: space-around;
+    padding: 6px 0;
+    border-top: 1px solid var(--border);
+    background: var(--nav-bg);
+    z-index: 100;
+  }
+
+  main {
+    padding-bottom: 72px;
   }
 }
 
