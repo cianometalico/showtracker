@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { getShowDisplayName } from '@/lib/show-utils'
+import { getShowDisplayName, isShowPast } from '@/lib/show-utils'
 import { removeAccents } from '@/lib/text-utils'
 
 type Show = {
@@ -56,57 +56,61 @@ function formatData(iso: string) {
   })
 }
 
-function isPast(iso: string) {
-  return new Date(iso + 'T23:59:59') < new Date()
-}
+// ── Filter definitions ────────────────────────────────────────
 
-function todayMidnight() {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-}
+type ShowFilter = 'a-participar' | 'nao-participarei' | 'participados' | 'nao-participados' | 'todos'
 
-type FilterKey = 'proximos' | 'agenda' | 'realizados' | 'legado'
-
-const FILTROS: { key: FilterKey; label: string }[] = [
-  { key: 'proximos',   label: 'próximos' },
-  { key: 'agenda',     label: 'agenda' },
-  { key: 'realizados', label: 'realizados' },
-  { key: 'legado',     label: 'legado' },
+const FILTERS: { value: ShowFilter; label: string }[] = [
+  { value: 'a-participar',     label: 'A PARTICIPAR' },
+  { value: 'nao-participarei', label: 'NÃO PARTICIPAREI' },
+  { value: 'participados',     label: 'PARTICIPADOS' },
+  { value: 'nao-participados', label: 'NÃO PARTICIPADOS' },
+  { value: 'todos',            label: 'TODOS' },
 ]
 
+function applyFilter(shows: Show[], filtro: ShowFilter): Show[] {
+  switch (filtro) {
+    case 'a-participar':
+      return shows
+        .filter(s => !isShowPast(s.data) && s.participou === true)
+        .sort((a, b) => a.data.localeCompare(b.data))
+    case 'nao-participarei':
+      return shows
+        .filter(s => !isShowPast(s.data) && s.participou === false)
+        .sort((a, b) => a.data.localeCompare(b.data))
+    case 'participados':
+      return shows
+        .filter(s => isShowPast(s.data) && s.participou === true)
+        .sort((a, b) => b.data.localeCompare(a.data))
+    case 'nao-participados':
+      return shows
+        .filter(s => isShowPast(s.data) && s.participou === false)
+        .sort((a, b) => b.data.localeCompare(a.data))
+    case 'todos':
+      return [...shows].sort((a, b) => a.data.localeCompare(b.data))
+  }
+}
+
+// ── Component ─────────────────────────────────────────────────
+
 export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows: number }) {
-  const [filtro, setFiltro] = useState<FilterKey>('proximos')
-  const [busca,  setBusca]  = useState('')
+  const [filtro, setFiltro] = useState<ShowFilter>(() =>
+    shows.some(s => !isShowPast(s.data) && s.participou === true) ? 'a-participar' : 'todos'
+  )
+  const [busca, setBusca] = useState('')
+  const todayMarkerRef = useRef<HTMLDivElement>(null)
+
+  // Per-filter counts (no busca applied — always reflect full dataset)
+  const counts = useMemo<Record<ShowFilter, number>>(() => ({
+    'a-participar':     shows.filter(s => !isShowPast(s.data) && s.participou === true).length,
+    'nao-participarei': shows.filter(s => !isShowPast(s.data) && s.participou === false).length,
+    'participados':     shows.filter(s =>  isShowPast(s.data) && s.participou === true).length,
+    'nao-participados': shows.filter(s =>  isShowPast(s.data) && s.participou === false).length,
+    'todos':            shows.length,
+  }), [shows])
 
   const filtered = useMemo(() => {
-    let list = [...shows]
-    const today = todayMidnight()
-    const limit5 = new Date(today)
-    limit5.setDate(limit5.getDate() + 5)
-
-    switch (filtro) {
-      case 'proximos':
-        list = list.filter(s => {
-          const d = new Date(s.data + 'T12:00:00')
-          return d >= today && d <= limit5
-        })
-        list.sort((a, b) => a.data.localeCompare(b.data))
-        break
-      case 'agenda':
-        list = list.filter(s => new Date(s.data + 'T12:00:00') >= today)
-        list.sort((a, b) => a.data.localeCompare(b.data))
-        break
-      case 'realizados':
-        list = list.filter(s => isPast(s.data))
-        list.sort((a, b) => b.data.localeCompare(a.data))
-        break
-      case 'legado':
-        list = list.filter(s => s.legado)
-        list.sort((a, b) => b.data.localeCompare(a.data))
-        break
-    }
-
+    let list = applyFilter(shows, filtro)
     if (busca.trim()) {
       const q = removeAccents(busca.toLowerCase())
       list = list.filter(s =>
@@ -117,6 +121,19 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
     }
     return list
   }, [shows, filtro, busca])
+
+  // Index of first future show in 'todos' list (for "hoje" marker)
+  const firstFutureIndex = useMemo(() =>
+    filtro === 'todos' ? filtered.findIndex(s => !isShowPast(s.data)) : -1,
+    [filtered, filtro]
+  )
+
+  // Scroll to "hoje" marker when switching to 'todos'
+  useEffect(() => {
+    if (filtro === 'todos' && todayMarkerRef.current) {
+      todayMarkerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [filtro])
 
   return (
     <div>
@@ -133,14 +150,16 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-          {FILTROS.map(f => (
-            <button key={f.key} onClick={() => setFiltro(f.key)} style={{
-              padding: '0.3rem 0.75rem', fontSize: '0.75rem', borderRadius: 99,
+          {FILTERS.map(f => (
+            <button key={f.value} onClick={() => setFiltro(f.value)} style={{
+              padding: '0.3rem 0.75rem', fontSize: '0.68rem', borderRadius: 99,
               cursor: 'pointer', border: '1px solid var(--border)',
-              background: filtro === f.key ? 'var(--text)' : 'var(--surface)',
-              color: filtro === f.key ? 'var(--nav-bg)' : 'var(--text-dim)',
+              fontFamily: 'var(--font-mono)', letterSpacing: '0.06em',
+              background: filtro === f.value ? 'var(--text)' : 'var(--surface)',
+              color:      filtro === f.value ? 'var(--nav-bg)' : 'var(--text-dim)',
             }}>
               {f.label}
+              <span style={{ marginLeft: '0.35em', opacity: 0.6 }}>({counts[f.value]})</span>
             </button>
           ))}
         </div>
@@ -160,33 +179,50 @@ export function ShowsListClient({ shows, totalRows }: { shows: Show[]; totalRows
         <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', padding: '2rem 0.5rem' }}>Nenhum show encontrado.</p>
       ) : (
         <div>
-          {filtered.map(show => <ShowRow key={show.id} show={show} />)}
+          {filtered.map((show, idx) => (
+            <div key={show.id}>
+              {filtro === 'todos' && idx === firstFutureIndex && (
+                <div ref={todayMarkerRef} style={{
+                  fontSize: '0.65rem',
+                  fontFamily: 'var(--font-mono)',
+                  color: 'var(--cyan)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  padding: '4px 0',
+                  borderTop: '1px solid var(--cyan)',
+                  marginBottom: 4,
+                }}>
+                  hoje
+                </div>
+              )}
+              <ShowRow show={show} />
+            </div>
+          ))}
         </div>
       )}
     </div>
   )
 }
 
+// ── ShowRow ───────────────────────────────────────────────────
+
 function statusBadge(show: Show): { text: string; color: string } {
-  const past = isPast(show.data)
-  // Legado not yet confirmed
+  const past = isShowPast(show.data)
   if (show.legado && show.participou === null && past) {
     return { text: 'confirmar', color: 'var(--amber)' }
   }
   if (show.legado) {
     return { text: 'leg.', color: 'var(--text-muted)' }
   }
-  // Future: no participou badge
   if (!past) {
     return { text: '—', color: 'var(--text-dim)' }
   }
   if (show.resultado_geral) {
     return {
-      text: LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral,
+      text:  LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral,
       color: corResultado(show.resultado_geral),
     }
   }
-  // Past without confirmed participation
   if (show.participou === null) {
     return { text: 'confirmar', color: 'var(--amber)' }
   }
@@ -197,7 +233,7 @@ function statusBadge(show: Show): { text: string; color: string } {
 }
 
 function ShowRow({ show }: { show: Show }) {
-  const past    = isPast(show.data)
+  const past    = isShowPast(show.data)
   const opacity = !past ? 1 : show.participou === false ? 0.45 : 0.55
   const badge   = statusBadge(show)
   const nome    = getShowDisplayName(show.nome_evento, show.artistas)

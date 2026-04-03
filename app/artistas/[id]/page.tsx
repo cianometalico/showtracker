@@ -94,7 +94,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   }))
 
   const linkedNichosDisplay = linkedNichos
-    .map(ln => {
+    .map((ln: any) => {
       const nicho = (allNichos ?? []).find((n: any) => n.id === ln.id)
       if (!nicho) return null
       return {
