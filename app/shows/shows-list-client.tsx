@@ -17,6 +17,7 @@ type Show = {
   participou: boolean | null
   resultado_geral: string | null
   legado: boolean
+  tour: string | null
 }
 
 const LABEL_RESULTADO: Record<string, string> = {
@@ -235,6 +236,11 @@ function ShowRow({ show }: { show: Show }) {
             </>
           )}
         </div>
+        {show.tour && (
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: '2px 0 0' }}>
+            {show.tour}
+          </p>
+        )}
       </div>
       <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: badge.color, flexShrink: 0, paddingTop: 2 }}>
         {badge.text}

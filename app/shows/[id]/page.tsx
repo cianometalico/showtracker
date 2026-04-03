@@ -13,7 +13,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   const { data: show, error } = await supabase
     .from('shows')
-    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, clima_temp, concorrencia, observacoes, publico_estimado, singularidades, legado, venue_id, source_url, pecas_levadas, pecas_vendidas, venues(id, nome, cidade, bairro, capacidade_praticavel, risco_fiscalizacao, lat, lng)')
+    .select('id, data, nome_evento, status_ingresso, participou, resultado_geral, clima_estimado, clima_temp, concorrencia, observacoes, publico_estimado, singularidades, legado, venue_id, source_url, pecas_levadas, pecas_vendidas, tour, venues(id, nome, cidade, bairro, capacidade_praticavel, risco_fiscalizacao, lat, lng)')
     .eq('id', id)
     .single() as any
 
@@ -136,6 +136,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
           source_url: show.source_url ?? null,
           pecas_levadas: show.pecas_levadas ?? null,
           pecas_vendidas: show.pecas_vendidas ?? null,
+          tour: show.tour ?? null,
         }}
         venue={venue ?? null}
         lineup={lineup}

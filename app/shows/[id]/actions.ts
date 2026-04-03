@@ -15,6 +15,7 @@ export type UpdateShowInput = {
   source_url?:     string | null
   pecas_levadas?:  number | null
   pecas_vendidas?: number | null
+  tour?:           string | null
 }
 
 export async function updateShowInline(
@@ -37,6 +38,7 @@ export async function updateShowInline(
       source_url:      input.source_url || null,
       pecas_levadas:   input.pecas_levadas ?? null,
       pecas_vendidas:  input.pecas_vendidas ?? null,
+      tour:            input.tour ?? null,
     })
     .eq('id', id)
   if (error) throw new Error(error.message)

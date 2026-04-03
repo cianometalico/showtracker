@@ -33,6 +33,7 @@ type ShowData = {
   publico_estimado: number | null; singularidades: string[] | null
   legado: boolean | null; venue_id: string | null
   source_url: string | null; pecas_levadas: number | null; pecas_vendidas: number | null
+  tour: string | null
 }
 
 type Props = { show: ShowData; venue: Venue | null; lineup: LineupItem[]; stockSection?: React.ReactNode; weatherSummary?: string | null; weatherTemp?: number | null }
@@ -98,6 +99,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
   const [eStatus,       setEStatus]      = useState(show.status_ingresso ?? '')
   const [eConcorrencia, setEConcorrencia]= useState(show.concorrencia ?? '')
   const [eObservacoes,  setEObservacoes] = useState(show.observacoes ?? '')
+  const [eTour,         setETour]        = useState(show.tour ?? '')
   const [eSourceUrl,    setESourceUrl]   = useState(show.source_url ?? '')
 
   // ── Venue edit ──
@@ -152,6 +154,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
     setEConcorrencia(show.concorrencia ?? '')
     setEObservacoes(show.observacoes ?? '')
     setESourceUrl(show.source_url ?? '')
+    setETour(show.tour ?? '')
     setEVenueId(show.venue_id)
     setEVenueLabel(initialVenue?.nome ?? '')
     setEVenueQuery('')
@@ -178,6 +181,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
       source_url:      eSourceUrl || null,
       pecas_levadas:   rPecasLevadas || null,
       pecas_vendidas:  rPecasVendidas || null,
+      tour:            eTour || null,
     }
     const artistas = pickerArtists.map(a => ({
       artist_id: a.id, ordem: a.ordem, faz_estampa: a.faz_estampa,
@@ -231,6 +235,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
   const pipePartes = [
     formatDataPipe(show.data),
     initialVenue?.nome ?? null,
+    show.tour ?? null,
     show.status_ingresso ? (LABEL_STATUS[show.status_ingresso] ?? show.status_ingresso) : null,
     show.resultado_geral ? (LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral) : null,
     weatherSummary ? `${weatherSummary}${weatherTemp ? ` ${weatherTemp}°C` : ''}` : null,
@@ -319,6 +324,10 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
 
               <EField label="Source URL">
                 <input value={eSourceUrl} onChange={e => setESourceUrl(e.target.value)} style={inputStyle} placeholder="https://..." />
+              </EField>
+
+              <EField label="Turnê">
+                <input value={eTour} onChange={e => setETour(e.target.value)} style={inputStyle} placeholder="ex: The Clancy World Tour" />
               </EField>
 
             </div>
