@@ -155,10 +155,11 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         }
       />
 
-      {/* Grid: nichos ∥ tags */}
+      {/* Grid: nichos ∥ tags — card leve nível 2 */}
+      <div style={{ background: 'var(--surface-raised)', padding: 'var(--space-md)', borderRadius: 2, marginBottom: 'var(--space-lg)' }}>
       <div style={{
         display: 'grid', gridTemplateColumns: '1fr 1fr',
-        gap: 24, alignItems: 'start', marginBottom: '1.5rem',
+        gap: 24, alignItems: 'start',
       }}>
         {/* Nichos — coluna esquerda */}
         <div>
@@ -168,25 +169,32 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-serif)' }}>
                 nenhum nicho vinculado
               </p>
-              {sugestoes.length > 0 && (
-                <div style={{ marginTop: 'var(--space-sm)' }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', margin: '0 0 var(--space-sm)' }}>
-                    sugestões
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                    {sugestoes.slice(0, 3).map(s => (
-                      <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <Link href={`/publicos/${s.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.85rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
-                          {s.nome}
-                        </Link>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-dim)', flexShrink: 0, marginLeft: 8 }}>
-                          {s.score_match} {s.score_match === 1 ? 'tag' : 'tags'} em comum
-                        </span>
-                      </div>
-                    ))}
+              {(() => {
+                const sugestoesComConfianca = sugestoes.filter(s => s.score_match >= 2).slice(0, 3)
+                return sugestoesComConfianca.length > 0 ? (
+                  <div style={{ marginTop: 'var(--space-sm)' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', margin: '0 0 var(--space-sm)' }}>
+                      sugestões
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                      {sugestoesComConfianca.map(s => (
+                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                          <Link href={`/publicos/${s.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.85rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
+                            {s.nome}
+                          </Link>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-dim)', flexShrink: 0, marginLeft: 8 }}>
+                            {s.score_match} tags em comum
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : sugestoes.length > 0 ? (
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-sm)' }}>
+                    nenhuma sugestão com confiança suficiente
+                  </p>
+                ) : null
+              })()}
             </>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -201,7 +209,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
                 }}>
                   {n.nome}
                   <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                    {n.score}
+                    {(Math.round(n.score * 10) / 10).toFixed(1)}
                   </span>
                 </a>
               ))}
@@ -244,7 +252,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           )}
         </div>
       </div>
-
+      </div>
 
       {/* Overrides */}
       <OverrideSectionClient

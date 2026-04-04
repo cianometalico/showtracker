@@ -53,7 +53,9 @@ export const COUNTRIES: Record<string, string> = {
   CN: 'China (中国)',
 }
 
-export function countryName(code: string | null | undefined): string {
+export function countryName(code: string | null | undefined, short = false): string {
   if (!code) return '—'
-  return COUNTRIES[code.toUpperCase()] ?? code
+  const full = COUNTRIES[code.toUpperCase()] ?? code
+  if (short) return full.replace(/\s*\(.*\)$/, '').trim()
+  return full
 }

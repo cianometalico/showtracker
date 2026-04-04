@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { nichoColor, nichoColorAlpha } from '@/lib/nicho-color'
+import { nichoColor } from '@/lib/nicho-color'
 import { NichoDeleteButton } from './delete-button-client'
 import { NichoArtistasClient } from './nicho-artistas-client'
 import { TooltipIcon } from '../tooltip-client'
@@ -39,7 +39,6 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
   if (error || !nicho) notFound()
 
   const score = nicho.underground_score ?? 5
-  const cor   = nichoColor(nicho.nome, score)
 
   // ── Artistas vinculados (com override fields para agregação) ──
   const { data: artistNichos } = await (supabase as any)
@@ -229,7 +228,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
       </section>
 
       {/* CORPORALIDADE + MENTALIDADE */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: 'var(--space-lg)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: 'var(--space-lg)' }}>
 
         <section>
           <p style={sectionLabel}>corporalidade</p>
@@ -288,17 +287,17 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
                 <Link key={t} href={`/publicos/generos/${match.id}`} style={{ textDecoration: 'none' }}>
                   <span style={{
                     fontSize: '0.75rem', padding: '0.15rem 0.55rem',
-                    background: nichoColorAlpha(nicho.nome, score, 0.15),
-                    border: `1px solid ${nichoColorAlpha(nicho.nome, score, 0.4)}`,
-                    borderRadius: 4, color: cor,
+                    background: 'var(--surface-raised)',
+                    border: '1px solid var(--text-muted)',
+                    borderRadius: 2, color: 'var(--text-primary)',
                   }}>{t}</span>
                 </Link>
               ) : (
                 <span key={t} style={{
                   fontSize: '0.75rem', padding: '0.15rem 0.55rem',
-                  background: nichoColorAlpha(nicho.nome, score, 0.08),
-                  border: `1px solid ${nichoColorAlpha(nicho.nome, score, 0.2)}`,
-                  borderRadius: 4, color: `${cor}99`,
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--text-muted)',
+                  borderRadius: 2, color: 'var(--text-dim)',
                 }}>{t}</span>
               )
             })}
@@ -306,12 +305,9 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
         </section>
       )}
 
-      {/* ARTISTAS — client component com busca + vinculação */}
-      <NichoArtistasClient nichoId={id} initialArtistas={artistasParaClient} />
-
       {/* PRÓXIMOS SHOWS */}
       {proximosShows.length > 0 && (
-        <section style={{ marginTop: 'var(--space-xl)', marginBottom: 'var(--space-lg)' }}>
+        <section style={{ marginBottom: 'var(--space-lg)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
               Próximos shows
@@ -351,7 +347,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
 
       {/* HISTÓRICO / RESULTADO MÉDIO */}
       {resultadoNicho && resultadoNicho.total_shows > 0 && (
-        <section style={{ marginBottom: 'var(--space-lg)' }}>
+        <section style={{ marginBottom: 'var(--space-xl)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
               Histórico
@@ -378,6 +374,9 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
           </div>
         </section>
       )}
+
+      {/* ARTISTAS — client component com busca + vinculação */}
+      <NichoArtistasClient nichoId={id} initialArtistas={artistasParaClient} />
 
     </div>
   )

@@ -186,10 +186,10 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
         <span style={{ color: saldo.saldo_atual === 0 ? 'var(--status-neg)' : saldo.saldo_atual < 0 ? 'var(--status-neg)' : undefined }}>EM ESTOQUE {saldo.saldo_atual}</span>
       </p>
 
-      {/* Nova movimentação */}
+      {/* Nova movimentação — nível 3 */}
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <p className="section-label">Registrar movimentação</p>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '1rem' }}>
+        <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--text-muted)', borderRadius: 2, padding: 'var(--space-md)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
             <EField label="Tipo">
               <select value={mTipo} onChange={e => { setMTipo(e.target.value as any); setMShowId('') }} style={inputStyle}>

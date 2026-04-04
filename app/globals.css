@@ -70,12 +70,13 @@
   --space-xl:   48px;
   --space-page: 24px;
 
-  /* form (1.3.5) */
+  /* form (1.3.2) */
   --form-bg:           var(--surface-raised);
-  --form-border:       #1e3040;
+  --form-border:       var(--text-muted);
   --form-border-focus: var(--cyan);
+  --form-text:         var(--text-primary);
   --form-radius:       2px;
-  --form-padding:      6px 10px;
+  --form-padding:      var(--space-sm) var(--space-md);
   --form-font-size:    0.8rem;
 
   /* compat: aliases para migração gradual de componentes */
@@ -106,8 +107,8 @@ input::placeholder, textarea::placeholder {
 }
 
 .btn-primary {
-  background: var(--surface-raised);
-  border: 1px solid var(--form-border-focus);
+  background: transparent;
+  border: 1px solid var(--cyan);
   border-radius: var(--form-radius);
   padding: var(--form-padding);
   font-family: var(--font-mono);
@@ -117,13 +118,13 @@ input::placeholder, textarea::placeholder {
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
-.btn-primary:hover { background: var(--surface-enriched); }
+.btn-primary:hover { background: var(--cyan); color: var(--nav-bg); }
 .btn-primary:disabled { opacity: 0.4; cursor: default; }
 
 .btn-danger {
-  background: var(--surface-raised);
+  background: transparent;
   border: 1px solid var(--status-neg);
   border-radius: var(--form-radius);
   padding: var(--form-padding);
@@ -134,9 +135,9 @@ input::placeholder, textarea::placeholder {
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
-.btn-danger:hover { background: rgba(219,41,29,0.08); }
+.btn-danger:hover { background: var(--status-neg); color: var(--nav-bg); }
 .btn-danger:disabled { opacity: 0.4; cursor: default; }
 
 .page-container         { padding: 1.5rem; max-width: 720px; }
@@ -354,6 +355,28 @@ input::placeholder, textarea::placeholder {
   main {
     padding-bottom: 72px;
   }
+}
+
+/* show action block — bloco de ação (1.3.3) */
+.show-action-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  align-items: start;
+}
+.show-action-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--space-sm);
+  align-items: end;
+}
+@media (max-width: 768px) {
+  .show-action-top,
+  .show-action-bottom {
+    grid-template-columns: 1fr;
+  }
+  :root { --space-xl: 32px; --space-lg: 24px; }
 }
 
 /* show detail — grid venue ∥ lineup */

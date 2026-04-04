@@ -313,24 +313,26 @@ export function VenueDetailClient({ venue, subprefeitura, subprefeituras, shows,
               {nichosByVenue.length} {nichosByVenue.length === 1 ? 'nicho' : 'nichos'}
             </span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-            {nichosByVenue.map(n => (
-              <div key={n.id}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <Link href={`/publicos/${n.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
-                    {n.nome}
-                  </Link>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                    {n.ocorrencias} {n.ocorrencias === 1 ? 'show' : 'shows'}
-                  </span>
-                </div>
-                {n.underground_score != null && (
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                    underground {n.underground_score}/10
+          <div style={{ background: 'var(--surface-raised)', padding: 'var(--space-md)', borderRadius: 2 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+              {nichosByVenue.map(n => (
+                <div key={n.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <Link href={`/publicos/${n.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
+                      {n.nome}
+                    </Link>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                      {n.ocorrencias} {n.ocorrencias === 1 ? 'show' : 'shows'}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+                  {n.underground_score != null && (
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                      underground {n.underground_score}/10
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

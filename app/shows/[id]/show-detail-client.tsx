@@ -61,6 +61,9 @@ function corStatusIngresso(s: string): string { return COR_STATUS[s] ?? 'var(--t
 function labelStatusIngresso(s: string): string { return LABEL_STATUS[s] ?? s }
 function corResultado(r: string): string { return COR_RESULTADO[r] ?? 'var(--text-dim)' }
 function labelResultado(r: string): string { return LABEL_RESULTADO[r] ?? r }
+function riscoColor(r: string): string {
+  return r === 'high' ? 'var(--status-neg)' : r === 'medium' ? 'var(--status-neut)' : 'var(--status-pos)'
+}
 
 
 function formatDataPipe(iso: string) {
@@ -225,21 +228,6 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
 
   const singularidades = show.singularidades ?? []
 
-  const pipePartes = [
-    formatDataPipe(show.data),
-    show.tour ?? null,
-    show.status_ingresso ? (LABEL_STATUS[show.status_ingresso] ?? show.status_ingresso) : null,
-    show.resultado_geral ? (LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral) : null,
-    weatherSummary ? `${weatherSummary}${weatherTemp ? ` ${weatherTemp}°C` : ''}` : null,
-  ].filter(Boolean)
-
-  const venuePipe = initialVenue ? [
-    initialVenue.nome,
-    [initialVenue.bairro, initialVenue.cidade].filter(Boolean).join(' · '),
-    initialVenue.capacidade_praticavel ? `cap. ${initialVenue.capacidade_praticavel.toLocaleString('pt-BR')}` : null,
-    initialVenue.risco_fiscalizacao ? `risco ${initialVenue.risco_fiscalizacao}` : null,
-  ].filter(Boolean).join(' | ') : null
-
   // ── Render ────────────────────────────────────────────────
 
   return (
@@ -373,37 +361,67 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
       {/* ── READ MODE ─────────────────────────────────────── */}
       {!isEditing && (
         <>
-          {/* Seção 1: nome + meta */}
-          <div style={{ marginTop: '1rem', marginBottom: 'var(--space-xl)' }}>
+          {/* 1. CARD DE EVENTO — nível 3 */}
+          <div style={{
+            background: 'var(--surface-raised)', border: '1px solid var(--text-muted)',
+            padding: 'var(--space-md)', borderRadius: 2,
+            marginTop: 'var(--space-md)', marginBottom: 'var(--space-lg)',
+          }}>
+            {/* Linha 1: nome + badges */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: 6 }}>
               <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0, lineHeight: 1.3 }}>
                 {nomeShow}
               </h1>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
                 {show.legado && (
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', border: '1px solid var(--border)', padding: '0.2rem 0.5rem', borderRadius: 3, fontFamily: 'var(--font-mono)' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', border: '1px solid var(--text-muted)', padding: '0.2rem 0.5rem', borderRadius: 2, fontFamily: 'var(--font-mono)' }}>
                     legado
                   </span>
                 )}
                 <button onClick={startEdit} style={editBtnStyle}>editar</button>
               </div>
             </div>
-            {pipePartes.length > 0 && (
+
+            {/* Linha 2: data | venue | tour */}
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 2px', lineHeight: 1.6 }}>
+              {formatDataPipe(show.data)}
+              {initialVenue && (
+                <> | <Link href={`/locais/${initialVenue.id}`} style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>
+                  {initialVenue.nome}
+                </Link></>
+              )}
+              {show.tour && <> | {show.tour}</>}
+              {weatherSummary && <> | {weatherSummary}{weatherTemp ? ` ${weatherTemp}°C` : ''}</>}
+            </p>
+
+            {/* Linha 3: bairro · cidade | cap | risco */}
+            {initialVenue && (
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 2px', lineHeight: 1.6 }}>
-                {pipePartes.join(' | ')}
+                {[initialVenue.bairro, initialVenue.cidade].filter(Boolean).join(' · ')}
+                {initialVenue.capacidade_praticavel && <> | cap. {initialVenue.capacidade_praticavel.toLocaleString('pt-BR')}</>}
+                {initialVenue.risco_fiscalizacao && (
+                  <> | <span style={{ color: riscoColor(initialVenue.risco_fiscalizacao) }}>risco {initialVenue.risco_fiscalizacao}</span></>
+                )}
               </p>
             )}
-            {venuePipe && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 8px', lineHeight: 1.6 }}>
-                <Link href={`/locais/${initialVenue!.id}`} style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>
-                  {venuePipe}
-                </Link>
+
+            {/* Linha 4: PÚBLICOS */}
+            {nichosDerivados && nichosDerivados.length > 0 && (
+              <p style={{ margin: '4px 0 0', lineHeight: 1.6 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginRight: 6 }}>
+                  Públicos
+                </span>
+                <span style={{ fontFamily: 'var(--font-serif)', fontSize: '0.85rem', color: 'var(--text-dim)' }}>
+                  {nichosDerivados.map(n => n.nome).join(' · ')}
+                </span>
               </p>
             )}
+
+            {/* Singularidades */}
             {singularidades.length > 0 && (
               <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: 8 }}>
                 {singularidades.map((tag: string) => (
-                  <span key={tag} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: 'rgba(110,144,216,0.08)', border: '1px solid rgba(110,144,216,0.2)', borderRadius: 3, color: 'var(--status-pos)' }}>
+                  <span key={tag} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: 'rgba(110,144,216,0.08)', border: '1px solid rgba(110,144,216,0.2)', borderRadius: 2, color: 'var(--status-pos)' }}>
                     {tag}
                   </span>
                 ))}
@@ -411,178 +429,166 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
             )}
           </div>
 
-          {/* Seção 2: Lineup */}
-          <div style={{ marginBottom: 'var(--space-lg)' }}>
-            <p className="section-label">Lineup</p>
-            {initialLineup.length === 0 ? (
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Sem artistas cadastrados.</p>
-            ) : (
-              <div>
-                {initialLineup.map(l => {
-                  const metaParts = [
-                    l.pais ? countryName(l.pais) : null,
-                    l.lastfm_listeners && l.lastfm_listeners > 0 ? `${l.lastfm_listeners.toLocaleString('pt-BR')} ouvintes` : null,
-                    l.faz_estampa ? 'estampa' : null,
-                  ].filter(Boolean)
-                  return (
-                    <div key={l.artist_id} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
-                      <Link href={`/artistas/${l.artist_id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.95rem', color: 'var(--text)', textDecoration: 'none' }}>
-                        {l.nome}
-                      </Link>
-                      {metaParts.length > 0 && (
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: 2 }}>
-                          {metaParts.join(' · ')}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+          {/* 2. BLOCO DE AÇÃO — nível 3 */}
+          <div style={{
+            background: 'var(--surface-raised)', border: '1px solid var(--text-muted)',
+            padding: 'var(--space-md)', borderRadius: 2, marginBottom: 'var(--space-lg)',
+          }}>
+            {/* Participação — sempre visível */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap', marginBottom: past ? 'var(--space-md)' : 0 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', flexShrink: 0 }}>
+                {past ? 'Participação' : 'Presença'}
+              </span>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button onClick={() => toggleParticipou(true)} disabled={savingP} style={{ padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 2, cursor: 'pointer', border: '1px solid var(--text-muted)', background: pParticipou ? 'var(--text)' : 'transparent', color: pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)', opacity: savingP ? 0.5 : 1, fontFamily: 'var(--font-mono)', transition: 'all 0.15s' }}>
+                  {past ? 'participei' : 'vou participar'}
+                </button>
+                <button onClick={() => toggleParticipou(false)} disabled={savingP} style={{ padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 2, cursor: 'pointer', border: '1px solid var(--text-muted)', background: !pParticipou ? 'var(--text)' : 'transparent', color: !pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)', opacity: savingP ? 0.5 : 1, fontFamily: 'var(--font-mono)', transition: 'all 0.15s' }}>
+                  {past ? 'não participei' : 'não vou participar'}
+                </button>
               </div>
-            )}
-          </div>
-
-          {/* Seção 2b: Públicos esperados */}
-          {nichosDerivados && nichosDerivados.length > 0 && (
-            <div style={{ marginBottom: 'var(--space-lg)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
-                  Públicos esperados
-                </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                  {nichosDerivados.length} {nichosDerivados.length === 1 ? 'nicho' : 'nichos'}
-                </span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                {nichosDerivados.map(n => (
-                  <div key={n.id}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <a href={`/publicos/${n.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
-                        {n.nome}
-                      </a>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                        score {n.score_medio.toFixed(1)}
-                      </span>
-                    </div>
-                    {n.underground_score != null && (
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                        underground {n.underground_score}/10
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Seção 3: Participação + link do evento */}
-          <div style={{ marginBottom: 'var(--space-lg)' }}>
-            <p className="section-label">{past ? 'Participação' : 'Presença prevista'}</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <button onClick={() => toggleParticipou(true)} disabled={savingP} style={{ padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 99, cursor: 'pointer', border: '1px solid var(--border)', background: pParticipou ? 'var(--text)' : 'var(--surface)', color: pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)', opacity: savingP ? 0.5 : 1 }}>
-                {past ? 'participei' : 'vou participar'}
-              </button>
-              <button onClick={() => toggleParticipou(false)} disabled={savingP} style={{ padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 99, cursor: 'pointer', border: '1px solid var(--border)', background: !pParticipou ? 'var(--text)' : 'var(--surface)', color: !pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)', opacity: savingP ? 0.5 : 1 }}>
-                {past ? 'não participei' : 'não vou participar'}
-              </button>
               {show.source_url && (
                 <a href={show.source_url} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-structure)', textDecoration: 'none' }}>
                   ver evento →
                 </a>
               )}
             </div>
+
+            {/* Resultado + peças — só shows passados */}
+            {past && (
+              <>
+                <div className="show-action-top">
+                  <EField label="Resultado geral">
+                    <select value={rResultado} onChange={e => setRResultado(e.target.value)} style={inputStyle}>
+                      <option value="">—</option>
+                      <option value="sucesso_total">Sucesso Total</option>
+                      <option value="sucesso">Sucesso</option>
+                      <option value="medio">Médio</option>
+                      <option value="fracasso">Fracasso</option>
+                    </select>
+                  </EField>
+                  <div />
+                </div>
+                <div className="show-action-bottom">
+                  <EField label="Peças levadas">
+                    <input type="number" min={0} value={rPecasLevadas || ''}
+                      onChange={e => setRPecasLevadas(parseInt(e.target.value) || 0)} style={inputStyle} />
+                  </EField>
+                  <EField label="Peças vendidas">
+                    <input type="number" min={0} max={rPecasLevadas || undefined}
+                      value={rPecasVendidas || ''}
+                      onChange={e => setRPecasVendidas(parseInt(e.target.value) || 0)} style={inputStyle} />
+                  </EField>
+                  <div>
+                    <button onClick={saveResultado} disabled={savingR} className="btn-primary" style={{ opacity: savingR ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                      {savingR ? '…' : 'Salvar'}
+                    </button>
+                  </div>
+                </div>
+                {taxa !== null && (
+                  <p style={{ fontSize: '0.75rem', margin: 'var(--space-xs) 0 0', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                    taxa <span style={{ color: taxaColor }}>{taxa.toFixed(1)}%</span>
+                  </p>
+                )}
+                {rSaved && <p style={{ fontSize: '0.75rem', color: 'var(--status-pos)', margin: 'var(--space-xs) 0 0', fontFamily: 'var(--font-mono)' }}>✓ salvo</p>}
+                {rError && <p style={{ fontSize: '0.75rem', color: 'var(--status-neg)', margin: 'var(--space-xs) 0 0' }}>{rError}</p>}
+              </>
+            )}
           </div>
 
-          {/* Seção 4: Stats — linha horizontal */}
-          <div style={{ display: 'flex', gap: 32, alignItems: 'baseline', padding: '12px 0', marginBottom: 24, flexWrap: 'wrap' }}>
-            {show.status_ingresso && (
-              <div>
-                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>STATUS</div>
-                <div style={{ fontFamily: 'var(--font-mono)', color: corStatusIngresso(show.status_ingresso) }}>
-                  {labelStatusIngresso(show.status_ingresso)}
-                </div>
-              </div>
-            )}
-            {show.publico_estimado && (
-              <div>
-                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>PÚBLICO EST.</div>
-                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
-                  {show.publico_estimado.toLocaleString('pt-BR')}
-                </div>
-              </div>
-            )}
-            {show.concorrencia && (
-              <div>
-                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>CONCORRÊNCIA</div>
-                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
-                  {show.concorrencia}
-                </div>
-              </div>
-            )}
-            {show.resultado_geral && (
-              <div>
-                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>RESULTADO</div>
-                <div style={{ fontFamily: 'var(--font-mono)', color: corResultado(show.resultado_geral) }}>
-                  {labelResultado(show.resultado_geral)}
-                </div>
+          {/* 3. LINEUP — nível 2 */}
+          <div style={{ marginBottom: 'var(--space-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+                Lineup
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                {initialLineup.length} {initialLineup.length === 1 ? 'artista' : 'artistas'}
+              </span>
+            </div>
+            {initialLineup.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Sem artistas cadastrados.</p>
+            ) : (
+              <div style={{ background: 'var(--surface-raised)', padding: 'var(--space-md)', borderRadius: 2 }}>
+                {initialLineup.map((l, idx) => (
+                  <div key={l.artist_id} style={{
+                    paddingTop: idx > 0 ? 'var(--space-md)' : 0,
+                    paddingBottom: idx < initialLineup.length - 1 ? 'var(--space-md)' : 0,
+                    borderBottom: idx < initialLineup.length - 1 ? '1px solid var(--border)' : 'none',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                  }}>
+                    <div>
+                      <Link href={`/artistas/${l.artist_id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.95rem', color: 'var(--text)', textDecoration: 'none' }}>
+                        {l.nome}
+                      </Link>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: 2 }}>
+                        {l.pais ? countryName(l.pais, true) : null}
+                        {l.faz_estampa && <span style={{ color: 'var(--cyan)' }}>{l.pais ? ' · ' : ''}● estampa</span>}
+                      </div>
+                    </div>
+                    {l.lastfm_listeners && l.lastfm_listeners > 0 && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', flexShrink: 0, marginLeft: 'var(--space-sm)' }}>
+                        {l.lastfm_listeners.toLocaleString('pt-BR')}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Seção 5: Peças por design */}
+          {/* 4. PÚBLICO ESTIMADO — nível 1 */}
+          {(show.publico_estimado || show.status_ingresso || show.concorrencia || show.resultado_geral) && (
+            <div style={{ display: 'flex', gap: 32, alignItems: 'baseline', flexWrap: 'wrap', marginBottom: 'var(--space-lg)' }}>
+              {show.publico_estimado && (
+                <div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>PÚBLICO EST.</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
+                    {show.publico_estimado.toLocaleString('pt-BR')}
+                  </div>
+                </div>
+              )}
+              {show.status_ingresso && (
+                <div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>STATUS</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', color: corStatusIngresso(show.status_ingresso) }}>
+                    {labelStatusIngresso(show.status_ingresso)}
+                  </div>
+                </div>
+              )}
+              {show.concorrencia && (
+                <div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>CONCORRÊNCIA</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                    {show.concorrencia}
+                  </div>
+                </div>
+              )}
+              {show.resultado_geral && (
+                <div>
+                  <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>RESULTADO</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', color: corResultado(show.resultado_geral) }}>
+                    {labelResultado(show.resultado_geral)}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 5. PEÇAS POR DESIGN — nível 3 */}
           {stockSection && <div style={{ marginBottom: 'var(--space-lg)' }}>{stockSection}</div>}
 
-          {/* Setlist.fm */}
+          {/* 6. HISTÓRICO · PRÓXIMOS — nível 1 */}
           {setlistSection && <div style={{ marginBottom: 'var(--space-lg)' }}>{setlistSection}</div>}
 
           {/* Observações */}
           {show.observacoes && (
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ marginBottom: 'var(--space-lg)' }}>
               <p className="section-label">Observações</p>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', lineHeight: 1.5 }}>{show.observacoes}</p>
             </div>
           )}
         </>
-      )}
-
-      {/* ── RESULTADO (sempre editável para shows passados) ── */}
-      {past && (
-        <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-          <p className="section-label">Resultado</p>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-              <EField label="Peças levadas">
-                <input type="number" min={0} value={rPecasLevadas || ''}
-                  onChange={e => setRPecasLevadas(parseInt(e.target.value) || 0)} style={inputStyle} />
-              </EField>
-              <EField label="Peças vendidas">
-                <input type="number" min={0} max={rPecasLevadas || undefined}
-                  value={rPecasVendidas || ''}
-                  onChange={e => setRPecasVendidas(parseInt(e.target.value) || 0)} style={inputStyle} />
-              </EField>
-              <EField label="Resultado geral">
-                <select value={rResultado} onChange={e => setRResultado(e.target.value)} style={inputStyle}>
-                  <option value="">—</option>
-                  <option value="sucesso_total">Sucesso Total</option>
-                  <option value="sucesso">Sucesso</option>
-                  <option value="medio">Médio</option>
-                  <option value="fracasso">Fracasso</option>
-                </select>
-              </EField>
-            </div>
-            {taxa !== null && (
-              <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-                Taxa de conversão: <span style={{ fontWeight: 700, color: taxaColor }}>{taxa.toFixed(1)}%</span>
-              </p>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <button onClick={saveResultado} disabled={savingR} style={{ ...saveBtnStyle, opacity: savingR ? 0.5 : 1 }}>
-                {savingR ? 'Salvando...' : 'Salvar resultado'}
-              </button>
-              {rSaved && <span style={{ fontSize: '0.8rem', color: 'var(--status-pos)' }}>✓ salvo</span>}
-              {rError && <span style={{ fontSize: '0.8rem', color: 'var(--red)' }}>{rError}</span>}
-            </div>
-          </div>
-        </div>
       )}
     </div>
   )
