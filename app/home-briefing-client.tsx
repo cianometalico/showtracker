@@ -282,7 +282,7 @@ function ShowCard({ show }: { show: ProximoShowCard }) {
         }}>
           {show.nomeShow}
         </Link>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexShrink: 0, whiteSpace: 'nowrap' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
             {formatDataCurta(show.data)}
           </span>

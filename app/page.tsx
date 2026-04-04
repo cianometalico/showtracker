@@ -25,7 +25,7 @@ export default async function HomePage() {
   const ultimoDia   = `${mesAno}-${String(mesMes).padStart(2, '0')}-${new Date(mesAno, mesMes, 0).getDate()}`
 
   const ms = (d: number) => d * 864e5
-  const sete_dias    = new Date(hoje.getTime() + ms(7) ).toISOString().slice(0, 10)
+  const tres_dias    = new Date(hoje.getTime() + ms(3) ).toISOString().slice(0, 10)
   const trinta_dias  = new Date(hoje.getTime() + ms(30)).toISOString().slice(0, 10)
   const cinco_dias   = new Date(hoje.getTime() + ms(5) ).toISOString().slice(0, 10)
   const noventa_atras = new Date(hoje.getTime() - ms(90)).toISOString().slice(0, 10)
@@ -90,11 +90,11 @@ export default async function HomePage() {
       .eq('ativo', true)
       .lte('saldo_atual', 0),
 
-    // Pendência c: presença indefinida próxima semana
+    // Pendência c: presença indefinida próximos 3 dias
     db.from('shows')
       .select('id, data, nome_evento')
       .gte('data', hojeStr)
-      .lte('data', sete_dias)
+      .lte('data', tres_dias)
       .eq('participou', false)
       .order('data', { ascending: true }),
 
@@ -112,14 +112,15 @@ export default async function HomePage() {
       .not('venue_id', 'is', null),
   ])
 
-  // ── Sort próximos: participou=true primeiro ───────────────────
+  // ── Sort próximos: estritamente cronológico; participou=true desempata dentro do mesmo dia ──
 
   const sortedProximos = ((proximosRows ?? []) as any[])
     .sort((a, b) => {
+      const dataCmp = a.data.localeCompare(b.data)
+      if (dataCmp !== 0) return dataCmp
       const aP = a.participou === true ? 0 : 1
       const bP = b.participou === true ? 0 : 1
-      if (aP !== bP) return aP - bP
-      return a.data.localeCompare(b.data)
+      return aP - bP
     })
     .slice(0, 7)
 
