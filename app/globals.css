@@ -62,6 +62,22 @@
   --font-mono:  'IBM Plex Mono', monospace;
   --font-serif: 'Instrument Serif', Georgia, serif;
 
+  /* espaçamento (1.3.1) */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   16px;
+  --space-lg:   32px;
+  --space-xl:   48px;
+  --space-page: 24px;
+
+  /* form (1.3.5) */
+  --form-bg:           var(--surface-raised);
+  --form-border:       #1e3040;
+  --form-border-focus: var(--cyan);
+  --form-radius:       2px;
+  --form-padding:      6px 10px;
+  --form-font-size:    0.8rem;
+
   /* compat: aliases para migração gradual de componentes */
   --text:      var(--text-primary);
   --surface:   var(--surface-raised);
@@ -69,6 +85,59 @@
   --red:       var(--status-neg);
   --green:     var(--status-pos);
 }
+
+/* form globals (1.3.5) */
+input, select, textarea {
+  background: var(--form-bg);
+  border: 1px solid var(--form-border);
+  border-radius: var(--form-radius);
+  padding: var(--form-padding);
+  font-family: var(--font-mono);
+  font-size: var(--form-font-size);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--form-border-focus);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.btn-primary {
+  background: var(--surface-raised);
+  border: 1px solid var(--form-border-focus);
+  border-radius: var(--form-radius);
+  padding: var(--form-padding);
+  font-family: var(--font-mono);
+  font-size: var(--form-font-size);
+  font-weight: 500;
+  color: var(--cyan);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--surface-enriched); }
+.btn-primary:disabled { opacity: 0.4; cursor: default; }
+
+.btn-danger {
+  background: var(--surface-raised);
+  border: 1px solid var(--status-neg);
+  border-radius: var(--form-radius);
+  padding: var(--form-padding);
+  font-family: var(--font-mono);
+  font-size: var(--form-font-size);
+  font-weight: 500;
+  color: var(--status-neg);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: background 0.15s;
+}
+.btn-danger:hover { background: rgba(219,41,29,0.08); }
+.btn-danger:disabled { opacity: 0.4; cursor: default; }
 
 .page-container         { padding: 1.5rem; max-width: 720px; }
 .page-container-narrow  { padding: 1.5rem; max-width: 480px; }

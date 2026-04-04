@@ -38,8 +38,6 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
 
   const score = nicho.underground_score ?? 5
   const cor   = nichoColor(nicho.nome, score)
-  const corBg = nichoColorAlpha(nicho.nome, score, 0.07)
-  const corBorder = nichoColorAlpha(nicho.nome, score, 0.3)
 
   // ── Artistas vinculados (com override fields para agregação) ──
   const { data: artistNichos } = await (supabase as any)
@@ -101,38 +99,26 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
     topTag: (a.artist?.tags_editorial as string[] | null)?.[0] ?? null,
   }))
 
-  // ── Helpers de exibição ───────────────────────────────────────
-  const labelColor = 'rgba(255,255,255,0.45)'
-  const valueColor = 'rgba(255,255,255,0.88)'
-
   function ScoreBar({ value, max = 5 }: { value: number | null; max?: number }) {
-    if (!value) return <span style={{ fontSize: '0.75rem', color: labelColor }}>—</span>
+    if (!value) return <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>—</span>
     return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ fontSize: '0.85rem', color: valueColor, fontFamily: 'var(--font-mono)', width: 20 }}>{value}</span>
-        <span style={{ display: 'flex', gap: 2 }}>
-          {Array.from({ length: max }).map((_, i) => (
-            <span key={i} style={{
-              width: 8, height: 8, borderRadius: 2,
-              background: i < value ? cor : nichoColorAlpha(nicho.nome, score, 0.2),
-            }} />
-          ))}
-        </span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+        {value}<span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>/{max}</span>
       </span>
     )
   }
 
   function Chips({ items }: { items: string[] }) {
-    if (!items || items.length === 0) return <span style={{ fontSize: '0.75rem', color: labelColor }}>—</span>
+    if (!items || items.length === 0) return <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>—</span>
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-        {items.map((item, i) => (
+        {items.map((item) => (
           <span key={item} style={{
             fontSize: '0.72rem', padding: '0.15rem 0.5rem',
-            background: nichoColorAlpha(nicho.nome, score, i === 0 ? 0.18 : 0.08),
-            border: `1px solid ${nichoColorAlpha(nicho.nome, score, i === 0 ? 0.4 : 0.2)}`,
-            borderRadius: 4,
-            color: i === 0 ? valueColor : labelColor,
+            background: 'var(--surface-raised)',
+            border: '1px solid var(--border)',
+            borderRadius: 2,
+            color: 'var(--text-dim)',
           }}>{item}</span>
         ))}
       </div>
@@ -141,7 +127,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
 
   function FieldLabel({ label, tooltipKey }: { label: string; tooltipKey: string }) {
     return (
-      <span style={{ fontSize: '0.68rem', color: labelColor, display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', marginBottom: 4 }}>
         {label}
         {TOOLTIPS[tooltipKey] && <TooltipIcon text={TOOLTIPS[tooltipKey]} />}
       </span>
@@ -156,8 +142,8 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
         <FieldLabel label={label} tooltipKey={fieldKey} />
         <ScoreBar value={nicho_val} />
         {media !== null && (
-          <span style={{ fontSize: '0.65rem', color: labelColor, marginTop: 3, display: 'block' }}>
-            artistas ({n}): <span style={{ color: cor }}>{media}</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 3, display: 'block' }}>
+            artistas ({n}): <span style={{ color: 'var(--text-dim)' }}>{media}</span>
           </span>
         )}
       </div>
@@ -168,7 +154,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
     <div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <Link href="/publicos" style={{ fontSize: '0.75rem', color: labelColor, textDecoration: 'none' }}>
+        <Link href="/publicos" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textDecoration: 'none' }}>
           ← públicos
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -184,35 +170,27 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* HEADER */}
-      <div style={{
-        border: `1px solid ${corBorder}`,
-        borderLeft: `4px solid ${cor}`,
-        borderRadius: 6, background: corBg, padding: '1.5rem',
-        marginBottom: '1.5rem',
-      }}>
-        <div style={{ marginBottom: '0.5rem' }}>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, margin: '0 0 6px', color: cor, letterSpacing: '0.04em' }}>
-            {nicho.nome}
-          </h1>
-          <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              underground <span style={{ color: cor }}>{score}</span>/10
-              <TooltipIcon text={TOOLTIPS.underground_score} />
-            </span>
-            <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>
-            <span>{artistas.length} artistas</span>
-          </div>
+      <div style={{ marginBottom: 'var(--space-xl)' }}>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, margin: '0 0 6px' }}>
+          {nicho.nome}
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', gap: 8 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            underground {score}/10
+            <TooltipIcon text={TOOLTIPS.underground_score} />
+          </span>
+          <span style={{ opacity: 0.4 }}>|</span>
+          <span>{artistas.length} artistas</span>
         </div>
-
         {nicho.descricao && (
-          <p style={{ fontSize: '0.9rem', color: valueColor, margin: '0.75rem 0 0', opacity: 0.75 }}>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-dim)', margin: '0.75rem 0 0' }}>
             {nicho.descricao}
           </p>
         )}
       </div>
 
       {/* CORE */}
-      <section style={{ marginBottom: '1.5rem' }}>
+      <section style={{ marginBottom: 'var(--space-lg)' }}>
         <p style={sectionLabel}>core</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
           <div>
@@ -231,7 +209,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
       </section>
 
       {/* DEFAULTS */}
-      <section style={{ marginBottom: '1.5rem' }}>
+      <section style={{ marginBottom: 'var(--space-lg)' }}>
         <p style={sectionLabel}>defaults</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem' }}>
           <DefaultField key="letramento"            label="letramento"            fieldKey="letramento" />
@@ -242,7 +220,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
       </section>
 
       {/* CORPORALIDADE + MENTALIDADE */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: 'var(--space-lg)' }}>
 
         <section>
           <p style={sectionLabel}>corporalidade</p>
@@ -253,7 +231,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
             </div>
             <div>
               <FieldLabel label="faixa etária" tooltipKey="" />
-              <span style={{ fontSize: '0.85rem', color: valueColor }}>{nicho.faixa_etaria ?? '—'}</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{nicho.faixa_etaria ?? '—'}</span>
             </div>
             <div>
               <FieldLabel label="estética" tooltipKey="" />
@@ -275,7 +253,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
             </div>
             <div>
               <FieldLabel label="concorrência merch" tooltipKey="" />
-              <span style={{ fontSize: '0.85rem', color: valueColor }}>{nicho.concorrencia_merch ?? '—'}</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{nicho.concorrencia_merch ?? '—'}</span>
             </div>
             <div>
               <FieldLabel label="abertura experimental" tooltipKey="abertura_experimental" />
@@ -292,7 +270,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
 
       {/* GÊNEROS */}
       {(tags.length > 0 || generosRelacionados.length > 0) && (
-        <section style={{ marginBottom: '1.5rem' }}>
+        <section style={{ marginBottom: 'var(--space-lg)' }}>
           <p style={sectionLabel}>gêneros associados</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
             {tags.map((t: string) => {
@@ -327,7 +305,7 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
 }
 
 const sectionLabel: React.CSSProperties = {
-  fontSize: '0.62rem', color: 'rgba(255,255,255,0.4)',
+  fontSize: '0.62rem', color: 'var(--text-muted)',
   textTransform: 'uppercase', letterSpacing: '0.1em',
   margin: '0 0 0.75rem',
 }

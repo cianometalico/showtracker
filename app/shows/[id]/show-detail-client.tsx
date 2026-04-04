@@ -9,7 +9,6 @@ import {
 import type { UpdateShowInput } from './actions'
 import { isShowPast, getShowDisplayName } from '@/lib/show-utils'
 import { countryName } from '@/lib/countries'
-import { EnrichmentDot } from '@/components/enrichment-dot'
 import { ArtistPicker } from '@/components/artist-picker'
 import type { PickedArtist } from '@/components/artist-picker'
 
@@ -61,14 +60,6 @@ function labelStatusIngresso(s: string): string { return LABEL_STATUS[s] ?? s }
 function corResultado(r: string): string { return COR_RESULTADO[r] ?? 'var(--text-dim)' }
 function labelResultado(r: string): string { return LABEL_RESULTADO[r] ?? r }
 
-function riscoColor(risco: string): string {
-  switch (risco) {
-    case 'low':    return 'var(--status-pos)'
-    case 'medium': return 'var(--status-neut)'
-    case 'high':   return 'var(--status-neg)'
-    default:       return 'var(--text-muted)'
-  }
-}
 
 function formatDataPipe(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', {
@@ -234,12 +225,18 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
 
   const pipePartes = [
     formatDataPipe(show.data),
-    initialVenue?.nome ?? null,
     show.tour ?? null,
     show.status_ingresso ? (LABEL_STATUS[show.status_ingresso] ?? show.status_ingresso) : null,
     show.resultado_geral ? (LABEL_RESULTADO[show.resultado_geral] ?? show.resultado_geral) : null,
     weatherSummary ? `${weatherSummary}${weatherTemp ? ` ${weatherTemp}°C` : ''}` : null,
   ].filter(Boolean)
+
+  const venuePipe = initialVenue ? [
+    initialVenue.nome,
+    [initialVenue.bairro, initialVenue.cidade].filter(Boolean).join(' · '),
+    initialVenue.capacidade_praticavel ? `cap. ${initialVenue.capacidade_praticavel.toLocaleString('pt-BR')}` : null,
+    initialVenue.risco_fiscalizacao ? `risco ${initialVenue.risco_fiscalizacao}` : null,
+  ].filter(Boolean).join(' | ') : null
 
   // ── Render ────────────────────────────────────────────────
 
@@ -374,111 +371,76 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
       {/* ── READ MODE ─────────────────────────────────────── */}
       {!isEditing && (
         <>
-          {/* Seção 1: nome+pipe ∥ local */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start', marginTop: '1rem', marginBottom: 24 }}>
-
-            {/* Left: nome + editar + pipe + singularidades */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0, lineHeight: 1.3 }}>
-                  {nomeShow}
-                </h1>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
-                  {show.legado && (
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', border: '1px solid var(--border)', padding: '0.2rem 0.5rem', borderRadius: 3, fontFamily: 'var(--font-mono)' }}>
-                      legado
-                    </span>
-                  )}
-                  <button onClick={startEdit} style={editBtnStyle}>editar</button>
-                </div>
+          {/* Seção 1: nome + meta */}
+          <div style={{ marginTop: '1rem', marginBottom: 'var(--space-xl)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: 6 }}>
+              <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0, lineHeight: 1.3 }}>
+                {nomeShow}
+              </h1>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                {show.legado && (
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', border: '1px solid var(--border)', padding: '0.2rem 0.5rem', borderRadius: 3, fontFamily: 'var(--font-mono)' }}>
+                    legado
+                  </span>
+                )}
+                <button onClick={startEdit} style={editBtnStyle}>editar</button>
               </div>
-              {pipePartes.length > 0 && (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: 6, marginBottom: 0, lineHeight: 1.6 }}>
-                  {pipePartes.join(' | ')}
-                </p>
-              )}
-              {singularidades.length > 0 && (
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: 8 }}>
-                  {singularidades.map((tag: string) => (
-                    <span key={tag} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: 'rgba(110,144,216,0.08)', border: '1px solid rgba(110,144,216,0.2)', borderRadius: 3, color: 'var(--status-pos)' }}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
-
-            {/* Right: venue */}
-            <div>
-              {initialVenue ? (
-                <Link href={`/locais/${initialVenue.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '0.75rem 1rem', background: 'var(--surface)' }}>
-                    <p style={{ fontFamily: 'var(--font-serif)', fontSize: '0.95rem', color: 'var(--text)', margin: 0 }}>
-                      {initialVenue.nome}
-                    </p>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', margin: '4px 0 0' }}>
-                      {[initialVenue.bairro, initialVenue.cidade].filter(Boolean).join(' · ')}
-                    </p>
-                    {initialVenue.capacidade_praticavel && (
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', margin: '2px 0 0' }}>
-                        cap. {initialVenue.capacidade_praticavel.toLocaleString('pt-BR')}
-                      </p>
-                    )}
-                    {initialVenue.risco_fiscalizacao && (
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: riscoColor(initialVenue.risco_fiscalizacao), margin: '2px 0 0' }}>
-                        risco {initialVenue.risco_fiscalizacao}
-                      </p>
-                    )}
-                  </div>
+            {pipePartes.length > 0 && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 2px', lineHeight: 1.6 }}>
+                {pipePartes.join(' | ')}
+              </p>
+            )}
+            {venuePipe && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 8px', lineHeight: 1.6 }}>
+                <Link href={`/locais/${initialVenue!.id}`} style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>
+                  {venuePipe}
                 </Link>
-              ) : (
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>local não cadastrado</p>
-              )}
-            </div>
-          </div>
-
-          {/* Seção 2: Lineup — largura total */}
-          <div style={{ marginBottom: 24 }}>
-            <p className="section-label">Lineup</p>
-            {initialLineup.length === 0 ? (
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Sem artistas cadastrados.</p>
-            ) : (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '4px 0', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
-                  <span style={{ width: 16, flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>ARTISTA</span>
-                  <span style={{ width: 8, flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', width: 90, flexShrink: 0 }}>PAÍS</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', width: 80, flexShrink: 0, textAlign: 'right' }}>OUVINTES</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', width: 56, flexShrink: 0 }}>ESTAMPA</span>
-                </div>
-                {initialLineup.map(l => (
-                  <div key={l.artist_id} style={{
-                    display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    padding: '0.45rem 0', borderBottom: '1px solid var(--border)',
-                  }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-muted)', width: 16, flexShrink: 0 }}>{l.ordem}</span>
-                    <Link href={`/artistas/${l.artist_id}`} style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {l.nome}
-                    </Link>
-                    <EnrichmentDot mbid={l.mbid} />
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', width: 90, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {l.pais ? countryName(l.pais) : ''}
-                    </span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', width: 80, flexShrink: 0, textAlign: 'right' }}>
-                      {l.lastfm_listeners && l.lastfm_listeners > 0 ? l.lastfm_listeners.toLocaleString('pt-BR') : ''}
-                    </span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--accent-structure)', fontFamily: 'var(--font-mono)', width: 56, flexShrink: 0 }}>
-                      {l.faz_estampa ? 'estampa' : ''}
-                    </span>
-                  </div>
+              </p>
+            )}
+            {singularidades.length > 0 && (
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: 8 }}>
+                {singularidades.map((tag: string) => (
+                  <span key={tag} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', background: 'rgba(110,144,216,0.08)', border: '1px solid rgba(110,144,216,0.2)', borderRadius: 3, color: 'var(--status-pos)' }}>
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}
           </div>
 
+          {/* Seção 2: Lineup */}
+          <div style={{ marginBottom: 'var(--space-lg)' }}>
+            <p className="section-label">Lineup</p>
+            {initialLineup.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Sem artistas cadastrados.</p>
+            ) : (
+              <div>
+                {initialLineup.map(l => {
+                  const metaParts = [
+                    l.pais ? countryName(l.pais) : null,
+                    l.lastfm_listeners && l.lastfm_listeners > 0 ? `${l.lastfm_listeners.toLocaleString('pt-BR')} ouvintes` : null,
+                    l.faz_estampa ? 'estampa' : null,
+                  ].filter(Boolean)
+                  return (
+                    <div key={l.artist_id} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
+                      <Link href={`/artistas/${l.artist_id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.95rem', color: 'var(--text)', textDecoration: 'none' }}>
+                        {l.nome}
+                      </Link>
+                      {metaParts.length > 0 && (
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: 2 }}>
+                          {metaParts.join(' · ')}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Seção 3: Participação + link do evento */}
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 'var(--space-lg)' }}>
             <p className="section-label">{past ? 'Participação' : 'Presença prevista'}</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <button onClick={() => toggleParticipou(true)} disabled={savingP} style={{ padding: '0.3rem 0.9rem', fontSize: '0.8rem', borderRadius: 99, cursor: 'pointer', border: '1px solid var(--border)', background: pParticipou ? 'var(--text)' : 'var(--surface)', color: pParticipou ? 'var(--nav-bg)' : 'var(--text-dim)', opacity: savingP ? 0.5 : 1 }}>
@@ -496,7 +458,7 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
           </div>
 
           {/* Seção 4: Stats — linha horizontal */}
-          <div style={{ display: 'flex', gap: 32, alignItems: 'baseline', padding: '12px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: 24, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 32, alignItems: 'baseline', padding: '12px 0', marginBottom: 24, flexWrap: 'wrap' }}>
             {show.status_ingresso && (
               <div>
                 <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>STATUS</div>
@@ -532,10 +494,10 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
           </div>
 
           {/* Seção 5: Peças por design */}
-          {stockSection && <div style={{ marginBottom: 24 }}>{stockSection}</div>}
+          {stockSection && <div style={{ marginBottom: 'var(--space-lg)' }}>{stockSection}</div>}
 
           {/* Setlist.fm */}
-          {setlistSection && <div style={{ marginBottom: 24 }}>{setlistSection}</div>}
+          {setlistSection && <div style={{ marginBottom: 'var(--space-lg)' }}>{setlistSection}</div>}
 
           {/* Observações */}
           {show.observacoes && (

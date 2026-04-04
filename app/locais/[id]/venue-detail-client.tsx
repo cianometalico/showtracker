@@ -62,8 +62,8 @@ const LABEL_RESULTADO: Record<string, string> = {
 }
 
 const COR_RESULTADO: Record<string, string> = {
-  sucesso_total: 'var(--green)',
-  sucesso:       'var(--green)',
+  sucesso_total: 'var(--status-pos)',
+  sucesso:       'var(--status-pos)',
   medio:         'var(--amber)',
   fracasso:      'var(--red)',
 }
@@ -75,7 +75,7 @@ const LABEL_STATUS: Record<string, string> = {
 }
 
 const RISCO_COR: Record<string, string> = {
-  low:    'var(--green)',
+  low:    'var(--status-pos)',
   medium: 'var(--amber)',
   high:   'var(--red)',
 }
@@ -167,7 +167,7 @@ export function VenueDetailClient({ venue, subprefeitura, subprefeituras, shows 
       <Link href="/locais" className="breadcrumb">← Locais</Link>
 
       {/* Header */}
-      <div style={{ marginTop: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div style={{ marginTop: '1rem', marginBottom: 'var(--space-xl)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>
             {venue.nome}

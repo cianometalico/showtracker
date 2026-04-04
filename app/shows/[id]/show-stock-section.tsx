@@ -144,43 +144,39 @@ export function ShowStockSection({ showId, movements, activeDesigns, levadosAqui
         </div>
       )}
 
-      {/* Forms rápidos */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      {/* Forms rápidos — uma linha */}
+      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'flex-start', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
 
-        {/* Levar design */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '0.875rem' }}>
-          <p style={{ fontSize: '0.7rem', color: 'var(--amber)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Levar para o show</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <select value={levarDesignId} onChange={e => setLevarDesignId(e.target.value)} style={selectStyle}>
-              <option value="">Design...</option>
-              {designsParaLevar.map(d => <option key={d.id} value={d.id}>{d.nome} (saldo: {d.saldo})</option>)}
-            </select>
-            <input type="number" min={1} value={levarQtd} onChange={e => setLevarQtd(e.target.value)}
-              placeholder="Qtd" style={selectStyle} />
-            <button onClick={submitLevar} disabled={saving} style={{ ...actionBtnStyle, borderColor: 'var(--amber)', color: 'var(--amber)', opacity: saving ? 0.5 : 1 }}>
-              Levar
-            </button>
-            {levarSaved && <span style={{ fontSize: '0.75rem', color: 'var(--green)' }}>✓</span>}
-            {levarError && <span style={{ fontSize: '0.75rem', color: 'var(--red)' }}>{levarError}</span>}
-          </div>
+        {/* Levar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--amber)', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>levar</span>
+          <select value={levarDesignId} onChange={e => setLevarDesignId(e.target.value)} style={inlineSelectStyle}>
+            <option value="">design…</option>
+            {designsParaLevar.map(d => <option key={d.id} value={d.id}>{d.nome} ({d.saldo})</option>)}
+          </select>
+          <input type="number" min={1} value={levarQtd} onChange={e => setLevarQtd(e.target.value)}
+            placeholder="qtd" style={inlineQtdStyle} />
+          <button onClick={submitLevar} disabled={saving} style={{ ...actionBtnStyle, borderColor: 'var(--amber)', color: 'var(--amber)', opacity: saving ? 0.5 : 1 }}>
+            ok
+          </button>
+          {levarSaved && <span style={{ fontSize: '0.75rem', color: 'var(--status-pos)' }}>✓</span>}
+          {levarError && <span style={{ fontSize: '0.75rem', color: 'var(--red)' }}>{levarError}</span>}
         </div>
 
-        {/* Registrar venda */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '0.875rem' }}>
-          <p style={{ fontSize: '0.7rem', color: 'var(--cyan)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Registrar venda</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <select value={venderDesignId} onChange={e => setVenderDesignId(e.target.value)} style={selectStyle}>
-              <option value="">Design...</option>
-              {designsParaVender.map(d => <option key={d.id} value={d.id}>{d.nome}</option>)}
-            </select>
-            <input type="number" min={1} value={venderQtd} onChange={e => setVenderQtd(e.target.value)}
-              placeholder="Qtd" style={selectStyle} />
-            <button onClick={submitVender} disabled={saving} style={{ ...actionBtnStyle, borderColor: 'var(--cyan)', color: 'var(--cyan)', opacity: saving ? 0.5 : 1 }}>
-              Registrar
-            </button>
-            {venderSaved && <span style={{ fontSize: '0.75rem', color: 'var(--green)' }}>✓</span>}
-            {venderError && <span style={{ fontSize: '0.75rem', color: 'var(--red)' }}>{venderError}</span>}
-          </div>
+        {/* Vender */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--cyan)', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>vender</span>
+          <select value={venderDesignId} onChange={e => setVenderDesignId(e.target.value)} style={inlineSelectStyle}>
+            <option value="">design…</option>
+            {designsParaVender.map(d => <option key={d.id} value={d.id}>{d.nome}</option>)}
+          </select>
+          <input type="number" min={1} value={venderQtd} onChange={e => setVenderQtd(e.target.value)}
+            placeholder="qtd" style={inlineQtdStyle} />
+          <button onClick={submitVender} disabled={saving} style={{ ...actionBtnStyle, borderColor: 'var(--cyan)', color: 'var(--cyan)', opacity: saving ? 0.5 : 1 }}>
+            ok
+          </button>
+          {venderSaved && <span style={{ fontSize: '0.75rem', color: 'var(--status-pos)' }}>✓</span>}
+          {venderError && <span style={{ fontSize: '0.75rem', color: 'var(--red)' }}>{venderError}</span>}
         </div>
 
       </div>
@@ -188,12 +184,17 @@ export function ShowStockSection({ showId, movements, activeDesigns, levadosAqui
   )
 }
 
-const selectStyle: React.CSSProperties = {
-  width: '100%', fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text)',
-  border: '1px solid var(--border)', borderRadius: 4, padding: '0.35rem 0.6rem',
-  outline: 'none', boxSizing: 'border-box',
+const inlineSelectStyle: React.CSSProperties = {
+  fontSize: '0.8rem', background: 'var(--form-bg)', color: 'var(--text-primary)',
+  border: '1px solid var(--form-border)', borderRadius: 'var(--form-radius)',
+  padding: '4px 8px', outline: 'none',
+}
+const inlineQtdStyle: React.CSSProperties = {
+  fontSize: '0.8rem', background: 'var(--form-bg)', color: 'var(--text-primary)',
+  border: '1px solid var(--form-border)', borderRadius: 'var(--form-radius)',
+  padding: '4px 8px', outline: 'none', width: 56,
 }
 const actionBtnStyle: React.CSSProperties = {
-  fontSize: '0.8rem', background: 'none', border: '1px solid', borderRadius: 4,
-  padding: '0.3rem 0.75rem', cursor: 'pointer',
+  fontSize: '0.75rem', background: 'none', border: '1px solid', borderRadius: 2,
+  padding: '4px 10px', cursor: 'pointer',
 }

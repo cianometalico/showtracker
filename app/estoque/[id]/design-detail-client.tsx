@@ -44,7 +44,7 @@ type Props = {
 }
 
 const TIPO_COLOR: Record<string, string> = {
-  produzido: 'var(--green)',
+  produzido: 'var(--status-pos)',
   levado:    'var(--amber)',
   vendido:   'var(--cyan)',
   perdido:   'var(--red)',
@@ -119,7 +119,7 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
       <Link href="/estoque" className="breadcrumb">← Estoque</Link>
 
       {/* Header */}
-      <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ marginTop: '1rem', marginBottom: 'var(--space-xl)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--text)', margin: 0 }}>{design.nome}</h1>
@@ -187,7 +187,7 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
       </p>
 
       {/* Nova movimentação */}
-      <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+      <div style={{ marginBottom: 'var(--space-lg)' }}>
         <p className="section-label">Registrar movimentação</p>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '1rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -227,7 +227,7 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
             <button onClick={submitMovement} disabled={savingM} style={{ ...saveBtnStyle, opacity: savingM ? 0.5 : 1 }}>
               {savingM ? 'Registrando...' : 'Registrar'}
             </button>
-            {mSaved && <span style={{ fontSize: '0.8rem', color: 'var(--green)' }}>✓ registrado</span>}
+            {mSaved && <span style={{ fontSize: '0.8rem', color: 'var(--status-pos)' }}>✓ registrado</span>}
             {mError && <span style={{ fontSize: '0.8rem', color: 'var(--red)' }}>{mError}</span>}
           </div>
         </div>
@@ -235,7 +235,7 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
 
       {/* Shows do artista */}
       {artistShows.length > 0 && (
-        <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+        <div style={{ marginBottom: 'var(--space-lg)' }}>
           <p className="section-label">Shows — {design.artista} ({artistShows.length})</p>
           <div>
             {artistShows.map(s => {

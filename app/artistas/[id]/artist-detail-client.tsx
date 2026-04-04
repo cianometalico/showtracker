@@ -130,7 +130,7 @@ export function ArtistDetailClient({ artist, nichoManagerSlot, enrichSlot }: { a
     : null
 
   return (
-    <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+    <div style={{ marginTop: '1rem', marginBottom: 'var(--space-xl)' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
         <h1 style={{
           fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400,
