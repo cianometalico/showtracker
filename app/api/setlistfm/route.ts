@@ -21,14 +21,16 @@ export async function GET(req: NextRequest) {
       today.setHours(0, 0, 0, 0)
       const todayTs = today.getTime()
 
+      const limitPages = Math.min(Math.max(parseInt(searchParams.get('limit_pages') ?? '15') || 15, 1), 15)
+
       // Estratégia dupla:
       // 1. countryCode=BR (filtra server-side quando funciona)
       // 2. Sem filtro de país nas últimas páginas como fallback
-      
+
       let page = 1
       let emptyBRPages = 0  // contador de páginas sem resultado BR
 
-      while (page <= 15) {  // até 300 shows
+      while (page <= limitPages) {  // até limitPages × 20 shows
         const url = `${BASE}/artist/${mbid}/setlists?p=${page}&countryCode=BR`
         const res = await fetch(url, { headers, signal: AbortSignal.timeout(10000) })
 

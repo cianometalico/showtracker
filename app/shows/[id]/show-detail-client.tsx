@@ -36,7 +36,7 @@ type ShowData = {
   tour: string | null
 }
 
-type Props = { show: ShowData; venue: Venue | null; lineup: LineupItem[]; stockSection?: React.ReactNode; weatherSummary?: string | null; weatherTemp?: number | null }
+type Props = { show: ShowData; venue: Venue | null; lineup: LineupItem[]; stockSection?: React.ReactNode; setlistSection?: React.ReactNode; weatherSummary?: string | null; weatherTemp?: number | null }
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ function lineupToPickedArtists(lineup: LineupItem[]): PickedArtist[] {
 
 // ── Main Component ────────────────────────────────────────────
 
-export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLineup, stockSection, weatherSummary, weatherTemp }: Props) {
+export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLineup, stockSection, setlistSection, weatherSummary, weatherTemp }: Props) {
   const router = useRouter()
   const past = isShowPast(show.data)
   const nomeShow = getShowDisplayName(show.nome_evento, initialLineup.map(l => l.nome))
@@ -533,6 +533,9 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
 
           {/* Seção 5: Peças por design */}
           {stockSection && <div style={{ marginBottom: 24 }}>{stockSection}</div>}
+
+          {/* Setlist.fm */}
+          {setlistSection && <div style={{ marginBottom: 24 }}>{setlistSection}</div>}
 
           {/* Observações */}
           {show.observacoes && (

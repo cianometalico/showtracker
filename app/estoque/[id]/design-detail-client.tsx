@@ -175,26 +175,16 @@ export function DesignDetailClient({ design, saldo, movements, showOptions, arti
         </div>
       )}
 
-      {/* Saldo */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <p className="section-label">Saldo</p>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          {[
-            { label: 'Produzido', value: saldo.total_produzido, color: 'var(--green)' },
-            { label: 'Vendido',   value: saldo.total_vendido,   color: 'var(--cyan)' },
-            { label: 'Perdido',   value: saldo.total_perdido,   color: 'var(--red)' },
-            {
-              label: 'Em estoque', value: saldo.saldo_atual,
-              color: saldo.saldo_atual > 0 ? 'var(--green)' : saldo.saldo_atual < 0 ? 'var(--red)' : 'var(--text-muted)',
-            },
-          ].map(({ label, value, color }) => (
-            <div key={label} className="stat-card">
-              <p className="stat-label">{label}</p>
-              <div className="stat-value" style={{ color }}>{value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Saldo — linha de dados */}
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-primary)', margin: '0 0 1.5rem' }}>
+        <span>PRODUZIDO {saldo.total_produzido}</span>
+        {' | '}
+        <span style={{ color: saldo.total_vendido > 0 ? 'var(--status-pos)' : undefined }}>VENDIDO {saldo.total_vendido}</span>
+        {' | '}
+        <span style={{ color: saldo.total_perdido > 0 ? 'var(--status-neg)' : undefined }}>PERDIDO {saldo.total_perdido}</span>
+        {' | '}
+        <span style={{ color: saldo.saldo_atual === 0 ? 'var(--status-neg)' : saldo.saldo_atual < 0 ? 'var(--status-neg)' : undefined }}>EM ESTOQUE {saldo.saldo_atual}</span>
+      </p>
 
       {/* Nova movimentação */}
       <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>

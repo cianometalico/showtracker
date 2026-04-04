@@ -16,6 +16,11 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
 
   const sub = Array.isArray(venue.subprefeituras) ? venue.subprefeituras[0] : venue.subprefeituras
 
+  const { data: subprefeituras } = await (supabase as any)
+    .from('subprefeituras')
+    .select('id, nome, zona')
+    .order('nome')
+
   const { data: showRows } = await (supabase as any)
     .from('shows')
     .select('id, data, nome_evento, status_ingresso, participou, resultado_geral')
@@ -60,6 +65,6 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   }))
 
   return (
-    <VenueDetailClient venue={venue} subprefeitura={sub ?? null} shows={showsEnriquecidos} />
+    <VenueDetailClient venue={venue} subprefeitura={sub ?? null} subprefeituras={subprefeituras ?? []} shows={showsEnriquecidos} />
   )
 }

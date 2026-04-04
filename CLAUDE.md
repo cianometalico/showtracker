@@ -4,8 +4,8 @@ Sistema operacional para vendas de camisetas estampadas em shows ao vivo.
 Vendedor ambulante com estamparia própria (tinta à base de água), São Paulo.
 Repositório: github.com/cianometalico/showtracker
 
-**Versão atual: v0.6.3** (2026-03-30)
-Próxima: v0.9.0 (UX/Layout Pass — Fases A+C parcialmente concluídas — ver ROADMAP abaixo)
+**Versão atual: v0.9.1** (2026-04-03)
+Sistema visual fechado. Nav responsiva implementada. Filtros de shows e /dados ativos.
 
 ---
 
@@ -218,7 +218,7 @@ venues: id, nome, cidade, bairro (nullable), lat, lng, capacidade_praticavel,
 shows: id, venue_id, data, nome_evento (nullable), status_ingresso
   (sold out|bem vendido|mal vendido|null=sem informação), publico_estimado,
   participou bool, resultado_geral, concorrencia, clima_estimado, clima_temp int,
-  observacoes, singularidades jsonb, source_url, legado bool,
+  observacoes, singularidades jsonb, source_url, legado bool, tour text (nullable),
   pecas_levadas int, pecas_vendidas int,
   fiscalizacao_override (string|null), publico_estimado_manual (bool|null),
   tipo_venue_override (string|null)
@@ -272,6 +272,7 @@ app/
     page.tsx                        ← Lista de gêneros
   shows/
     page.tsx + shows-list-client.tsx ← Lista com filtros + busca
+    shows-list-client.tsx               ← filtros: a-participar|nao-participarei|participados|nao-participados|todos
     new/page.tsx + new-show-client.tsx + actions.ts ← Múltiplas datas: cada DateEntry gera um show
     [id]/page.tsx                   ← Detalhe: clima, lineup, venue, estoque
     [id]/show-detail-client.tsx     ← Edição inline (toggle read/edit + seção resultado)
@@ -302,10 +303,14 @@ app/
     [id]/page.tsx                   ← Detalhe do nicho (4 níveis)
     generos/[id]/page.tsx           ← Detalhe do gênero
   ohara/page.tsx                    ← Enriquecimento (link removido da nav, rota existe)
+  dados/
+    page.tsx                            ← Import CSV/XLSX (shows históricos, legado=true), fluxo encadeado
 
 components/
   artist-picker.tsx                 ← ArtistPicker (3 fases: local → MB → enrich+save)
   ohara-search.tsx                  ← OharaSearch (busca → navegação; auto-abre via ?abrir=artista)
+  enrichment-dot.tsx                    ← EnrichmentDot: dot amber (enriquecido) / dot outline muted (pendente)
+  terminal-spinner.tsx                  ← TerminalSpinner: spinner Braille Unicode (.bodycore)
 
 api/
   weather/route.ts
@@ -352,7 +357,7 @@ utils/supabase/
 Pipeline: MusicBrainz (mbid) → Last.fm (listeners, tags) → Wikipedia → Setlist.fm
 - `enrich-all` processa artistas sem mbid sequencialmente com rate limiting
 - `/api/artists` faz upsert: mbid → nome ilike sem mbid → cria novo
-- 170 artistas enriquecidos, 183 shows importados (legado=true)
+- ~204 artistas cadastrados, 260+ shows importados (legado=true)
 
 ---
 
@@ -466,63 +471,78 @@ OPENWEATHER_API_KEY=...
 - Artista pipe: `desde XXXX` após país, só se não-null
 - Artistas já enriquecidos: precisam de re-enrich para popular `founded_year`
 
----
-
-## ROADMAP v0.9.0
-
-Implementação em 4 fases. Não pular — cada uma depende da anterior.
-
-```
-FASE A — fundação visual ✓ CONCLUÍDA (commit 96b0768)
-  1. Paleta + tokens CSS ✓
-  2. Tipografia (IBM Plex Mono + Instrument Serif) ✓
-  3. Superfícies ✓
-
-FASE B — indicadores (depende de A)
-  4. Dissolver glifos I Ching e funcionais, criar indicadores .bodycore
-  5. nichoColor() revisão e propagação descendente
-  6. Ohara visual (amber ambiente)
-  → Bruno testa cada página.
-
-FASE C — layout (depende de A+B)
-  7. Show detalhe: venue ∥ lineup, header pipe ✓ CONCLUÍDO
-  8. Artista detalhe: nichos ∥ tags, header pipe (pipe feito, layout grid pendente)
-  9. Listas reestruturadas (shows, artistas, locais, públicos) ✓ CONCLUÍDO
-  10. Nav: formato + labels MONO CAPS
-  → v0.9.0 pronta para commit.
-
-FASE D — extras (se couber)
-  11. Metadata pipe em todas as páginas
-  12. Loading mínimo (.bodycore)
-```
-
-**Adiado para v1.0:** logo dodecaedro, Braille expandido, Ohara inline, Home completa.
-**Adiado para v2.0+:** multi-user (Auth + RLS), ML regressão, RPG UI, mobile suporte completo.
-
-### Pretext (text layout engine)
-Implementar quando: histórico 500+ shows, ou públicos 50+ entradas, ou reflow >100ms/frame.
-Hoje: ~200 shows, Tailwind resolve. Não implementar antes — premature optimization.
+### v0.9.1
+- Sistema visual v0.9.0 fechado: IBM Plex Mono + Instrument Serif, tokens cyan/amber/status, glifos descontinuados
+- Nav responsiva implementada: top bar desktop (≥768px) / bottom bar + popover mobile (<768px)
+- Componentes: `EnrichmentDot` (dot amber=enriquecido, dot outline muted=pendente), `TerminalSpinner` (Braille Unicode)
+- Campo `shows.tour` adicionado ao schema
+- Rota `/dados`: import CSV/XLSX de shows históricos com fluxo encadeado
+- Filtros de shows: a-participar | nao-participarei | participados | nao-participados | todos
+- OharaSearch: removido do header — busca por seção em cada lista de entidade
 
 ---
 
-## FASE 2 — PENDENTE
+## SISTEMA VISUAL v0.9.0 — FECHADO ✓
 
-### 1. Ohara inline na página do artista
-Hoje: botão redireciona para `/ohara?prefill=nome`.
-Objetivo: painel embutido. Requer transformar em client ou componente separado.
+Implementação concluída em 4 fases (commit 96b0768 + patches subsequentes).
+```
+FASE A ✓ — Paleta + tokens CSS, tipografia, superfícies
+FASE B ✓ — Glifos I Ching e funcionais descontinuados; EnrichmentDot + TerminalSpinner criados
+FASE C ✓ — Show detalhe, artista detalhe, listas pipe format, nav MONO CAPS
+FASE D ✓ — Nav responsiva (desktop top / mobile bottom+popover), filtros shows, /dados
+```
 
-### 2. Setlist.fm na página do show
-Rota `/api/setlistfm` existe. Falta exibir.
+---
 
-### 3. Múltiplas datas por evento
-Solução futura: tabela `show_dates`. Não implementar antes de 5+ casos reais.
+## ROADMAP v1.0 — SEQUÊNCIA DEFINIDA (Opus, 2026-04-03)
 
-### 4. Histórico anterior ao app
-Gerar CSV, importar com `legado=true`.
+Critérios de saída: dado limpo + 3 fluxos críticos mobile + home como briefing operacional.
 
-### 5. ML fase 3
-Regressão com scikit-learn quando ~30 shows tiverem `resultado_geral` preenchido.
-Features: listeners, status_ingresso, capacidade, concorrencia, underground_score.
+### 0. CLAUDE.md atualizado ✓ (este arquivo)
 
-### 6. Songkick API
-Aguardando aprovação.
+### 1. Limpeza de dados + diagnóstico em /dados
+Artistas duplicados, artistas sem mbid, listeners zerados, shows sem resultado, venues sem subprefeitura.
+Seção "diagnóstico" mostra pendências críticas. Permite excluir/merge artistas órfãos.
+
+### 2. Ohara inline no perfil do artista
+Painel embutido em `/artistas/[id]` — sem redirecionamento para `/ohara`.
+Requer transformar em client component ou componente separado.
+
+### 3. Home como briefing operacional
+Bloco "próximos shows" com: nome, venue, risco, público estimado, status de estoque (design pronto? peças produzidas?).
+Sinalização visual de campos incompletos.
+
+### 4. Audit mobile — 3 fluxos críticos
+(a) registrar resultado de show no campo
+(b) consultar detalhe do show antes de sair de casa
+(c) registrar movimentação de estoque
+Touch targets, collapse de grids lado a lado, ações sem scroll profundo.
+
+### 5. Setlist.fm no detalhe do show
+Rota `/api/setlistfm` existe. Exibir usando mbid do artista com `ordem=1` (headliner).
+Cache server-side com revalidação de 24h.
+
+### 6. /publicos — view "próximos shows por nicho"
+Inversão de fluxo: nicho → artistas vinculados → próximos shows.
+Pergunta respondida: "quando vou encontrar esse público de novo?"
+Sem refactor de taxonomia, sem nichoColor semântico — esses vão para v2.0+.
+
+### Critérios verificáveis de saída de v1.0
+**Dado:** zero artistas duplicados; artistas com shows futuros têm mbid + listeners; todos venues com risco; /dados sem pendências críticas.
+**Fluxo:** 3 fluxos críticos funcionam no mobile com feedback visual de sucesso/falha. Ohara inline sem redirecionamento.
+**Velocidade:** "vale ir nesse show?" respondível em ≤2 toques da home. "quanto estoque tenho?" respondível em ≤2 toques de qualquer show.
+
+---
+
+## ADIADO PARA v2.0+
+
+- Multi-user: Supabase Auth + tabela `profiles` (role: admin|editor|viewer) + RLS
+- nichoColor() semântico por gênero
+- Taxonomia hierárquica de nichos
+- ML regressão (scikit-learn, ~30 shows com `resultado_geral`)
+- RPG UI exploration
+- Mobile suporte completo
+- Pretext (implementar quando: 500+ shows, ou 50+ nichos, ou reflow >100ms/frame)
+- Logo dodecaedro (dot-matrix halftone, opacidade uniforme)
+- Songkick API (aguardando aprovação)
+- Múltiplas datas por evento: tabela `show_dates` — não antes de 5+ casos reais

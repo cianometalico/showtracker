@@ -1,5 +1,8 @@
 import { Suspense } from 'react'
 import { OharaSearch } from '@/components/ohara-search'
+import { ImportClient } from '../dados/import-client'
+import { DiagnosticsSection } from '../dados/diagnostics-section'
+import { DadosOperationsClient } from '../dados/dados-operations-client'
 
 export default function OharaPage() {
   return (
@@ -30,6 +33,33 @@ export default function OharaPage() {
       <Suspense fallback={null}>
         <OharaSearch defaultExpanded />
       </Suspense>
+
+      <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '2rem 0' }} />
+
+      {/* Diagnóstico */}
+      <Suspense fallback={
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          carregando diagnóstico...
+        </p>
+      }>
+        <DiagnosticsSection />
+      </Suspense>
+
+      <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.5rem 0 2rem' }} />
+
+      {/* Importar shows */}
+      <ImportClient />
+
+      {/* Enriquecer + Consolidar */}
+      <DadosOperationsClient />
+
+      {/* Exportar */}
+      <section style={{ marginBottom: '2rem' }}>
+        <p className="section-label">exportar</p>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+          em breve — exportar shows, artistas e estoque em CSV
+        </p>
+      </section>
     </div>
   )
 }

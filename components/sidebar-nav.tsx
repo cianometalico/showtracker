@@ -36,8 +36,8 @@ export function SidebarNav() {
         <span className="nav-indicator" aria-hidden="true" /> estoque
       </Link>
       <div className="sidebar-separator" />
-      <Link href="/dados" className={navClass('/dados')} style={{ opacity: 0.7 }}>
-        <span className="nav-indicator" aria-hidden="true" /> dados
+      <Link href="/ohara" className={navClass('/ohara')} style={{ opacity: 0.7 }}>
+        <span className="nav-indicator" aria-hidden="true" /> ohara
       </Link>
     </nav>
   )

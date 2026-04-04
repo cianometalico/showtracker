@@ -157,19 +157,17 @@ export default async function HomePage({
         </span>
       </div>
 
-      {/* Stats — 3 cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
-        {[
-          { value: countHoje ?? 0,     label: 'hoje' },
-          { value: countEsteMes ?? 0,  label: 'este mês' },
-          { value: countTotal ?? 0,    label: 'acervo' },
-        ].map(({ value, label }) => (
-          <div key={label} className="stat-card">
-            <p className="stat-value">{value}</p>
-            <p className="stat-label">{label}</p>
-          </div>
-        ))}
-      </div>
+      {/* Stats — pipe */}
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 1.75rem' }}>
+        {(countHoje ?? 0) === 0
+          ? 'nenhum show hoje'
+          : `${countHoje} show${(countHoje ?? 0) !== 1 ? 's' : ''} hoje`
+        }
+        {' | '}
+        {countEsteMes ?? 0} este mês
+        {' | '}
+        {countTotal ?? 0} no acervo
+      </p>
 
       {/* Calendário mensal */}
       <section style={{ marginBottom: '2rem' }}>

@@ -3,7 +3,6 @@
 import { useState, useTransition, Fragment } from 'react'
 import { updateArtist, deleteArtist } from './actions'
 import { countryName } from '@/lib/countries'
-import { EnrichmentDot } from '@/components/enrichment-dot'
 
 type ArtistData = {
   id: string
@@ -12,9 +11,10 @@ type ArtistData = {
   mbid: string | null
   founded_year: number | null
   lastfm_listeners: number | null
+  ultima_atualizacao: string | null
 }
 
-export function ArtistDetailClient({ artist, nichoManagerSlot }: { artist: ArtistData; nichoManagerSlot?: React.ReactNode }) {
+export function ArtistDetailClient({ artist, nichoManagerSlot, enrichSlot }: { artist: ArtistData; nichoManagerSlot?: React.ReactNode; enrichSlot?: React.ReactNode }) {
   const [isEditing,    setIsEditing]    = useState(false)
   const [editError,    setEditError]    = useState<string | null>(null)
   const [deleteError,  setDeleteError]  = useState<string | null>(null)
@@ -95,6 +95,11 @@ export function ArtistDetailClient({ artist, nichoManagerSlot }: { artist: Artis
           </button>
         </div>
         {deleteError && <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: '0.5rem' }}>{deleteError}</p>}
+        {enrichSlot && (
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
+            {enrichSlot}
+          </div>
+        )}
         {nichoManagerSlot && (
           <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
             {nichoManagerSlot}
@@ -105,62 +110,55 @@ export function ArtistDetailClient({ artist, nichoManagerSlot }: { artist: Artis
   }
 
   // ── Pipe segments ──────────────────────────────────────────
-  const pipeSegments: React.ReactNode[] = []
+  const pipeSegments: string[] = []
 
   if (artist.pais) {
-    pipeSegments.push(countryName(artist.pais))
+    const cn = countryName(artist.pais)?.replace(/\s*\(.*\)$/, '').trim()
+    if (cn) pipeSegments.push(cn)
   }
 
   if (artist.founded_year) {
     pipeSegments.push(`desde ${artist.founded_year}`)
   }
 
-  pipeSegments.push(
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <EnrichmentDot mbid={artist.mbid} />
-      <span style={{ color: artist.mbid ? 'var(--amber)' : 'var(--text-muted)' }}>
-        {artist.mbid ? 'enriquecido' : 'pendente'}
-      </span>
-    </span>
-  )
-
   if (artist.lastfm_listeners && artist.lastfm_listeners > 0) {
     pipeSegments.push(`${artist.lastfm_listeners.toLocaleString('pt-BR')} ouvintes`)
   }
 
+  const atualizadoStr = artist.ultima_atualizacao
+    ? new Date(artist.ultima_atualizacao).toLocaleDateString('pt-BR')
+    : null
+
   return (
     <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
-          <h1 style={{
-            fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400,
-            color: 'var(--text)', margin: 0, lineHeight: 1.3,
-          }}>
-            {artist.nome}
-          </h1>
-          {artist.mbid && (
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.7rem',
-              color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0,
-            }}>
-              {artist.mbid}
-            </span>
-          )}
-        </div>
+        <h1 style={{
+          fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 400,
+          color: 'var(--text)', margin: 0, lineHeight: 1.3,
+        }}>
+          {artist.nome}
+        </h1>
         <button onClick={startEdit} style={editBtnStyle}>editar</button>
       </div>
-      <div style={{
-        display: 'flex', alignItems: 'center', flexWrap: 'wrap',
-        fontFamily: 'var(--font-mono)', fontSize: '0.78rem',
-        color: 'var(--text-dim)', marginTop: 6,
-      }}>
-        {pipeSegments.map((seg, i) => (
-          <Fragment key={i}>
-            {i > 0 && <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>}
-            <span style={{ whiteSpace: 'nowrap' }}>{seg}</span>
-          </Fragment>
-        ))}
-      </div>
+      {pipeSegments.length > 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', flexWrap: 'wrap',
+          fontFamily: 'var(--font-mono)', fontSize: '0.78rem',
+          color: 'var(--text-dim)', marginTop: 6,
+        }}>
+          {pipeSegments.map((seg, i) => (
+            <Fragment key={i}>
+              {i > 0 && <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>}
+              <span style={{ whiteSpace: 'nowrap' }}>{seg}</span>
+            </Fragment>
+          ))}
+        </div>
+      )}
+      {atualizadoStr && (
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+          atualizado {atualizadoStr}
+        </p>
+      )}
       {deleteError && <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 4 }}>{deleteError}</p>}
     </div>
   )

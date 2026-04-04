@@ -29,6 +29,12 @@ type Subprefeitura = {
   perfil: string
 }
 
+type SubprefeituraOption = {
+  id: string
+  nome: string
+  zona: string
+}
+
 type ShowRow = {
   id: string
   data: string
@@ -42,6 +48,7 @@ type ShowRow = {
 type Props = {
   venue: VenueData
   subprefeitura: Subprefeitura | null
+  subprefeituras: SubprefeituraOption[]
   shows: ShowRow[]
 }
 
@@ -81,7 +88,7 @@ const RISCO_LABEL: Record<string, string> = {
 
 // ── Main Component ────────────────────────────────────────────
 
-export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
+export function VenueDetailClient({ venue, subprefeitura, subprefeituras, shows }: Props) {
   // ── Edit state ──
   const [isEditing, setIsEditing] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
@@ -93,9 +100,10 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
   const [eCidade, setECidade] = useState(venue.cidade ?? '')
   const [eBairro, setEBairro] = useState(venue.bairro ?? '')
   const [eCap,    setECap]    = useState(String(venue.capacidade_praticavel ?? ''))
-  const [eRisco,  setERisco]  = useState(venue.risco_fiscalizacao ?? '')
-  const [eLat,    setELat]    = useState(String(venue.lat ?? ''))
-  const [eLng,    setELng]    = useState(String(venue.lng ?? ''))
+  const [eRisco,    setERisco]    = useState(venue.risco_fiscalizacao ?? '')
+  const [eSubpref,  setESubpref]  = useState(subprefeitura?.id ?? '')
+  const [eLat,      setELat]      = useState(String(venue.lat ?? ''))
+  const [eLng,      setELng]      = useState(String(venue.lng ?? ''))
 
   // ── Stats ──
   const participados = shows.filter(s => s.participou)
@@ -110,6 +118,7 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
     setEBairro(venue.bairro ?? '')
     setECap(String(venue.capacidade_praticavel ?? ''))
     setERisco(venue.risco_fiscalizacao ?? '')
+    setESubpref(subprefeitura?.id ?? '')
     setELat(String(venue.lat ?? ''))
     setELng(String(venue.lng ?? ''))
     setEditError(null)
@@ -137,6 +146,7 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
       risco_fiscalizacao:    eRisco || null,
       lat:                   eLat ? parseFloat(eLat) : null,
       lng:                   eLng ? parseFloat(eLng) : null,
+      subprefeitura_id:      eSubpref || null,
     }
     startSave(async () => {
       const res = await updateVenueInline(venue.id, input)
@@ -179,6 +189,8 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
                   </span>
                 </>
               )}
+              <span style={{ margin: '0 6px', opacity: 0.4 }}>|</span>
+              <span>{subprefeitura ? subprefeitura.nome : '—'}</span>
             </div>
           )}
         </div>
@@ -221,6 +233,21 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
               </EField>
             </div>
 
+            <EField label="Subprefeitura">
+              <select
+                value={eSubpref}
+                onChange={e => setESubpref(e.target.value)}
+                style={{ ...inputStyle, fontFamily: 'var(--font-mono)', fontSize: '0.78rem', textTransform: 'uppercase' }}
+              >
+                <option value="">— sem subprefeitura —</option>
+                {subprefeituras.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.nome.toUpperCase()} ({s.zona.toUpperCase()})
+                  </option>
+                ))}
+              </select>
+            </EField>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <EField label="Latitude">
                 <input value={eLat} onChange={e => setELat(e.target.value)}
@@ -258,49 +285,16 @@ export function VenueDetailClient({ venue, subprefeitura, shows }: Props) {
         </div>
       )}
 
-      {/* ── READ MODE ────────────────────────────────────── */}
+      {/* ── READ MODE stats ──────────────────────────────── */}
       {!isEditing && (
-        <>
-          {/* Stats */}
-          <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-            {[
-              { label: 'Shows',        value: String(shows.length) },
-              { label: 'Participei',   value: String(participados.length) },
-              { label: 'Taxa sucesso', value: taxaSucesso !== null ? `${taxaSucesso}%` : '—' },
-            ].map(({ label, value }) => (
-              <div key={label} className="stat-card">
-                <p className="stat-label">{label}</p>
-                <p className="stat-value">{value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Info do venue */}
-          <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '1rem', background: 'var(--surface)', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
-              <InfoCell label="Capacidade">
-                {venue.capacidade_praticavel ? venue.capacidade_praticavel.toLocaleString('pt-BR') : '—'}
-              </InfoCell>
-              {venue.risco_fiscalizacao && (
-                <InfoCell label="Fiscalização">
-                  <span style={{ color: RISCO_COR[venue.risco_fiscalizacao] ?? 'var(--text)' }}>
-                    {RISCO_LABEL[venue.risco_fiscalizacao] ?? venue.risco_fiscalizacao}
-                  </span>
-                </InfoCell>
-              )}
-              {subprefeitura && (
-                <InfoCell label="Subprefeitura">
-                  <span>{subprefeitura.nome}</span>
-                  {subprefeitura.risco_base && (
-                    <span style={{ marginLeft: 6, fontSize: '0.75rem', color: RISCO_COR[subprefeitura.risco_base] ?? 'var(--text-dim)' }}>
-                      · risco {RISCO_LABEL[subprefeitura.risco_base] ?? subprefeitura.risco_base}
-                    </span>
-                  )}
-                </InfoCell>
-              )}
-            </div>
-          </div>
-        </>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 1.5rem' }}>
+          {shows.length} {shows.length !== 1 ? 'shows' : 'show'}
+          {' | '}
+          {participados.length} {participados.length !== 1 ? 'participados' : 'participado'}
+          {taxaSucesso !== null && (
+            <> | <span style={{ color: taxaSucesso >= 70 ? 'var(--status-pos)' : taxaSucesso >= 40 ? 'var(--status-neut)' : 'var(--status-neg)' }}>{taxaSucesso}% taxa</span></>
+          )}
+        </p>
       )}
 
       {/* ── SHOW HISTORY (sempre visível) ────────────────── */}

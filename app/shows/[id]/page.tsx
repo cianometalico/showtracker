@@ -1,5 +1,6 @@
 import { ShowDetailClient } from './show-detail-client'
 import { ShowStockSection } from './show-stock-section'
+import { ArtistHistoryBlock } from './artist-history-block'
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 
@@ -151,6 +152,13 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
               levadosAqui={levadosAqui}
             />
           ) : null
+        }
+        setlistSection={
+          <ArtistHistoryBlock
+            lineup={lineup.map(l => ({ id: l.artist_id, nome: l.nome, mbid: l.mbid, ordem: l.ordem }))}
+            currentShowId={show.id}
+            currentShowData={show.data}
+          />
         }
       />
     </div>

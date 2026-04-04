@@ -76,6 +76,13 @@ export async function updateResultado(
   return {}
 }
 
+export async function updateResultadoOnly(id: string, resultado: string | null): Promise<void> {
+  const supabase = await createClient()
+  await (supabase as any).from('shows').update({ resultado_geral: resultado || null }).eq('id', id)
+  revalidatePath(`/shows/${id}`)
+  revalidatePath('/shows')
+}
+
 export async function updateParticipou(id: string, participou: boolean): Promise<void> {
   const supabase = await createClient()
   await (supabase as any).from('shows').update({ participou }).eq('id', id)

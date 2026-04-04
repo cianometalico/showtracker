@@ -13,6 +13,7 @@ export type UpdateVenueInput = {
   risco_fiscalizacao:    string | null
   lat:                   number | null
   lng:                   number | null
+  subprefeitura_id:      string | null
 }
 
 export async function updateVenue(id: string, input: UpdateVenueInput): Promise<void> {
@@ -28,6 +29,7 @@ export async function updateVenue(id: string, input: UpdateVenueInput): Promise<
       risco_fiscalizacao:    input.risco_fiscalizacao || null,
       lat:                   input.lat,
       lng:                   input.lng,
+      subprefeitura_id:      input.subprefeitura_id || null,
     })
     .eq('id', id)
   if (error) throw new Error(error.message)
@@ -47,6 +49,7 @@ export async function updateVenueInline(id: string, input: UpdateVenueInput): Pr
       risco_fiscalizacao:    input.risco_fiscalizacao || null,
       lat:                   input.lat,
       lng:                   input.lng,
+      subprefeitura_id:      input.subprefeitura_id || null,
     })
     .eq('id', id)
   if (error) return { error: error.message }

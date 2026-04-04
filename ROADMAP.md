@@ -1,87 +1,7 @@
-# Roadmap
-
-Plano de evolução do Radiant. Prioridade definida por impacto operacional — o que muda a decisão do vendedor no dia do show vem primeiro.
-
----
-
-## Fase 1.1 — Estabilização (pré-requisito para tudo)
-
-Auditar código contra schema real do Supabase. Resolver arquivos mortos, imports quebrados, duplicatas. Garantir que tudo que está no repo compila e roda sem erro.
-
-| Item | Descrição | Status |
-|------|-----------|--------|
-| Auditoria de código | Validar todos os arquivos contra schema real | pendente |
-| Resolver duplicatas | `lib/readiness.ts` vs `lib/db/readiness.ts` | pendente |
-| inference_actions.ts | Verificar alinhamento com schema atual | pendente |
-| inference.ts | Decidir: remover ou manter como referência | pendente |
-| scrape route | Documentar ou remover | pendente |
-| Fix weather API | OpenWeather retornando erro | pendente |
-| Revisão UI/UX | Consistência visual, cores, espaçamentos, responsividade | pendente |
-| Estrutura de pastas | Avaliar reorganização de `lib/`, `utils/`, `types/` | pendente |
-
----
-
-## Fase 2 — Operacional (impacto direto na decisão de venda)
-
-### Prioridade alta
-
-**Home funcional** — Calendário 10 dias, shows agendados, alertas, acesso rápido. Hoje a home não serve pra nada. É a primeira coisa que o vendedor abre.
-
-**Resultado e peças vendidas** — Adicionar `pecas_levadas` e `pecas_vendidas` ao schema de shows. Sem isso não existe feedback loop real. Bloqueia a fase 3 inteira.
-
-**Setlist.fm na página do show** — Rota já existe (`/api/setlistfm`). Falta exibir na página do show. Repertório esperado é fator de decisão de estampa.
-
-### Prioridade média
-
-**Ohara inline no perfil do artista** — Enriquecimento sem sair da página. Melhora o fluxo mas não bloqueia nenhuma feature.
-
-**Histórico anterior ao app** — Recuperar shows pré-Notion por venue. Aumenta a base de dados pra ML. Depende de pesquisa manual.
-
-### Prioridade baixa
-
-**Múltiplas datas por evento** — Tabela `show_dates`. Só implementar com 5+ casos reais. Hoje o workaround (um show por data) funciona.
-
-**Songkick API** — Aguardando aprovação. Monitoramento automático de shows futuros.
-
----
-
-## Fase 3 — Inteligência (requer ~30 shows com resultado)
-
-**ML com scikit-learn** — Regressão numérica sobre `pecas_vendidas`. Features: listeners, status_ingresso, capacidade, concorrencia, underground_score. Rodar localmente, exportar modelo, servir via API Python.
-
-**Perfil de público** — Turista vs local (turista compra mais por urgência). Requer campo novo ou inferência por venue/artista.
-
-**Previsão de gargalo de produção** — Cruzar volume sugerido com capacidade real de estamparia. Depende do ML funcional.
-
-**Auto-enriquecimento de gêneros** — Job: MB tags + Last.fm → tabela genres automaticamente. Substitui seed manual.
-
----
-
-## Princípios de priorização
-
-1. **O que muda a decisão antes do show** vem antes do que analisa depois
-2. **Feedback loop** (registrar resultado real) vem antes de predição
-3. **Dados confiáveis** vêm antes de features que dependem deles
-4. **Não implementar sem 5+ casos reais** — evitar over-engineering
-5. **Opus decide, Claude Code executa, Sonnet ajusta**
-
-
-
-
-
-
-666666666666666666666666666666666666666666666666666666666666
-
-
-
-
-
-
-
 # RADIANT — ROADMAP
 
-última atualização: 2026-03-30
-versão atual: v0.6.3 / v0.9.0 em finalização
+última atualização: 2026-04-03
+versão atual: v0.9.1
 
 ---
 
@@ -111,7 +31,7 @@ Bruno   → testes no browser, decisões operacionais
 
 ---
 
-## v0.9.0 — UX/LAYOUT PASS (em finalização)
+## v0.9.0 — UX/LAYOUT PASS ✓ CONCLUÍDA
 
 ### Fase A — Fundação visual ✓
 - ✓ Paleta + tokens CSS (cyan, amber, status gradient, text, surfaces)
@@ -139,12 +59,10 @@ Bruno   → testes no browser, decisões operacionais
 ### Fase D — Extras ✓
 - ✓ Metadata pipe auditado em todas as páginas de detalhe
 - ✓ TerminalSpinner (Braille Unicode, components/terminal-spinner.tsx)
-- ○ Dot de enriquecimento em todos os lugares que exibem nome de artista
-- ○ NichoManager só visível em modo edição (fix duplicidade em artista detalhe)
-
-### Antes de fechar v0.9.0
-- ○ Import CSV (/dados) — planilha 2025 validada + enriquecimento no upload
-- ○ Commit e tag v0.9.0
+- ✓ EnrichmentDot global (dot amber = enriquecido, dot outline muted = pendente)
+- ✓ NichoManager só visível em modo edição (fix duplicidade em artista detalhe)
+- ✓ Import CSV/XLSX (/dados) — unified import flow com enriquecimento
+- ✓ Campo shows.tour adicionado ao schema
 
 ---
 
@@ -155,9 +73,9 @@ Bruno   → testes no browser, decisões operacionais
 
 ---
 
-## v0.9.1 — FILTROS E DADOS
+## v0.9.1 — FILTROS E DADOS ✓ CONCLUÍDA
 
-- ○ Filtros de shows por estado operacional:
+- ✓ Filtros de shows por estado operacional:
   ```
   a participar      → data futura + participou=true
   não participarei  → data futura + participou=false
@@ -165,37 +83,63 @@ Bruno   → testes no browser, decisões operacionais
   não participados  → data passada + participou=false
   todos             → cronológico completo
   ```
-- ○ Lista "todos" com scroll automático para o dia de hoje
-- ○ Import CSV histórico com validação + enriquecimento no upload (se não fechar no v0.9.0)
+- ✓ Lista "todos" com scroll automático para o dia de hoje
+- ✓ Contadores por estado no cabeçalho de shows
+- ✓ OharaSearch removido do header global — busca por seção em cada lista de entidade
 
 ---
 
 ## v1.0.0 — RELEASE OPERACIONAL
 
-Objetivo: sistema completo para uso solo em campo. Mobile como experiência primária.
+Critérios de saída: dado limpo + 3 fluxos críticos mobile + home como briefing operacional.
 
-- ○ Home completa (6 faces do dodecaedro — briefing operacional)
-- ○ Ohara inline na página do artista (painel embutido, sem redirect)
-- ○ Setlist.fm na página do show
-- ○ Logo dodecaedro halftone (Illustrator — Bruno)
-- ○ Braille Unicode expandido (backgrounds, transições)
-- ○ Mobile: polimento completo (Agenda, /publicos, formulários)
-- ○ Página /dados completa (import CSV, histórico, exportação)
-- ○ OharaSearch global expandido (busca por artista, show, local, nicho, tag)
-- ○ /publicos reestruturada (aguarda decisão Opus — ver abaixo)
-- ○ Vercel vs localhost: investigar e resolver diferenças de build
-- ○ Pretext: avaliar necessidade (trigger: 500+ shows ou reflow >100ms)
+### 1. Limpeza de dados + diagnóstico em /dados
+- ○ Seção "diagnóstico": artistas duplicados, sem mbid, listeners zerados, shows sem resultado, venues sem subprefeitura
+- ○ Excluir/merge artistas órfãos direto da interface
+
+### 2. Ohara inline no perfil do artista
+- ○ Painel embutido em `/artistas/[id]` — sem redirecionamento para `/ohara`
+- ○ Requer transformar em client component ou componente separado
+
+### 3. Home como briefing operacional
+- ○ Bloco "próximos shows": nome, venue, risco, público estimado, status de estoque
+- ○ Sinalização visual de campos incompletos
+
+### 4. Audit mobile — 3 fluxos críticos
+- ○ (a) registrar resultado de show no campo
+- ○ (b) consultar detalhe do show antes de sair de casa
+- ○ (c) registrar movimentação de estoque
+- ○ Touch targets, collapse de grids lado a lado, ações sem scroll profundo
+
+### 5. Setlist.fm na página do show
+- ○ Rota `/api/setlistfm` existe. Exibir usando mbid do artista com `ordem=1` (headliner)
+- ○ Cache server-side com revalidação de 24h
+
+### 6. /publicos — view "próximos shows por nicho"
+- ○ Inversão de fluxo: nicho → artistas vinculados → próximos shows
+- ○ Pergunta respondida: "quando vou encontrar esse público de novo?"
+
+### Critérios verificáveis de saída
+**Dado:** zero artistas duplicados; artistas com shows futuros têm mbid + listeners; todos venues com risco; /dados sem pendências críticas.
+**Fluxo:** 3 fluxos críticos funcionam no mobile com feedback visual de sucesso/falha. Ohara inline sem redirecionamento.
+**Velocidade:** "vale ir nesse show?" respondível em ≤2 toques da home. "quanto estoque tenho?" respondível em ≤2 toques de qualquer show.
 
 ---
 
 ## v2.0.0 — MULTI-USER + ML
 
-- ○ Supabase Auth + profiles (role: admin|editor|viewer) + RLS
+- ○ Supabase Auth + tabela `profiles` (role: admin|editor|viewer) + RLS
+- ○ nichoColor() semântico por gênero (metal=vermelho trevas, hc=amarelo, emo=roxo...)
+- ○ Taxonomia hierárquica de nichos (aguarda decisão Opus — ver abaixo)
 - ○ ML regressão: scikit-learn quando ~30 shows com resultado_geral preenchido
   - Features: listeners, status_ingresso, capacidade, concorrencia, underground_score
   - Rodar local, exportar modelo, Radiant chama via API Python
 - ○ RPG UI (exploração conceitual)
 - ○ Mobile suporte completo
+- ○ Pretext (implementar quando: 500+ shows, ou 50+ nichos, ou reflow >100ms/frame)
+- ○ Logo dodecaedro (dot-matrix halftone, opacidade uniforme)
+- ○ Songkick API (aguardando aprovação)
+- ○ Múltiplas datas por evento: tabela `show_dates` — não antes de 5+ casos reais
 
 ---
 
@@ -213,25 +157,18 @@ Aguarda Opus para fechar:
   → inferir gênero macro, subgêneros, descritores de público
   → separar grupo-gênero de grupo-descritor
   → alimentar nichoColor() semântica por gênero
-- nichoColor() semântica por gênero:
-  metal = vermelho trevas, hc = amarelo, emo = roxo, pop = rosa, etc.
-  (tensão: metal vs --status-neg vermelho — gerenciável por saturação/contexto)
-
-### OharaSearch global (Fase D expandida)
-Campo único no header, escopo selecionável: artista, show, local, nicho, tag.
-Decisão: v0.9.0 Fase D ou v1.0?
 
 ---
 
 ## DÍVIDA TÉCNICA
 
 - ~27 usos de var(--red)/var(--green) nos componentes via alias
-  → migrar para --status-pos/--status-neg semânticos na Fase C/D
+  → migrar para --status-pos/--status-neg semânticos
   → status: parcialmente migrado, residual nos componentes mais antigos
 - `zona_risco` (bool) existe no schema mas é ignorado na UI
 - `ultima_atualizacao` não está no pipe do artista (disponível no banco)
 - Agenda (/agenda): funcional mas não polida — polimento em v1.0
-- Artistas já enriquecidos antes de v0.6.3: founded_year = null até re-enrich
+- Artistas enriquecidos antes de v0.6.3: founded_year = null até re-enrich
   → rodar /api/enrich-all para popular em massa quando conveniente
 
 ---
@@ -241,6 +178,9 @@ Decisão: v0.9.0 Fase D ou v1.0?
 ```sql
 -- v0.6.3
 artists: founded_year int
+
+-- v0.9.0
+shows: tour text (nullable)
 
 -- já existia no banco, não precisou migration:
 shows: clima_temp int

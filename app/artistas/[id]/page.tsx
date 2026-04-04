@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { NichoManager } from './nicho-manager'
 import { nichoColor, nichoColorAlpha } from '@/lib/nicho-color'
 import { EnrichButton } from './enrich-button'
+import { OharaInlinePanel } from './ohara-inline-panel'
 import { ArtistDetailClient } from './artist-detail-client'
 import { OverrideSectionClient } from './override-section-client'
 
@@ -129,7 +130,18 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           mbid: artist.mbid ?? null,
           founded_year: artist.founded_year ?? null,
           lastfm_listeners: artist.lastfm_listeners ?? null,
+          ultima_atualizacao: artist.ultima_atualizacao ?? null,
         }}
+        enrichSlot={
+          artist.mbid
+            ? <EnrichButton
+                artistId={id}
+                artistNome={artist.nome}
+                artistMbid={artist.mbid}
+                ultimaAtualizacao={artist.ultima_atualizacao ?? null}
+              />
+            : <OharaInlinePanel artistId={id} artistName={artist.nome} />
+        }
         nichoManagerSlot={
           <NichoManager
             artistId={id}
@@ -138,20 +150,6 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           />
         }
       />
-
-      {/* Stats */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-        {[
-          { label: 'Shows', value: String(shows.length) },
-          { label: 'Participei', value: String(participados.length) },
-          { label: 'Taxa sucesso', value: taxaSucesso !== null ? `${taxaSucesso}%` : '—' },
-        ].map(({ label, value }) => (
-          <div key={label} className="stat-card">
-            <p className="stat-value">{value}</p>
-            <p className="stat-label">{label}</p>
-          </div>
-        ))}
-      </div>
 
       {/* Grid: nichos ∥ tags */}
       <div style={{
@@ -250,42 +248,19 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         } : null}
       />
 
-      {/* Enriquecer */}
-      <EnrichButton
-        artistId={id}
-        artistNome={artist.nome}
-        artistMbid={artist.mbid ?? null}
-        ultimaAtualizacao={artist.ultima_atualizacao ?? null}
-      />
-
-      {/* Designs */}
-      {artistDesigns.length > 0 && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <p className="section-label" style={{ margin: 0 }}>Designs</p>
-            <a href="/estoque/new" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textDecoration: 'none' }}>+ novo design</a>
-          </div>
-          <div>
-            {artistDesigns.map((d: any) => (
-              <a key={d.design_id} href={`/estoque/${d.design_id}`}
-                style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.45rem 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', opacity: d.ativo ? 1 : 0.5 }}>
-                <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)' }}>{d.nome}</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>{d.total_vendido} vendidas</span>
-                <span style={{
-                  fontSize: '0.75rem', fontFamily: 'var(--font-mono)',
-                  color: d.saldo_atual > 0 ? 'var(--green)' : 'var(--text-muted)',
-                }}>
-                  {d.saldo_atual} em estoque
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Histórico de shows */}
-      <div>
-        <p className="section-label">Histórico de shows</p>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginBottom: 8 }}>
+          <p className="section-label" style={{ margin: 0 }}>Histórico de shows</p>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+            {shows.length} {shows.length !== 1 ? 'shows' : 'show'}
+            {' | '}
+            {participados.length} {participados.length !== 1 ? 'participados' : 'participado'}
+            {taxaSucesso !== null && (
+              <> {' | '}<span style={{ color: taxaSucesso >= 70 ? 'var(--status-pos)' : taxaSucesso >= 40 ? 'var(--status-neut)' : 'var(--status-neg)' }}>{taxaSucesso}% taxa</span></>
+            )}
+          </span>
+        </div>
         {shows.length === 0 ? (
           <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Nenhum show cadastrado.</p>
         ) : (
@@ -319,6 +294,31 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           </div>
         )}
       </div>
+
+      {/* Designs */}
+      {artistDesigns.length > 0 && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <p className="section-label" style={{ margin: 0 }}>Designs</p>
+            <a href="/estoque/new" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textDecoration: 'none' }}>+ novo design</a>
+          </div>
+          <div>
+            {artistDesigns.map((d: any) => (
+              <a key={d.design_id} href={`/estoque/${d.design_id}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.45rem 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', opacity: d.ativo ? 1 : 0.5 }}>
+                <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--text)' }}>{d.nome}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>{d.total_vendido} vendidas</span>
+                <span style={{
+                  fontSize: '0.75rem', fontFamily: 'var(--font-mono)',
+                  color: d.saldo_atual > 0 ? 'var(--status-pos)' : 'var(--text-muted)',
+                }}>
+                  {d.saldo_atual} em estoque
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
     </div>
   )

@@ -12,4 +12,5 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/locais',   label: 'LOCAIS',   priority: 'secondary' },
   { href: '/publicos', label: 'PÚBLICOS', priority: 'secondary' },
   { href: '/agenda',   label: 'AGENDA',   priority: 'secondary' },
+  { href: '/ohara',   label: 'OHARA',    priority: 'secondary' },
 ]

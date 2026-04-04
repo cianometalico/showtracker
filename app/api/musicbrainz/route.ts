@@ -53,6 +53,7 @@ async function searchMB(q: string, limit = 6) {
       score:          a.score ?? 0,
       tags:           (a.tags ?? []).map((t: any) => t.name).slice(0, 8),
       disambiguation: a.disambiguation ?? null,
+      begin_year:     a['life-span']?.begin ? parseInt(a['life-span'].begin.slice(0, 4)) : null,
     }))
 
     // Considera sucesso se algum resultado tem score >= 60
