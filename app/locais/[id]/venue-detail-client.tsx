@@ -45,11 +45,16 @@ type ShowRow = {
   artistas: string[]
 }
 
+type NichoByVenue = { id: string; nome: string; underground_score: number | null; ocorrencias: number }
+type DistribuicaoResultado = { sucesso_total: number; sucesso: number; medio: number; fracasso: number }
+
 type Props = {
   venue: VenueData
   subprefeitura: Subprefeitura | null
   subprefeituras: SubprefeituraOption[]
   shows: ShowRow[]
+  nichosByVenue?: NichoByVenue[]
+  venueResultado?: { total_shows: number; distribuicao: DistribuicaoResultado } | null
 }
 
 // ── Constants ─────────────────────────────────────────────────
@@ -88,7 +93,7 @@ const RISCO_LABEL: Record<string, string> = {
 
 // ── Main Component ────────────────────────────────────────────
 
-export function VenueDetailClient({ venue, subprefeitura, subprefeituras, shows }: Props) {
+export function VenueDetailClient({ venue, subprefeitura, subprefeituras, shows, nichosByVenue, venueResultado }: Props) {
   // ── Edit state ──
   const [isEditing, setIsEditing] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
@@ -295,6 +300,69 @@ export function VenueDetailClient({ venue, subprefeitura, subprefeituras, shows 
             <> | <span style={{ color: taxaSucesso >= 70 ? 'var(--status-pos)' : taxaSucesso >= 40 ? 'var(--status-neut)' : 'var(--status-neg)' }}>{taxaSucesso}% taxa</span></>
           )}
         </p>
+      )}
+
+      {/* ── PÚBLICOS FREQUENTES ──────────────────────────── */}
+      {nichosByVenue && nichosByVenue.length > 0 && !isEditing && (
+        <div style={{ marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+              Públicos frequentes
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+              {nichosByVenue.length} {nichosByVenue.length === 1 ? 'nicho' : 'nichos'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+            {nichosByVenue.map(n => (
+              <div key={n.id}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <Link href={`/publicos/${n.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
+                    {n.nome}
+                  </Link>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                    {n.ocorrencias} {n.ocorrencias === 1 ? 'show' : 'shows'}
+                  </span>
+                </div>
+                {n.underground_score != null && (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                    underground {n.underground_score}/10
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── RESULTADO NO VENUE ───────────────────────────── */}
+      {venueResultado && venueResultado.total_shows > 0 && !isEditing && (
+        <div style={{ marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+              Resultado aqui
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+              {venueResultado.total_shows} {venueResultado.total_shows === 1 ? 'show' : 'shows'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {([
+              { key: 'sucesso_total', label: 'sucesso total', cor: 'var(--status-pos)' },
+              { key: 'sucesso',       label: 'sucesso',       cor: 'var(--status-neut-p)' },
+              { key: 'medio',         label: 'médio',         cor: 'var(--status-neut)' },
+              { key: 'fracasso',      label: 'fracasso',      cor: 'var(--status-neg)' },
+            ] as { key: keyof DistribuicaoResultado; label: string; cor: string }[])
+              .filter(r => venueResultado.distribuicao[r.key] > 0)
+              .map(r => (
+                <div key={r.key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: r.cor, minWidth: 100 }}>{r.label}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-dim)' }}>{venueResultado.distribuicao[r.key]}</span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
       )}
 
       {/* ── SHOW HISTORY (sempre visível) ────────────────── */}

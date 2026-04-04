@@ -35,7 +35,9 @@ type ShowData = {
   tour: string | null
 }
 
-type Props = { show: ShowData; venue: Venue | null; lineup: LineupItem[]; stockSection?: React.ReactNode; setlistSection?: React.ReactNode; weatherSummary?: string | null; weatherTemp?: number | null }
+type NichoDerived = { id: string; nome: string; underground_score: number | null; score_medio: number }
+
+type Props = { show: ShowData; venue: Venue | null; lineup: LineupItem[]; stockSection?: React.ReactNode; setlistSection?: React.ReactNode; weatherSummary?: string | null; weatherTemp?: number | null; nichosDerivados?: NichoDerived[] }
 
 // ── Constants ─────────────────────────────────────────────────
 
@@ -73,7 +75,7 @@ function lineupToPickedArtists(lineup: LineupItem[]): PickedArtist[] {
 
 // ── Main Component ────────────────────────────────────────────
 
-export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLineup, stockSection, setlistSection, weatherSummary, weatherTemp }: Props) {
+export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLineup, stockSection, setlistSection, weatherSummary, weatherTemp, nichosDerivados }: Props) {
   const router = useRouter()
   const past = isShowPast(show.data)
   const nomeShow = getShowDisplayName(show.nome_evento, initialLineup.map(l => l.nome))
@@ -438,6 +440,39 @@ export function ShowDetailClient({ show, venue: initialVenue, lineup: initialLin
               </div>
             )}
           </div>
+
+          {/* Seção 2b: Públicos esperados */}
+          {nichosDerivados && nichosDerivados.length > 0 && (
+            <div style={{ marginBottom: 'var(--space-lg)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+                  Públicos esperados
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                  {nichosDerivados.length} {nichosDerivados.length === 1 ? 'nicho' : 'nichos'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                {nichosDerivados.map(n => (
+                  <div key={n.id}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <a href={`/publicos/${n.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
+                        {n.nome}
+                      </a>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                        score {n.score_medio.toFixed(1)}
+                      </span>
+                    </div>
+                    {n.underground_score != null && (
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                        underground {n.underground_score}/10
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Seção 3: Participação + link do evento */}
           <div style={{ marginBottom: 'var(--space-lg)' }}>

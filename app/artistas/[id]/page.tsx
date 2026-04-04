@@ -7,6 +7,7 @@ import { EnrichButton } from './enrich-button'
 import { OharaInlinePanel } from './ohara-inline-panel'
 import { ArtistDetailClient } from './artist-detail-client'
 import { OverrideSectionClient } from './override-section-client'
+import { getSugestaoNichoByArtist } from '@/lib/db/intelligence'
 
 export default async function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -107,6 +108,9 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
     })
     .filter(Boolean) as { id: string; nome: string; underground_score: number; score: number }[]
 
+  // Sugestão de nicho (só quando sem vínculo — a função retorna [] se já tem)
+  const sugestoes = await getSugestaoNichoByArtist(id)
+
   // Designs do artista
   const { data: designRows } = await (supabase as any)
     .from('design_stock')
@@ -160,9 +164,30 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         <div>
           <p className="section-label">Nichos</p>
           {linkedNichosDisplay.length === 0 ? (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-serif)' }}>
-              nenhum nicho vinculado
-            </p>
+            <>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-serif)' }}>
+                nenhum nicho vinculado
+              </p>
+              {sugestoes.length > 0 && (
+                <div style={{ marginTop: 'var(--space-sm)' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', margin: '0 0 var(--space-sm)' }}>
+                    sugestões
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                    {sugestoes.slice(0, 3).map(s => (
+                      <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <Link href={`/publicos/${s.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.85rem', color: 'var(--text-primary)', textDecoration: 'none' }}>
+                          {s.nome}
+                        </Link>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-dim)', flexShrink: 0, marginLeft: 8 }}>
+                          {s.score_match} {s.score_match === 1 ? 'tag' : 'tags'} em comum
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               {linkedNichosDisplay.map(n => (

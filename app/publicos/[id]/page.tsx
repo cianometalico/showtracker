@@ -5,6 +5,8 @@ import { nichoColor, nichoColorAlpha } from '@/lib/nicho-color'
 import { NichoDeleteButton } from './delete-button-client'
 import { NichoArtistasClient } from './nicho-artistas-client'
 import { TooltipIcon } from '../tooltip-client'
+import { getProximosShowsByNicho, getResultadoMedioByNicho } from '@/lib/db/intelligence'
+import { getShowDisplayName } from '@/lib/show-utils'
 
 const TOOLTIPS: Record<string, string> = {
   coesao:                 'existe público ou existem pessoas?',
@@ -88,6 +90,13 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
   const generosRelacionados = (generos ?? []).filter((g: any) =>
     tags.map((t: string) => t.toLowerCase()).includes(g.nome.toLowerCase())
   )
+
+  // ── Intelligence: próximos shows + resultado médio ───────────
+  const [proximosShows, resultadosMedioAll] = await Promise.all([
+    getProximosShowsByNicho(id),
+    getResultadoMedioByNicho(),
+  ])
+  const resultadoNicho = resultadosMedioAll.find(r => r.id === id) ?? null
 
   // ── Dados serializados para o client ─────────────────────────
   const artistasParaClient = artistas.map((a: any) => ({
@@ -299,6 +308,76 @@ export default async function NichoPage({ params }: { params: Promise<{ id: stri
 
       {/* ARTISTAS — client component com busca + vinculação */}
       <NichoArtistasClient nichoId={id} initialArtistas={artistasParaClient} />
+
+      {/* PRÓXIMOS SHOWS */}
+      {proximosShows.length > 0 && (
+        <section style={{ marginTop: 'var(--space-xl)', marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+              Próximos shows
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+              {proximosShows.length} {proximosShows.length === 1 ? 'show' : 'shows'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+            {proximosShows.map(s => {
+              const nomeShow = getShowDisplayName(s.nome_evento, s.artistas)
+              const dataStr  = new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' })
+              return (
+                <div key={s.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', minWidth: 0 }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', flexShrink: 0 }}>{dataStr}</span>
+                      <Link href={`/shows/${s.id}`} style={{ fontFamily: 'var(--font-serif)', fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {nomeShow}
+                      </Link>
+                    </div>
+                    {s.venue_nome && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', flexShrink: 0 }}>{s.venue_nome}</span>
+                    )}
+                  </div>
+                  {s.artistas.length > 0 && (
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: 2 }}>
+                      {s.artistas.join(' · ')}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* HISTÓRICO / RESULTADO MÉDIO */}
+      {resultadoNicho && resultadoNicho.total_shows > 0 && (
+        <section style={{ marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-sm)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+              Histórico
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+              {resultadoNicho.total_shows} {resultadoNicho.total_shows === 1 ? 'show' : 'shows'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {([
+              { key: 'sucesso_total', label: 'sucesso total', cor: 'var(--status-pos)' },
+              { key: 'sucesso',       label: 'sucesso',       cor: 'var(--status-neut-p)' },
+              { key: 'medio',         label: 'médio',         cor: 'var(--status-neut)' },
+              { key: 'fracasso',      label: 'fracasso',      cor: 'var(--status-neg)' },
+            ] as { key: keyof typeof resultadoNicho.distribuicao; label: string; cor: string }[])
+              .filter(r => resultadoNicho.distribuicao[r.key] > 0)
+              .map(r => (
+                <div key={r.key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: r.cor, minWidth: 100 }}>{r.label}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-dim)' }}>{resultadoNicho.distribuicao[r.key]}</span>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+      )}
 
     </div>
   )

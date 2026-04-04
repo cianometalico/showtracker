@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import { VenueDetailClient } from './venue-detail-client'
+import { getNichosByVenue, getResultadoMedioByVenue } from '@/lib/db/intelligence'
 
 export default async function VenuePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -64,7 +65,23 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
     artistas:        artistsByShow[s.id] ?? [],
   }))
 
+  const [nichosByVenue, resultadosByVenue] = await Promise.all([
+    getNichosByVenue(id),
+    getResultadoMedioByVenue(),
+  ])
+  const venueResultadoData = resultadosByVenue.find(r => r.id === id) ?? null
+  const venueResultado = venueResultadoData
+    ? { total_shows: venueResultadoData.total_shows, distribuicao: venueResultadoData.distribuicao }
+    : null
+
   return (
-    <VenueDetailClient venue={venue} subprefeitura={sub ?? null} subprefeituras={subprefeituras ?? []} shows={showsEnriquecidos} />
+    <VenueDetailClient
+      venue={venue}
+      subprefeitura={sub ?? null}
+      subprefeituras={subprefeituras ?? []}
+      shows={showsEnriquecidos}
+      nichosByVenue={nichosByVenue}
+      venueResultado={venueResultado}
+    />
   )
 }

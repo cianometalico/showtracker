@@ -3,6 +3,7 @@ import { ShowStockSection } from './show-stock-section'
 import { ArtistHistoryBlock } from './artist-history-block'
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
+import { getNichosDerivedFromShow } from '@/lib/db/intelligence'
 
 function isPast(iso: string) {
   return new Date(iso + 'T23:59:59') < new Date()
@@ -117,6 +118,8 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
     saldo:   d.saldo_atual ?? 0,
   }))
 
+  const nichosDerivados = await getNichosDerivedFromShow(id)
+
   return (
     <div>
       <ShowDetailClient
@@ -143,6 +146,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
         lineup={lineup}
         weatherSummary={weatherSummary}
         weatherTemp={weatherTemp}
+        nichosDerivados={nichosDerivados}
         stockSection={
           (show.participou || movements.length > 0) ? (
             <ShowStockSection
